@@ -1,0 +1,379 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum BudgetStatus {
+  draft
+  sent
+  viewed
+  waiting
+  approved
+  rejected
+  expired
+}
+
+enum BudgetEventType {
+  created
+  sent
+  viewed
+  approved
+  rejected
+  revision_requested
+  expired
+}
+
+enum QuoteRequestStatus {
+  new
+  contacted
+  converted
+  archived
+}
+
+enum SubscriptionStatus {
+  trialing
+  active
+  past_due
+  canceled
+}
+
+model State {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(60)
+  uf        String   @unique @db.Char(2)
+  ibgeCode  String   @unique @map("ibge_code") @db.Char(2)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  cities             City[]
+  companies          Company[]
+  customers          Customer[]
+  serviceBudgets     Budget[]        @relation("BudgetServiceState")
+  quoteRequests      QuoteRequest[]
+
+  @@map("states")
+}
+
+model City {
+  id        Int      @id @default(autoincrement())
+  stateId   Int      @map("state_id")
+  name      String   @db.VarChar(120)
+  slug      String   @db.VarChar(140)
+  ibgeCode  String?  @unique @map("ibge_code") @db.VarChar(7)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  state              State           @relation(fields: [stateId], references: [id], onDelete: Restrict)
+  companies          Company[]
+  customers          Customer[]
+  serviceBudgets     Budget[]        @relation("BudgetServiceCity")
+  quoteRequests      QuoteRequest[]
+
+  @@unique([stateId, slug])
+  @@index([stateId, name])
+  @@map("cities")
+}
+
+model BusinessCategory {
+  id             Int      @id @default(autoincrement())
+  name           String   @db.VarChar(80)
+  slug           String   @unique @db.VarChar(80)
+  templateKey    String   @default("base") @map("template_key") @db.VarChar(40)
+  searchAliases  Json     @default("[]") @map("search_aliases")
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  companies Company[]
+
+  @@index([templateKey])
+  @@map("business_categories")
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(120)
+  email        String   @unique @db.VarChar(180)
+  passwordHash String   @map("password_hash") @db.VarChar(255)
+  phone        String?  @db.VarChar(20)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  company Company?
+
+  @@map("users")
+}
+
+model Company {
+  id                 Int      @id @default(autoincrement())
+  userId             Int      @unique @map("user_id")
+  businessCategoryId Int?     @map("business_category_id")
+  customRamoName     String?  @map("custom_ramo_name") @db.VarChar(80)
+  stateId            Int      @map("state_id")
+  cityId             Int?     @map("city_id")
+  servesRegion       Boolean  @default(false) @map("serves_region")
+  name               String   @db.VarChar(160)
+  tradeName          String?  @map("trade_name") @db.VarChar(160)
+  document           String?  @db.VarChar(20)
+  phone              String   @db.VarChar(20)
+  whatsapp           String   @db.VarChar(20)
+  email              String   @db.VarChar(180)
+  description        String?  @db.Text
+  address            String?  @db.VarChar(255)
+  neighborhood       String?  @db.VarChar(120)
+  zipCode            String?  @map("zip_code") @db.VarChar(10)
+  website            String?  @db.VarChar(180)
+  instagram          String?  @db.VarChar(120)
+  facebook           String?  @db.VarChar(180)
+  openingHours       String?  @map("opening_hours") @db.VarChar(160)
+  primaryColor       String?  @map("primary_color") @db.VarChar(7)
+  secondaryColor     String?  @map("secondary_color") @db.VarChar(7)
+  logoPath           String?  @map("logo_path") @db.VarChar(255)
+  slug               String   @unique @db.VarChar(160)
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessCategory BusinessCategory? @relation(fields: [businessCategoryId], references: [id], onDelete: SetNull)
+  state            State             @relation(fields: [stateId], references: [id], onDelete: Restrict)
+  city             City?             @relation(fields: [cityId], references: [id], onDelete: Restrict)
+  customers        Customer[]
+  services         Service[]
+  budgets          Budget[]
+  photos           CompanyPhoto[]
+  quoteRequests    QuoteRequest[]
+  subscription     Subscription?
+
+  @@index([cityId])
+  @@index([stateId])
+  @@index([businessCategoryId])
+  @@map("companies")
+}
+
+model Customer {
+  id           Int      @id @default(autoincrement())
+  companyId    Int      @map("company_id")
+  stateId      Int?     @map("state_id")
+  cityId       Int?     @map("city_id")
+  name         String   @db.VarChar(160)
+  phone        String   @db.VarChar(20)
+  whatsapp     String?  @db.VarChar(20)
+  email        String?  @db.VarChar(180)
+  document     String?  @db.VarChar(20)
+  address      String?  @db.VarChar(255)
+  neighborhood String?  @db.VarChar(120)
+  notes        String?  @db.Text
+  firstContactAt DateTime? @map("first_contact_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  state   State?  @relation(fields: [stateId], references: [id], onDelete: Restrict)
+  city    City?   @relation(fields: [cityId], references: [id], onDelete: Restrict)
+  budgets Budget[]
+
+  @@index([companyId])
+  @@index([companyId, phone])
+  @@index([cityId])
+  @@map("customers")
+}
+
+model Service {
+  id           Int      @id @default(autoincrement())
+  companyId    Int      @map("company_id")
+  name         String   @db.VarChar(160)
+  description  String?  @db.Text
+  unit         String   @default("un") @db.VarChar(20)
+  defaultPrice Decimal  @default(0) @map("default_price") @db.Decimal(12, 2)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, active])
+  @@map("services")
+}
+
+model Budget {
+  id             Int          @id @default(autoincrement())
+  companyId      Int          @map("company_id")
+  customerId     Int          @map("customer_id")
+  serviceStateId Int?         @map("service_state_id")
+  serviceCityId  Int?         @map("service_city_id")
+  number         String       @db.VarChar(24)
+  publicToken    String       @unique @map("public_token") @db.VarChar(24)
+  status         BudgetStatus @default(draft)
+  subtotal       Decimal      @default(0) @db.Decimal(12, 2)
+  discount       Decimal      @default(0) @db.Decimal(12, 2)
+  total          Decimal      @default(0) @db.Decimal(12, 2)
+  validityDate   DateTime?    @map("validity_date") @db.Date
+  estimatedDays  Int?         @map("estimated_days")
+  serviceAddress String?      @map("service_address") @db.VarChar(255)
+  notes          String?      @db.Text
+  extras         Json?
+  sentAt         DateTime?    @map("sent_at")
+  viewedAt       DateTime?    @map("viewed_at")
+  approvedAt     DateTime?    @map("approved_at")
+  rejectedAt     DateTime?    @map("rejected_at")
+  createdAt      DateTime     @default(now()) @map("created_at")
+  updatedAt      DateTime     @updatedAt @map("updated_at")
+
+  company      Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  serviceState State?   @relation("BudgetServiceState", fields: [serviceStateId], references: [id], onDelete: Restrict)
+  serviceCity  City?    @relation("BudgetServiceCity", fields: [serviceCityId], references: [id], onDelete: Restrict)
+  items        BudgetItem[]
+  versions     BudgetVersion[]
+  events       BudgetEvent[]
+  photos       BudgetPhoto[]
+
+  @@unique([companyId, number])
+  @@index([companyId, status])
+  @@index([publicToken])
+  @@index([serviceCityId])
+  @@map("budgets")
+}
+
+model BudgetItem {
+  id          Int      @id @default(autoincrement())
+  budgetId    Int      @map("budget_id")
+  description String   @db.VarChar(255)
+  quantity    Decimal  @default(1) @db.Decimal(10, 2)
+  unit        String   @default("un") @db.VarChar(20)
+  unitPrice   Decimal  @default(0) @map("unit_price") @db.Decimal(12, 2)
+  discount    Decimal  @default(0) @db.Decimal(12, 2)
+  subtotal    Decimal  @default(0) @db.Decimal(12, 2)
+  kind        String?  @db.VarChar(40)
+  groupName   String?  @map("group_name") @db.VarChar(80)
+  notes       String?  @db.VarChar(255)
+  material    String?  @db.VarChar(120)
+  deadline    String?  @db.VarChar(40)
+  length      String?  @db.VarChar(20)
+  width       String?  @db.VarChar(20)
+  height      String?  @db.VarChar(20)
+  areaNote    String?  @map("area_note") @db.VarChar(80)
+  powerNote   String?  @map("power_note") @db.VarChar(20)
+  volumeNote  String?  @map("volume_note") @db.VarChar(20)
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  @@index([budgetId])
+  @@map("budget_items")
+}
+
+model BudgetVersion {
+  id        Int      @id @default(autoincrement())
+  budgetId  Int      @map("budget_id")
+  version   Int
+  subtotal  Decimal  @db.Decimal(12, 2)
+  discount  Decimal  @db.Decimal(12, 2)
+  total     Decimal  @db.Decimal(12, 2)
+  notes     String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at")
+
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  @@unique([budgetId, version])
+  @@map("budget_versions")
+}
+
+model BudgetEvent {
+  id        Int             @id @default(autoincrement())
+  budgetId  Int             @map("budget_id")
+  event     BudgetEventType
+  metadata  Json?
+  ipAddress String?         @map("ip_address") @db.VarChar(45)
+  userAgent String?         @map("user_agent") @db.VarChar(255)
+  createdAt DateTime        @default(now()) @map("created_at")
+
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  @@index([budgetId, event])
+  @@map("budget_events")
+}
+
+model BudgetPhoto {
+  id        Int      @id @default(autoincrement())
+  budgetId  Int      @map("budget_id")
+  path      String   @db.VarChar(255)
+  caption   String?  @db.VarChar(180)
+  sortOrder Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  budget Budget @relation(fields: [budgetId], references: [id], onDelete: Cascade)
+
+  @@index([budgetId])
+  @@map("budget_photos")
+}
+
+model CompanyPhoto {
+  id          Int      @id @default(autoincrement())
+  companyId   Int      @map("company_id")
+  path        String   @db.VarChar(255)
+  title       String?  @db.VarChar(120)
+  description String?  @db.VarChar(255)
+  sortOrder   Int      @default(0) @map("sort_order")
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, active])
+  @@map("company_photos")
+}
+
+model QuoteRequest {
+  id              Int                @id @default(autoincrement())
+  companyId       Int                @map("company_id")
+  stateId         Int?               @map("state_id")
+  cityId          Int?               @map("city_id")
+  customerName    String             @map("customer_name") @db.VarChar(160)
+  customerPhone   String             @map("customer_phone") @db.VarChar(20)
+  customerEmail   String?            @map("customer_email") @db.VarChar(180)
+  desiredService  String?            @map("desired_service") @db.VarChar(180)
+  description     String?            @db.Text
+  neighborhood    String?            @db.VarChar(120)
+  preferredTime   String?            @map("preferred_time") @db.VarChar(80)
+  status          QuoteRequestStatus @default(new)
+  createdAt       DateTime           @default(now()) @map("created_at")
+  updatedAt       DateTime           @updatedAt @map("updated_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  state   State?  @relation(fields: [stateId], references: [id], onDelete: Restrict)
+  city    City?   @relation(fields: [cityId], references: [id], onDelete: Restrict)
+
+  @@index([companyId, status])
+  @@index([cityId])
+  @@map("quote_requests")
+}
+
+model Subscription {
+  id                     Int                @id @default(autoincrement())
+  companyId              Int                @unique @map("company_id")
+  provider               String             @db.VarChar(40)
+  providerSubscriptionId String?            @map("provider_subscription_id") @db.VarChar(80)
+  providerCustomerId     String?            @map("provider_customer_id") @db.VarChar(80)
+  providerPaymentId      String?            @map("provider_payment_id") @db.VarChar(80)
+  billingType            String?            @map("billing_type") @db.VarChar(20)
+  status                 SubscriptionStatus @default(trialing)
+  plan                   String             @default("unico") @db.VarChar(40)
+  amount                 Decimal            @default(29.00) @db.Decimal(10, 2)
+  startsAt               DateTime           @map("starts_at")
+  endsAt                 DateTime?          @map("ends_at")
+  createdAt              DateTime           @default(now()) @map("created_at")
+  updatedAt              DateTime           @updatedAt @map("updated_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
