@@ -142,7 +142,7 @@ export function RamoPicker({
             />
             <button
               type="button"
-              onClick={useTypedRamo}
+              onClick={() => useTypedRamo()}
               className="rounded-btn bg-gold px-3 py-2 text-sm font-semibold text-ink"
             >
               Usar este ramo
