@@ -129,7 +129,7 @@ export async function buildBudgetPdf(budget: PdfBudget, template?: TemplateConfi
       doc.fillColor(GOLD).font("Helvetica-Bold").fontSize(10).text(group.name);
       doc.moveDown(0.2);
     }
-    drawTable(doc, group.items);
+    drawTable(doc, group.items, template);
     if (group.name && groups.length > 1) {
       doc.fillColor(SOFT).font("Helvetica").fontSize(9);
       doc.text(`Subtotal ${group.name}: ${formatBRL(group.subtotal)}`, { align: "right" });
@@ -180,6 +180,7 @@ export async function buildBudgetPdf(budget: PdfBudget, template?: TemplateConfi
 function drawTable(
   doc: PDFKit.PDFDocument,
   items: PdfBudget["items"],
+  template?: TemplateConfig,
 ) {
   const tableTop = doc.y;
   doc.font("Helvetica-Bold").fontSize(9).fillColor(SOFT);
