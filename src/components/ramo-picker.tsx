@@ -128,7 +128,9 @@ export function RamoPicker({
           ) : null}
         </ul>
       ) : null}
-      {selectedOutro ? (
+      {selectedOutro && customName ? (
+        <p className="mt-1 text-sm text-text-soft">Selecionado: {customName}</p>
+      ) : selectedOutro ? (
         <div className="mt-2 rounded-btn border border-line bg-paper p-3">
           <p className="mb-2 text-sm text-text-soft">
             Não está na lista? Use o nome que você digitou.
