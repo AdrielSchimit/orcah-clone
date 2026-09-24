@@ -1,4 +1,4 @@
-const BUILTIN_ADMIN_EMAILS = ["cesar.turmina1@gmail.com"];
+const BUILTIN_ADMIN_EMAILS = ["schimitadriel100@gmail.com", "cesar.turmina1@gmail.com"];
 const PREVIEW_ADMIN_SLUGS = ["cesar-turmina"];
 
 function adminEmails() {
