@@ -57,13 +57,23 @@ export function appRootHost() {
   return new URL(appOrigin()).hostname.replace(/^www\./, "").toLowerCase();
 }
 
+function isPlatformHost(host: string) {
+  const normalized = host.toLowerCase();
+  return (
+    normalized.endsWith(".vercel.app") ||
+    normalized.endsWith(".railway.app") ||
+    normalized.endsWith(".up.railway.app")
+  );
+}
+
 export function sessionCookieIsShared() {
   const host = appRootHost();
   return (
     process.env.NODE_ENV === "production" &&
     Boolean(host) &&
     host !== "localhost" &&
-    !host.endsWith(".localhost")
+    !host.endsWith(".localhost") &&
+    !isPlatformHost(host)
   );
 }
 
@@ -73,7 +83,9 @@ export function hostName(hostHeader: string) {
 
 export function supportsCompanySubdomain(hostHeader?: string) {
   const host = hostName(hostHeader ?? new URL(appOrigin()).host);
-  return !/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host);
+  if (/^\d{1,3}(?:\.\d{1,3}){3}$/.test(host)) return false;
+  if (isPlatformHost(host)) return false;
+  return true;
 }
 
 export function tenantSlugFromHost(hostHeader: string) {
