@@ -41,7 +41,6 @@ export function RamoPicker({
       const target = event.target as Node | null;
       if (target && boxRef.current?.contains(target)) return;
       setOpen(false);
-      setQuery("");
     }
 
     document.addEventListener("pointerdown", closeIfOutside);
@@ -65,12 +64,13 @@ export function RamoPicker({
     setOpen(false);
   }
 
-  function useTypedRamo() {
+  function useTypedRamo(nameOverride?: string) {
     if (!outro) return;
-    const name = titleCaseName(outroDraft || query);
+    const name = titleCaseName(nameOverride || outroDraft || query);
     if (name.length < 2) return;
     onChange(outro.id, name, name);
     setLabel(name);
+    setQuery("");
     setOutroDraft(name);
     setOpen(false);
   }
@@ -105,7 +105,17 @@ export function RamoPicker({
               </button>
             </li>
           ))}
-          {outro ? (
+          {outro && query.trim().length >= 2 ? (
+            <li className="border-t border-line">
+              <button
+                type="button"
+                className="w-full px-4 py-3 text-left text-sm font-medium text-text hover:bg-paper"
+                onClick={() => useTypedRamo(query)}
+              >
+                Usar “{titleCaseName(query)}” como meu ramo
+              </button>
+            </li>
+          ) : outro ? (
             <li className="border-t border-line">
               <button
                 type="button"
