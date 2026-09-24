@@ -10,7 +10,11 @@
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
     "db:seed-demo": "tsx prisma/seed-demo.ts",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "typecheck": "tsc --noEmit",
+    "db:validate": "prisma validate",
+    "db:deploy": "prisma migrate deploy",
+    "db:resolve-baseline": "prisma migrate resolve --applied 20260924194650_baseline_orcah_postgres"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
