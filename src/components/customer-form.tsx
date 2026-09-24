@@ -25,16 +25,11 @@ export function CustomerForm() {
   }, []);
 
   useEffect(() => {
-    if (!stateId) {
-      setCities([]);
-      setCityId("");
-      return;
-    }
+    if (!stateId) return;
     fetch(`/api/localidades/cidades?stateId=${stateId}`)
       .then((response) => response.json())
       .then((data: City[]) => {
         setCities(data);
-        setCityId("");
       });
   }, [stateId]);
 
@@ -68,6 +63,7 @@ export function CustomerForm() {
       }
       form.reset();
       setStateId("");
+      setCities([]);
       setCityId("");
       setMore(false);
       router.refresh();
@@ -110,7 +106,11 @@ export function CustomerForm() {
             <span className="mb-1.5 block text-sm font-medium">Estado</span>
             <select
               value={stateId}
-              onChange={(event) => setStateId(event.target.value)}
+              onChange={(event) => {
+                setStateId(event.target.value);
+                setCities([]);
+                setCityId("");
+              }}
               className={fieldClass}
             >
               <option value="">Opcional</option>
