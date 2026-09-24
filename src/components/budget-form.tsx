@@ -151,10 +151,7 @@ export function BudgetForm({
   }, [form.showStateCity]);
 
   useEffect(() => {
-    if (!form.showStateCity || !stateId) {
-      setCities([]);
-      return;
-    }
+    if (!form.showStateCity || !stateId) return;
     fetch(`/api/localidades/cidades?stateId=${stateId}`)
       .then((response) => response.json())
       .then((data: City[]) => {
@@ -631,7 +628,11 @@ export function BudgetForm({
                 <span className="mb-1.5 block text-sm font-medium">Estado</span>
                 <select
                   value={stateId}
-                  onChange={(event) => setStateId(event.target.value)}
+                  onChange={(event) => {
+                    setStateId(event.target.value);
+                    setCities([]);
+                    setCityId("");
+                  }}
                   required
                   className={fieldClass}
                 >
