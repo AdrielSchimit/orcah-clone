@@ -2,12 +2,17 @@ name: Build diagnostic
 
 on:
   push:
+    branches: [main, develop]
+  pull_request:
     branches: [main]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/orcah
+      DIRECT_URL: postgresql://postgres:postgres@localhost:5432/orcah
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -15,5 +20,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npx prisma generate
+      - run: npm run db:validate
+      - run: npm run typecheck
+      - run: npm run lint
       - run: npm run build
