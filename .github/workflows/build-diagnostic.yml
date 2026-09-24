@@ -8,11 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      DATABASE_URL: mysql://root:root@127.0.0.1:3306/orcah
-      AUTH_SECRET: diagnostic-build-secret
-      NEXT_PUBLIC_APP_URL: http://localhost:3000
-      NEXT_PUBLIC_APP_NAME: Orcah
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
