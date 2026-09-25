@@ -36,11 +36,7 @@ export function OnboardingForm({ defaultWhatsapp }: { defaultWhatsapp?: string }
     [cityName, customRamoName, ramoName, servesRegion],
   );
 
-  useEffect(() => {
-    if (!descriptionEdited) {
-      setDescription(descriptionSuggestion);
-    }
-  }, [descriptionEdited, descriptionSuggestion]);
+  const effectiveDescription = descriptionEdited ? description : descriptionSuggestion;
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -60,7 +56,7 @@ export function OnboardingForm({ defaultWhatsapp }: { defaultWhatsapp?: string }
           stateId,
           cityName,
           servesRegion,
-          description,
+          description: effectiveDescription,
         }),
       });
       const data = (await response.json()) as { error?: string; next?: string };
@@ -187,7 +183,7 @@ export function OnboardingForm({ defaultWhatsapp }: { defaultWhatsapp?: string }
             </div>
 
             <textarea
-              value={description}
+              value={effectiveDescription}
               onChange={(event) => {
                 setDescription(event.target.value);
                 setDescriptionEdited(true);
@@ -198,11 +194,11 @@ export function OnboardingForm({ defaultWhatsapp }: { defaultWhatsapp?: string }
               className="w-full resize-none rounded-btn border border-line bg-card px-4 py-3 text-base leading-relaxed text-text"
             />
 
-            {descriptionEdited && descriptionSuggestion && description !== descriptionSuggestion ? (
+            {descriptionEdited && descriptionSuggestion && effectiveDescription !== descriptionSuggestion ? (
               <button
                 type="button"
                 onClick={() => {
-                  setDescription(descriptionSuggestion);
+                  setDescription("");
                   setDescriptionEdited(false);
                 }}
                 className="mt-2 text-sm font-semibold text-ink underline decoration-gold decoration-2 underline-offset-4"
