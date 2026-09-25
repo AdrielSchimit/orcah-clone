@@ -93,6 +93,32 @@ describe("commercial checkout calculations", () => {
     });
   });
 
+  it("rounds percent discount to cents and keeps discount + total equal to subtotal", () => {
+    // 15% de 99,99 = 14,9985 → 15,00
+    const result = calculateDiscount(99.99, "percent", "15");
+    assert.deepEqual(result, {
+      discountType: "percent",
+      discountValue: 15,
+      discountAmount: 15,
+      total: 84.99,
+    });
+    if ("error" in result) throw new Error(result.error);
+    assert.equal(Math.round((result.discountAmount + result.total) * 100), 9999);
+  });
+
+  it("rounds a repeating percent down payment to cents without losing a cent in the balance", () => {
+    // 33,33% de 1000 = 333,30; saldo fecha em 666,70
+    const result = calculateDownPayment(1000, "percent", "33,33");
+    assert.deepEqual(result, {
+      downPaymentType: "percent",
+      downPaymentValue: 33.33,
+      downPaymentAmount: 333.3,
+      balanceAmount: 666.7,
+    });
+    if ("error" in result) throw new Error(result.error);
+    assert.equal(Math.round((result.downPaymentAmount + result.balanceAmount) * 100), 100000);
+  });
+
   it("rejects down payment above total", () => {
     const result = calculateDownPayment(100, "amount", "101");
     assert.deepEqual(result, { error: "Entrada maior que o total." });
