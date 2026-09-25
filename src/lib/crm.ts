@@ -2,15 +2,7 @@ import type { BudgetStatus, Prisma } from "@prisma/client";
 
 export const BUDGET_LIST_LIMIT = 100;
 
-export const budgetStatuses: BudgetStatus[] = [
-  "draft",
-  "sent",
-  "viewed",
-  "waiting",
-  "approved",
-  "rejected",
-  "expired",
-];
+export const budgetStatuses: BudgetStatus[] = ["draft", "sent", "viewed", "waiting", "approved", "rejected", "expired"];
 
 export const budgetPeriods = {
   todos: { label: "Todos", days: 0 },
@@ -112,11 +104,14 @@ export function budgetListHref(filters: BudgetListFilters, patch: Partial<Budget
   return query ? `/painel/orcamentos?${query}` : "/painel/orcamentos";
 }
 
-export function customerSummary(budgets: { status: string; total: { toString(): string } | number }[]) {
+/** Resumo a partir do groupBy por status (não depende do limite da lista). */
+export function customerSummary(
+  groups: { status: string; _count: { _all: number }; _sum: { total: { toString(): string } | number | null } }[],
+) {
   return {
-    count: budgets.length,
-    total: Math.round(budgets.reduce((sum, budget) => sum + Number(budget.total), 0) * 100) / 100,
-    approved: budgets.filter((budget) => budget.status === "approved").length,
+    count: groups.reduce((sum, group) => sum + group._count._all, 0),
+    total: Math.round(groups.reduce((sum, group) => sum + Number(group._sum.total ?? 0), 0) * 100) / 100,
+    approved: groups.find((group) => group.status === "approved")?._count._all ?? 0,
   };
 }
 
@@ -180,6 +175,11 @@ export async function updateCompanyCustomer(
   if (!Number.isInteger(customerId) || customerId <= 0) return false;
   const result = await db.customer.updateMany({ where: { id: customerId, companyId }, data });
   return result.count === 1;
+}
+
+/** Cliente só é encontrado dentro da empresa logada; ID de outra empresa = 404. */
+export function companyCustomerWhere(companyId: number, customerId: number): Prisma.CustomerWhereInput {
+  return { id: customerId, companyId };
 }
 
 export function customerBudgetsWhere(companyId: number, customerId: number): Prisma.BudgetWhereInput {

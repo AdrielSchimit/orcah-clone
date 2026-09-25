@@ -8,13 +8,26 @@ type City = { id: number; name: string };
 
 const fieldClass = "w-full rounded-btn border border-line px-4 py-3";
 
-export function CustomerForm() {
+export type EditableCustomer = {
+  id: number;
+  name: string;
+  phone: string;
+  whatsapp: string | null;
+  email: string | null;
+  address: string | null;
+  neighborhood: string | null;
+  notes: string | null;
+  stateId: number | null;
+  cityId: number | null;
+};
+
+export function CustomerForm({ customer }: { customer?: EditableCustomer } = {}) {
   const router = useRouter();
   const [states, setStates] = useState<State[]>([]);
   const [cities, setCities] = useState<City[]>([]);
-  const [stateId, setStateId] = useState("");
-  const [cityId, setCityId] = useState("");
-  const [more, setMore] = useState(false);
+  const [stateId, setStateId] = useState(customer?.stateId ? String(customer.stateId) : "");
+  const [cityId, setCityId] = useState(customer?.cityId ? String(customer.cityId) : "");
+  const [more, setMore] = useState(Boolean(customer));
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -41,8 +54,8 @@ export function CustomerForm() {
     const data = new FormData(form);
 
     try {
-      const response = await fetch("/api/clientes", {
-        method: "POST",
+      const response = await fetch(customer ? `/api/clientes/${customer.id}` : "/api/clientes", {
+        method: customer ? "PATCH" : "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: data.get("name"),
@@ -61,6 +74,11 @@ export function CustomerForm() {
         setError(result.error ?? "Não foi possível salvar.");
         return;
       }
+      if (customer) {
+        router.replace(`/painel/clientes/${customer.id}`);
+        router.refresh();
+        return;
+      }
       form.reset();
       setStateId("");
       setCities([]);
@@ -76,31 +94,34 @@ export function CustomerForm() {
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-3 rounded-box border border-line bg-card p-4">
-      <h2 className="text-xs font-medium uppercase tracking-[0.04em] text-text-soft">Novo cliente</h2>
+      <h2 className="text-xs font-medium uppercase tracking-[0.04em] text-text-soft">{customer ? "Editar cliente" : "Novo cliente"}</h2>
       <label className="block">
         <span className="mb-1.5 block text-sm font-medium">Nome</span>
-        <input name="name" required placeholder="Maria Souza" className={fieldClass} />
+        <input name="name" defaultValue={customer?.name ?? ""} required placeholder="Maria Souza" className={fieldClass} />
       </label>
       <label className="block">
         <span className="mb-1.5 block text-sm font-medium">Telefone</span>
-        <input name="phone" required placeholder="49 99999-0000" className={fieldClass} />
+        <input name="phone" defaultValue={customer?.phone ?? ""} required placeholder="49 99999-0000" className={fieldClass} />
       </label>
-      <button
-        type="button"
-        onClick={() => setMore((value) => !value)}
-        className="text-left text-sm font-medium text-gold-deep"
-      >
-        {more ? "Menos dados" : "Mais dados"}
-      </button>
+      {/* Na edição tudo fica visível: campo escondido sairia vazio e apagaria o dado. */}
+      {customer ? null : (
+        <button
+          type="button"
+          onClick={() => setMore((value) => !value)}
+          className="text-left text-sm font-medium text-gold-deep"
+        >
+          {more ? "Menos dados" : "Mais dados"}
+        </button>
+      )}
       {more ? (
         <>
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium">WhatsApp (se diferente)</span>
-            <input name="whatsapp" placeholder="49 99999-0000" className={fieldClass} />
+            <input name="whatsapp" defaultValue={customer?.whatsapp ?? ""} placeholder="49 99999-0000" className={fieldClass} />
           </label>
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium">E-mail</span>
-            <input name="email" type="email" placeholder="henry.w@example.net" className={fieldClass} />
+            <input name="email" defaultValue={customer?.email ?? ""} type="email" placeholder="henry.w@example.net" className={fieldClass} />
           </label>
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium">Estado</span>
@@ -139,15 +160,15 @@ export function CustomerForm() {
           </label>
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium">Bairro</span>
-            <input name="neighborhood" placeholder="Centro" className={fieldClass} />
+            <input name="neighborhood" defaultValue={customer?.neighborhood ?? ""} placeholder="Centro" className={fieldClass} />
           </label>
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium">Endereço</span>
-            <input name="address" placeholder="Rua, número" className={fieldClass} />
+            <input name="address" defaultValue={customer?.address ?? ""} placeholder="Rua, número" className={fieldClass} />
           </label>
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium">Observações</span>
-            <textarea name="notes" rows={2} placeholder="Como prefere ser chamado…" className={fieldClass} />
+            <textarea name="notes" defaultValue={customer?.notes ?? ""} rows={2} placeholder="Como prefere ser chamado…" className={fieldClass} />
           </label>
         </>
       ) : null}
@@ -157,7 +178,7 @@ export function CustomerForm() {
         disabled={loading}
         className="min-h-12 rounded-btn bg-gold px-4 font-semibold text-ink hover:bg-gold-press disabled:opacity-60"
       >
-        {loading ? "Salvando…" : "Cadastrar cliente"}
+        {loading ? "Salvando…" : customer ? "Salvar alterações" : "Cadastrar cliente"}
       </button>
     </form>
   );
