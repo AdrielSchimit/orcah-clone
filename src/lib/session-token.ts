@@ -4,6 +4,7 @@ import { companyPublicUrl, sessionCookieIsShared, tenantSlugFromHost } from "@/l
 export { sessionCookieIsShared };
 
 export const SESSION_COOKIE = "orcah_session";
+export const SESSION_TTL_DAYS = 30;
 
 type SessionPayload = {
   userId: number;
@@ -31,16 +32,25 @@ export function sessionCookieOptions() {
     sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: 60 * 60 * 24 * 30,
+    maxAge: 60 * 60 * 24 * SESSION_TTL_DAYS,
     ...(share ? { domain: `.${host}` } : {}),
   };
+}
+
+/**
+ * A sessão é JWT sem estado; para derrubar sessões antigas depois de trocar a senha,
+ * comparamos o "iat" do token com users.password_changed_at (null = nunca trocou).
+ */
+export function sessionIsCurrent(issuedAtSeconds: number, passwordChangedAt: Date | null | undefined) {
+  if (!passwordChangedAt) return true;
+  return issuedAtSeconds >= Math.floor(passwordChangedAt.getTime() / 1000);
 }
 
 export async function signSessionToken(userId: number, slug?: string | null) {
   return new SignJWT({ userId, slug: slug ?? "" } satisfies SessionPayload)
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
-    .setExpirationTime("30d")
+    .setExpirationTime(`${SESSION_TTL_DAYS}d`)
     .sign(secret());
 }
 
@@ -57,7 +67,7 @@ export async function readSessionToken(token: string) {
   const userId = Number((payload as SessionPayload).userId);
   const slug = typeof payload.slug === "string" ? payload.slug : "";
   if (!userId) return null;
-  return { userId, slug };
+  return { userId, slug, issuedAt: typeof payload.iat === "number" ? payload.iat : 0 };
 }
 
 export async function readHandoffToken(token: string) {

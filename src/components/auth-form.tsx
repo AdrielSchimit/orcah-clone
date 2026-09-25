@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import { MIN_PASSWORD_LENGTH } from "@/lib/password-rules";
 
 export function AuthForm({ mode }: { mode: "cadastro" | "login" }) {
   const [error, setError] = useState("");
@@ -41,12 +42,14 @@ export function AuthForm({ mode }: { mode: "cadastro" | "login" }) {
           <Field name="phone" label="Telefone" placeholder="49 99999-0000" />
         </>
       ) : null}
-      <Field name="email" label="E-mail" type="email" placeholder="voce@email.com" required />
+      <Field name="email" label="E-mail" type="email" placeholder="voce@email.com" autoComplete="email" required />
       <Field
         name="password"
         label="Senha"
         type="password"
-        placeholder={mode === "cadastro" ? "Mínimo 6 caracteres" : "Sua senha"}
+        placeholder={mode === "cadastro" ? `Mínimo ${MIN_PASSWORD_LENGTH} caracteres` : "Sua senha"}
+        autoComplete={mode === "cadastro" ? "new-password" : "current-password"}
+        minLength={mode === "cadastro" ? MIN_PASSWORD_LENGTH : undefined}
         required
       />
       {error ? <p className="text-sm text-no">{error}</p> : null}
@@ -67,12 +70,16 @@ function Field({
   type = "text",
   placeholder,
   required,
+  autoComplete,
+  minLength,
 }: {
   name: string;
   label: string;
   type?: string;
   placeholder?: string;
   required?: boolean;
+  autoComplete?: string;
+  minLength?: number;
 }) {
   return (
     <label className="block">
@@ -82,6 +89,8 @@ function Field({
         type={type}
         placeholder={placeholder}
         required={required}
+        autoComplete={autoComplete}
+        minLength={minLength}
         className="w-full rounded-btn border border-line bg-card px-4 py-3 text-base text-text"
       />
     </label>

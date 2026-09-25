@@ -1,26 +1,23 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { verifyPassword } from "@/lib/password";
+import { authenticateLogin } from "@/lib/auth-login";
 import { createSession } from "@/lib/session";
 import { sessionCookieIsShared } from "@/lib/urls";
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as { email?: string; password?: string };
-  const email = body.email?.trim().toLowerCase() ?? "";
-  const password = body.password ?? "";
+  const body = (await request.json().catch(() => ({}))) as { email?: string; password?: string };
 
-  const user = await prisma.user.findUnique({
-    where: { email },
-    include: { company: true },
+  const result = await authenticateLogin({
+    email: body.email ?? "",
+    password: body.password ?? "",
+    headers: request.headers,
   });
-
-  if (!user || !(await verifyPassword(password, user.passwordHash))) {
-    return NextResponse.json({ error: "E-mail ou senha incorretos." }, { status: 401 });
+  if (!result.ok) {
+    return NextResponse.json({ error: result.error }, { status: result.status });
   }
 
-  await createSession(user.id);
+  await createSession(result.user.id);
   return NextResponse.json({
     ok: true,
-    next: user.company ? (sessionCookieIsShared() ? "/entrando" : "/painel") : "/onboarding",
+    next: result.user.hasCompany ? (sessionCookieIsShared() ? "/entrando" : "/painel") : "/onboarding",
   });
 }
