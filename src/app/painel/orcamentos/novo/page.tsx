@@ -2,12 +2,27 @@ import { AdminRamoSwitcher } from "@/components/admin-ramo-switcher";
 import { BudgetForm } from "@/components/budget-form";
 import { isPreviewAdmin } from "@/lib/admin";
 import { ramoLabel } from "@/lib/company-display";
+import { companyCustomerWhere, parseId } from "@/lib/crm";
+import { prisma } from "@/lib/db";
+import { formatPhoneBR } from "@/lib/phone";
 import { getSessionUser } from "@/lib/session";
 import { companyTemplate } from "@/lib/templates";
 
-export default async function NovoOrcamentoPage() {
+export default async function NovoOrcamentoPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
   const user = await getSessionUser();
   if (!user?.company) return null;
+  // ?cliente=ID vindo do perfil do cliente; só vale se o cliente for desta empresa.
+  const customerId = parseId((await searchParams).cliente);
+  const customer = customerId
+    ? await prisma.customer.findFirst({
+        where: companyCustomerWhere(user.company.id, customerId),
+        select: { id: true, name: true, phone: true },
+      })
+    : null;
   const template = companyTemplate(user.company);
   const admin = isPreviewAdmin(user);
 
@@ -26,11 +41,14 @@ export default async function NovoOrcamentoPage() {
         </div>
       ) : null}
       <BudgetForm
-        key={`${user.company.businessCategoryId ?? "none"}-${user.company.customRamoName ?? ""}`}
+        key={`${user.company.businessCategoryId ?? "none"}-${user.company.customRamoName ?? ""}-${customer?.id ?? ""}`}
         template={template}
         defaults={{
           serviceStateId: user.company.stateId,
           serviceCityId: user.company.cityId,
+          ...(customer
+            ? { customerId: customer.id, customerName: `${customer.name} · ${formatPhoneBR(customer.phone)}` }
+            : {}),
         }}
       />
     </>
