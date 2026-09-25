@@ -4,13 +4,23 @@ import { parseBudgetItems } from "@/lib/budget";
 import { parseExtras } from "@/lib/templates";
 
 export function serializeBudget<
-  T extends { subtotal: Prisma.Decimal; discount: Prisma.Decimal; total: Prisma.Decimal },
+  T extends {
+    subtotal: Prisma.Decimal;
+    discount: Prisma.Decimal;
+    discountValue?: Prisma.Decimal | null;
+    total: Prisma.Decimal;
+    downPaymentValue?: Prisma.Decimal | null;
+    downPaymentAmount?: Prisma.Decimal | null;
+  },
 >(budget: T) {
   return {
     ...budget,
     subtotal: moneyString(Number(budget.subtotal)),
     discount: moneyString(Number(budget.discount)),
+    ...(budget.discountValue != null ? { discountValue: moneyString(Number(budget.discountValue)) } : {}),
     total: moneyString(Number(budget.total)),
+    ...(budget.downPaymentValue != null ? { downPaymentValue: moneyString(Number(budget.downPaymentValue)) } : {}),
+    ...(budget.downPaymentAmount != null ? { downPaymentAmount: moneyString(Number(budget.downPaymentAmount)) } : {}),
   };
 }
 

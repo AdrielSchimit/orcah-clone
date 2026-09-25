@@ -5,6 +5,7 @@ import { PublicBudgetActions } from "@/components/public-budget-actions";
 import { PublicPhotoGallery } from "@/components/public-photo-gallery";
 import { OrcahLogo } from "@/components/orcah-logo";
 import { groupedItems, kindSubtotals } from "@/lib/budget";
+import { PAYMENT_CONDITION_LABEL, PAYMENT_METHOD_LABEL, type PaymentMethod } from "@/lib/commercial";
 import { ramoLabel, serviceAreaLabel } from "@/lib/company-display";
 import { formatDate } from "@/lib/date";
 import { prisma } from "@/lib/db";
@@ -30,6 +31,10 @@ function companyPlace(company: {
 }) {
   const city = company.city && company.state ? `${company.city.name}-${company.state.uf}` : company.state?.name;
   return [company.address, company.neighborhood, city].filter(Boolean).join(" · ");
+}
+
+function paymentMethodLabel(value: string | null | undefined) {
+  return value && value in PAYMENT_METHOD_LABEL ? PAYMENT_METHOD_LABEL[value as PaymentMethod] : "";
 }
 
 export async function generateMetadata({
@@ -68,6 +73,14 @@ export default async function PublicOrcamentoPage({
   const totalLabel = formatBRL(Number(budget.total));
   const travel = travelFeeAmount(extras);
   const discount = Number(budget.discount);
+  const paymentLabel = paymentMethodLabel(budget.paymentMethod);
+  const acceptedMethods = Array.isArray(budget.acceptedPaymentMethods)
+    ? budget.acceptedPaymentMethods.map((method) => paymentMethodLabel(String(method))).filter(Boolean)
+    : [];
+  const conditionLabel =
+    budget.paymentCondition in PAYMENT_CONDITION_LABEL
+      ? PAYMENT_CONDITION_LABEL[budget.paymentCondition as keyof typeof PAYMENT_CONDITION_LABEL]
+      : "";
   const showBreakdown = kinds.some(([kind]) => kind in KIND_LABEL) || travel > 0 || discount > 0;
   const canRespond = !["approved", "rejected", "waiting", "expired"].includes(status);
   const place = companyPlace(budget.company);
@@ -187,6 +200,37 @@ export default async function PublicOrcamentoPage({
             ) : null}
           </section>
         ) : null}
+
+        <section className="mt-4 rounded-box border border-line bg-card p-4">
+          <h2 className="mb-2 text-xs font-medium uppercase tracking-[0.04em] text-text-soft">Pagamento</h2>
+          {paymentLabel ? (
+            <p className="flex justify-between text-sm">
+              <span>Forma principal</span>
+              <span className="font-semibold">{paymentLabel}</span>
+            </p>
+          ) : null}
+          {acceptedMethods.length > 1 ? (
+            <p className="mt-1 text-sm text-text-soft">Também aceita: {acceptedMethods.join(", ")}</p>
+          ) : null}
+          {conditionLabel ? (
+            <p className="mt-1 flex justify-between text-sm text-text-soft">
+              <span>Condição</span>
+              <span>{conditionLabel}</span>
+            </p>
+          ) : null}
+          {budget.paymentCondition === "deposit_balance" ? (
+            <div className="mt-2 space-y-1 text-sm">
+              <p className="flex justify-between">
+                <span>Entrada</span>
+                <span className="font-semibold">{formatBRL(Number(budget.downPaymentAmount))}</span>
+              </p>
+              <p className="flex justify-between text-text-soft">
+                <span>Saldo restante</span>
+                <span>{formatBRL(Number(budget.total) - Number(budget.downPaymentAmount))}</span>
+              </p>
+            </div>
+          ) : null}
+        </section>
 
         {contextLines.length > 0 ? (
           <section className="mt-4 rounded-box border border-line bg-card p-4">
