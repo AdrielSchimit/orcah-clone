@@ -47,8 +47,10 @@ export default async function ClientePage({
           customer={{
             id: customer.id,
             name: customer.name,
-            phone: customer.phone,
-            whatsapp: customer.whatsapp,
+            phone: formatPhoneBR(customer.phone),
+            // Campo é "se diferente": igual ao telefone fica vazio e o salvar repete o telefone.
+            whatsapp:
+              customer.whatsapp && customer.whatsapp !== customer.phone ? formatPhoneBR(customer.whatsapp) : null,
             email: customer.email,
             address: customer.address,
             neighborhood: customer.neighborhood,
