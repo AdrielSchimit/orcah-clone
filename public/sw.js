@@ -1,5 +1,5 @@
-const CACHE = "orcah-v1";
-const PRECACHE = ["/", "/apple-touch-icon.png", "/brand/orcah-icon.png", "/brand/orcah-logo.png"];
+const CACHE = "orcah-v2";
+const PRECACHE = ["/", "/apple-touch-icon.png", "/brand/orcah-logo.svg", "/brand/orcah-icon.svg"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(

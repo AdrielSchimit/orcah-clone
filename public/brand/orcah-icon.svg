@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="226 227 569 569" width="569" height="569" role="img" aria-label="Orçah">
+  <title>Orçah</title>
+  <defs>
+  <linearGradient id="orcah-band" x1="252.5" y1="0" x2="705.5" y2="0" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#BE761A"/>
+  <stop offset="0.174" stop-color="#C37A1D"/>
+  <stop offset="0.328" stop-color="#C88325"/>
+  <stop offset="0.504" stop-color="#D18D2F"/>
+  <stop offset="0.68" stop-color="#D89739"/>
+  <stop offset="1" stop-color="#DB9A3C"/>
+  </linearGradient>
+  <linearGradient id="orcah-bars" x1="430" y1="0" x2="640" y2="0" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#CD8B2F"/>
+  <stop offset="0.14" stop-color="#D08C2D"/>
+  <stop offset="0.52" stop-color="#DC9A3B"/>
+  <stop offset="0.9" stop-color="#E5A84B"/>
+  <stop offset="1" stop-color="#E6AA4D"/>
+  </linearGradient>
+  <linearGradient id="orcah-flap" x1="637" y1="253.5" x2="770" y2="451.0" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#F5BF66"/>
+  <stop offset="1" stop-color="#DF9F3D"/>
+  </linearGradient>
+  <linearGradient id="orcah-strip" x1="0" y1="451.0" x2="0" y2="795.5" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#B27520"/>
+  <stop offset="0.023" stop-color="#BB842F"/>
+  <stop offset="0.052" stop-color="#CD933D"/>
+  <stop offset="0.082" stop-color="#DBA047"/>
+  <stop offset="0.111" stop-color="#E5AA4E"/>
+  <stop offset="0.14" stop-color="#EAAF53"/>
+  <stop offset="0.286" stop-color="#EFB558"/>
+  <stop offset="0.577" stop-color="#ECB154"/>
+  <stop offset="0.869" stop-color="#E9AD4E"/>
+  <stop offset="1" stop-color="#EAB05A"/>
+  </linearGradient>
+  <linearGradient id="orcah-shade-fold" x1="590" y1="0" x2="637" y2="0" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#8A5208" stop-opacity="0"/>
+  <stop offset="0.4" stop-color="#8A5208" stop-opacity="0.25"/>
+  <stop offset="0.75" stop-color="#8A5208" stop-opacity="0.47"/>
+  <stop offset="1" stop-color="#8A5208" stop-opacity="0.63"/>
+  </linearGradient>
+  <linearGradient id="orcah-shade-tail" x1="650" y1="0" x2="705.5" y2="0" gradientUnits="userSpaceOnUse">
+  <stop offset="0" stop-color="#8A5208" stop-opacity="0"/>
+  <stop offset="1" stop-color="#8A5208" stop-opacity="0.28"/>
+  </linearGradient>
+  <clipPath id="orcah-band-clip"><path d="M252.5 429A202.25 202.25 0 0 1 454.75 226.75L587 226.75A50 50 0 0 1 637 276.75L637 339L421.75 339A66.5 66.5 0 0 0 355.25 405.5L355.25 546.75A67.5 67.5 0 0 0 422.75 614.25L588.69 614.25A67.75 67.75 0 0 1 636.59 634.09L707.5 705L707.5 785.36L635.65 736.93A64 64 0 0 0 599.88 726L426.5 726A174 174 0 0 1 252.5 552Z"/></clipPath>
+  <clipPath id="orcah-band-top"><rect x="517" y="221.75" width="125" height="117.25"/></clipPath>
+  </defs>
+  <g>
+    <path d="M252.5 429A202.25 202.25 0 0 1 454.75 226.75L587 226.75A50 50 0 0 1 637 276.75L637 339L421.75 339A66.5 66.5 0 0 0 355.25 405.5L355.25 546.75A67.5 67.5 0 0 0 422.75 614.25L588.69 614.25A67.75 67.75 0 0 1 636.59 634.09L707.5 705L707.5 785.36L635.65 736.93A64 64 0 0 0 599.88 726L426.5 726A174 174 0 0 1 252.5 552Z" fill="url(#orcah-band)"/>
+    <g clip-path="url(#orcah-band-clip)">
+    <rect x="590" y="226.75" width="47" height="112.25" fill="url(#orcah-shade-fold)"/>
+    <rect x="650" y="614.25" width="57.5" height="200" fill="url(#orcah-shade-tail)"/>
+    </g>
+    <path d="M705.5 449L770 449L770 761.75A33.75 33.75 0 0 1 736.25 795.5L727.5 795.5A22 22 0 0 1 705.5 773.5Z" fill="url(#orcah-strip)"/>
+    <path d="M567 226.75L577.11 226.75A80 80 0 0 1 633.68 250.18L752.87 369.37A58.5 58.5 0 0 1 770 410.73L770 451L699.75 451A62.75 62.75 0 0 1 637 388.25L637 327L567 327Z" fill="url(#orcah-flap)"/>
+    <g clip-path="url(#orcah-band-top)">
+    <path d="M252.5 429A202.25 202.25 0 0 1 454.75 226.75L587 226.75A50 50 0 0 1 637 276.75L637 339L421.75 339A66.5 66.5 0 0 0 355.25 405.5L355.25 546.75A67.5 67.5 0 0 0 422.75 614.25L588.69 614.25A67.75 67.75 0 0 1 636.59 634.09L707.5 705L707.5 785.36L635.65 736.93A64 64 0 0 0 599.88 726L426.5 726A174 174 0 0 1 252.5 552Z" fill="url(#orcah-band)"/>
+    <g clip-path="url(#orcah-band-clip)">
+    <rect x="590" y="226.75" width="47" height="112.25" fill="url(#orcah-shade-fold)"/>
+    </g>
+    </g>
+    <path d="M452.25 407.75H577.5A22.75 22.75 0 0 1 577.5 453.25H452.25A22.75 22.75 0 0 1 452.25 407.75Z" fill="url(#orcah-bars)"/>
+    <path d="M452.5 498.5H616.75A22.75 22.75 0 0 1 616.75 544H452.5A22.75 22.75 0 0 1 452.5 498.5Z" fill="url(#orcah-bars)"/>
+  </g>
+</svg>
