@@ -75,7 +75,10 @@ export default async function OrcamentosPage({
           {budgets.length === 0 ? (
             <div className="rounded-box border border-line bg-card p-6 text-center">
               <p className="text-sm text-text-soft">Nenhum orçamento encontrado com esses filtros.</p>
-              <Link href="/painel/orcamentos" className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-gold-deep">
+              <Link
+                href="/painel/orcamentos"
+                className="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-gold-deep"
+              >
                 Limpar filtros
               </Link>
             </div>
@@ -118,7 +121,9 @@ export default async function OrcamentosPage({
                         <span className="md:hidden">Atualizado </span>
                         {formatUpdatedAt(budget.updatedAt)}
                         {budget.validityDate && budget.status !== "approved" && budget.status !== "rejected" ? (
-                          <span className="block md:hidden">Válido até {budget.validityDate.toLocaleDateString("pt-BR", { timeZone: "UTC" })}</span>
+                          <span className="block md:hidden">
+                            Válido até {budget.validityDate.toLocaleDateString("pt-BR", { timeZone: "UTC" })}
+                          </span>
                         ) : null}
                       </p>
                     </Link>
