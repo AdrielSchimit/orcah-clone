@@ -90,7 +90,7 @@ export default async function OrcamentosPage({
                   : `${budgets.length} ${budgets.length === 1 ? "orçamento" : "orçamentos"}${filtering ? " encontrados" : ""}`}
               </p>
 
-              <div className="hidden grid-cols-[9rem_minmax(0,1fr)_7.5rem_8rem_8rem] gap-3 px-4 pb-2 text-xs font-medium uppercase tracking-[0.04em] text-text-soft md:grid">
+              <div className="hidden grid-cols-[9rem_minmax(0,1fr)_7.5rem_8rem_8rem] gap-3 px-4 pb-2 text-xs font-medium uppercase tracking-[0.04em] text-text-soft lg:grid">
                 <span>Número</span>
                 <span>Cliente</span>
                 <span>Status</span>
@@ -103,25 +103,25 @@ export default async function OrcamentosPage({
                   <li key={budget.id}>
                     <Link
                       href={`/painel/orcamentos/${budget.id}`}
-                      className="block rounded-box border border-line bg-card p-4 hover:border-ink-line md:grid md:grid-cols-[9rem_minmax(0,1fr)_7.5rem_8rem_8rem] md:items-center md:gap-3 md:py-3"
+                      className="block rounded-box border border-line bg-card p-4 hover:border-ink-line lg:grid lg:grid-cols-[9rem_minmax(0,1fr)_7.5rem_8rem_8rem] lg:items-center lg:gap-3 lg:py-3"
                     >
-                      <div className="flex items-center justify-between gap-3 md:contents">
-                        <span className="text-sm text-text-soft md:truncate">{budget.number}</span>
-                        <span className="md:order-1">
+                      <div className="flex items-center justify-between gap-3 lg:contents">
+                        <span className="text-sm text-text-soft lg:truncate">{budget.number}</span>
+                        <span className="lg:order-1">
                           <StatusPill tone={budgetStatusTone(budget.status)}>
                             {budgetStatusLabel[budget.status]}
                           </StatusPill>
                         </span>
                       </div>
-                      <p className="mt-2 truncate font-medium md:mt-0">{budget.customer.name}</p>
-                      <p className="mt-1 font-semibold md:order-2 md:mt-0 md:text-right">
+                      <p className="mt-2 truncate font-medium lg:mt-0">{budget.customer.name}</p>
+                      <p className="mt-1 font-semibold lg:order-2 lg:mt-0 lg:text-right">
                         {formatBRL(Number(budget.total))}
                       </p>
-                      <p className="mt-2 text-xs text-text-soft md:order-3 md:mt-0 md:text-right">
-                        <span className="md:hidden">Atualizado </span>
+                      <p className="mt-2 text-xs text-text-soft lg:order-3 lg:mt-0 lg:text-right">
+                        <span className="lg:hidden">Atualizado </span>
                         {formatUpdatedAt(budget.updatedAt)}
                         {budget.validityDate && budget.status !== "approved" && budget.status !== "rejected" ? (
-                          <span className="block md:hidden">
+                          <span className="block lg:hidden">
                             Válido até {budget.validityDate.toLocaleDateString("pt-BR", { timeZone: "UTC" })}
                           </span>
                         ) : null}
