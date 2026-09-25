@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { CustomerForm } from "@/components/customer-form";
 import { formatPhoneBR } from "@/lib/phone";
 
@@ -58,14 +59,19 @@ export function ClientesPanel({ customers }: { customers: Customer[] }) {
       ) : (
         <ul className="space-y-2">
           {listed.map((customer) => (
-            <li key={customer.id} className="rounded-box border border-line bg-card p-4">
-              <p className="font-medium">{customer.name}</p>
-              <p className="text-sm font-medium">{formatPhoneBR(customer.phone)}</p>
-              {customer.city && customer.state ? (
-                <p className="text-xs text-text-soft">
-                  {customer.city.name} - {customer.state.uf}
-                </p>
-              ) : null}
+            <li key={customer.id}>
+              <Link
+                href={`/painel/clientes/${customer.id}`}
+                className="block rounded-box border border-line bg-card p-4 hover:border-ink-line"
+              >
+                <p className="font-medium">{customer.name}</p>
+                <p className="text-sm font-medium">{formatPhoneBR(customer.phone)}</p>
+                {customer.city && customer.state ? (
+                  <p className="text-xs text-text-soft">
+                    {customer.city.name} - {customer.state.uf}
+                  </p>
+                ) : null}
+              </Link>
             </li>
           ))}
         </ul>
