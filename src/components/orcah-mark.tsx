@@ -9,10 +9,10 @@ export function OrcahMark({
 }) {
   return (
     <Image
-      src="/brand/orcah-header2.png"
+      src="/brand/orcah-logo.svg"
       alt="Orçah"
-      width={875}
-      height={264}
+      width={872}
+      height={242}
       className={className}
       priority={priority}
     />

@@ -94,9 +94,9 @@ export async function buildBudgetPdf(budget: PdfBudget, template?: TemplateConfi
   });
 
   try {
-    doc.image(publicFile("brand/orcah-pdf.png"), 48, 40, { height: 36 });
+    doc.image(publicFile("brand/png/orcah-logo-uma-cor-1744.png"), 48, 40, { height: 36 });
   } catch {
-    doc.fillColor(GOLD).font("Helvetica-Bold").fontSize(18).text("Orcah", 48, 48);
+    doc.fillColor(GOLD).font("Helvetica-Bold").fontSize(18).text("Orçah", 48, 48);
   }
 
   doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(16).text(budget.company.name, 48, 90);
@@ -198,7 +198,7 @@ export async function buildBudgetPdf(budget: PdfBudget, template?: TemplateConfi
   }
 
   doc.moveDown(2);
-  doc.fillColor(GOLD).font("Helvetica").fontSize(8).text("Feito com Orcah  ·  orcah.com.br", { align: "center" });
+  doc.fillColor(GOLD).font("Helvetica").fontSize(8).text("Feito com Orçah  ·  orcah.com.br", { align: "center" });
 
   doc.end();
   return done;

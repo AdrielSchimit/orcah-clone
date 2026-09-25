@@ -7,7 +7,7 @@ export function BrandBar() {
     <header className="sticky top-0 z-20 border-b border-line bg-card px-4 py-3">
       <div className="mx-auto flex w-full max-w-5xl items-center">
         <Link href={appUrl("/")} aria-label="Orçah" className="flex min-h-12 shrink-0 items-center">
-          <OrcahLogo />
+          <OrcahLogo priority />
         </Link>
       </div>
     </header>
