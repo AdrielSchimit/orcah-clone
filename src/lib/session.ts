@@ -5,6 +5,7 @@ import {
   sessionCookieOptions,
   signSessionToken,
   readSessionToken,
+  sessionIsCurrent,
 } from "@/lib/session-token";
 
 export async function issueSessionToken(userId: number) {
@@ -38,7 +39,7 @@ export async function getSessionUser() {
     const session = await readSessionToken(token);
     if (!session) return null;
 
-    return prisma.user.findUnique({
+    const user = await prisma.user.findUnique({
       where: { id: session.userId },
       include: {
         company: {
@@ -50,6 +51,8 @@ export async function getSessionUser() {
         },
       },
     });
+    if (!user || !sessionIsCurrent(session.issuedAt, user.passwordChangedAt)) return null;
+    return user;
   } catch {
     return null;
   }
