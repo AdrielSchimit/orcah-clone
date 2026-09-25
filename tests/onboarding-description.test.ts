@@ -21,7 +21,7 @@ describe("onboarding service description", () => {
         city: "Ribeirão Preto",
         servesRegion: false,
       }),
-      "Serviços hidráulicos, instalações e reparos em Ribeirão Preto.",
+      "Serviços hidráulicos residenciais e comerciais em Ribeirão Preto.",
     );
   });
 
@@ -32,7 +32,7 @@ describe("onboarding service description", () => {
         city: "Sertãozinho",
         servesRegion: true,
       }),
-      "Serviços de instalador de antenas em Sertãozinho e região.",
+      "Serviços de Instalador de Antenas em Sertãozinho e região.",
     );
   });
 
@@ -42,7 +42,7 @@ describe("onboarding service description", () => {
         ramo: "Pintor",
         servesRegion: true,
       }),
-      "Pintura residencial e comercial.",
+      "Serviços de pintura residencial e comercial.",
     );
   });
 
