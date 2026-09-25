@@ -34,6 +34,8 @@ export function OnboardingForm({ defaultWhatsapp }: { defaultWhatsapp?: string }
   const [name, setName] = useState("");
   const [whatsapp, setWhatsapp] = useState(defaultWhatsapp ?? "");
   const [stateId, setStateId] = useState("");
+  const [stateQuery, setStateQuery] = useState("");
+  const [stateOpen, setStateOpen] = useState(false);
   const [cityName, setCityName] = useState("");
   const [servesRegion, setServesRegion] = useState(false);
   const [ramoId, setRamoId] = useState<number | "">("");
@@ -79,6 +81,19 @@ export function OnboardingForm({ defaultWhatsapp }: { defaultWhatsapp?: string }
   }, [ramos]);
   const listedRamos = ramos.filter((ramo) => ramo.slug !== "outro");
   const selectedState = states.find((state) => String(state.id) === stateId);
+  const filteredStates = useMemo(() => {
+    const query = stateQuery.trim().toLocaleLowerCase("pt-BR");
+    const matches = query
+      ? states.filter(
+          (state) =>
+            state.name.toLocaleLowerCase("pt-BR").includes(query) ||
+            state.uf.toLocaleLowerCase("pt-BR").includes(query),
+        )
+      : states;
+
+    return matches.slice(0, 7);
+  }, [stateQuery, states]);
+
   const suggestedDescription = buildCompanyDescription({
     categoryName: ramoName,
     categorySlug: ramoSlug,
@@ -98,6 +113,15 @@ export function OnboardingForm({ defaultWhatsapp }: { defaultWhatsapp?: string }
     ];
 
     return answers.slice(0, step).filter(Boolean);
+  }
+
+  function pickState(state: State) {
+    setStateId(String(state.id));
+    setStateQuery(`${state.name} (${state.uf})`);
+    setStateOpen(false);
+    setCityName("");
+    setCities([]);
+    setError("");
   }
 
   function pickRamo(ramo: Ramo, customName?: string) {
@@ -144,7 +168,7 @@ export function OnboardingForm({ defaultWhatsapp }: { defaultWhatsapp?: string }
     setStep((current) => Math.max(current - 1, 0));
   }
 
-  function handleEnter(event: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+  function handleEnter(event: KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>) {
     if (event.key !== "Enter" || event.shiftKey || active.key === "description") return;
     event.preventDefault();
     goNext();
@@ -264,26 +288,99 @@ export function OnboardingForm({ defaultWhatsapp }: { defaultWhatsapp?: string }
         {active.key === "location" ? (
           <div className="space-y-4">
             <h2 className="text-2xl font-semibold text-text">Onde você trabalha?</h2>
-            <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-text">Estado</span>
-              <select
-                value={stateId}
-                onChange={(event) => {
-                  setStateId(event.target.value);
-                  setCityName("");
-                  setCities([]);
-                }}
-                onKeyDown={handleEnter}
-                className="w-full rounded-btn border border-line bg-card px-4 py-4 text-base"
-              >
-                <option value="">Selecione</option>
-                {states.map((state) => (
-                  <option key={state.id} value={state.id}>
-                    {state.name} ({state.uf})
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="block">
+              <label htmlFor="onboarding-state" className="mb-1.5 block text-sm font-medium text-text">
+                Estado
+              </label>
+              <div className="relative">
+                <svg
+                  aria-hidden="true"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  className="pointer-events-none absolute left-4 top-1/2 size-5 -translate-y-1/2 text-text-soft"
+                >
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="m20 20-3.5-3.5" />
+                </svg>
+                <input
+                  id="onboarding-state"
+                  value={stateQuery}
+                  onChange={(event) => {
+                    const value = event.target.value;
+                    setStateQuery(value);
+                    setStateOpen(true);
+
+                    if (
+                      selectedState &&
+                      value !== `${selectedState.name} (${selectedState.uf})`
+                    ) {
+                      setStateId("");
+                      setCityName("");
+                      setCities([]);
+                    }
+                  }}
+                  onFocus={(event) => {
+                    event.currentTarget.select();
+                    setStateOpen(true);
+                  }}
+                  onBlur={() => setTimeout(() => setStateOpen(false), 120)}
+                  onKeyDown={(event) => {
+                    if (event.key === "Escape") {
+                      setStateOpen(false);
+                      return;
+                    }
+
+                    if (event.key === "Enter" && !stateId && filteredStates[0]) {
+                      event.preventDefault();
+                      pickState(filteredStates[0]);
+                      return;
+                    }
+
+                    if (stateId) handleEnter(event);
+                  }}
+                  placeholder="Digite o estado ou a sigla"
+                  autoComplete="off"
+                  role="combobox"
+                  aria-expanded={stateOpen}
+                  aria-controls="onboarding-state-options"
+                  className="w-full rounded-btn border border-line bg-card py-4 pl-11 pr-4 text-base"
+                />
+
+                {stateOpen ? (
+                  <div
+                    id="onboarding-state-options"
+                    role="listbox"
+                    className="absolute z-30 mt-2 max-h-64 w-full overflow-y-auto overflow-x-hidden rounded-btn border border-line bg-card shadow-lg"
+                  >
+                    {filteredStates.length ? (
+                      filteredStates.map((state) => (
+                        <button
+                          key={state.id}
+                          type="button"
+                          role="option"
+                          aria-selected={stateId === String(state.id)}
+                          onMouseDown={(event) => event.preventDefault()}
+                          onClick={() => pickState(state)}
+                          className="flex w-full items-center justify-between gap-3 border-b border-line px-4 py-3 text-left text-sm last:border-b-0 hover:bg-paper"
+                        >
+                          <span className="min-w-0 truncate font-medium text-text">{state.name}</span>
+                          <span className="shrink-0 rounded-full bg-paper px-2 py-1 text-xs font-semibold text-text-soft">
+                            {state.uf}
+                          </span>
+                        </button>
+                      ))
+                    ) : (
+                      <p className="px-4 py-3 text-sm text-text-soft">Nenhum estado encontrado.</p>
+                    )}
+                  </div>
+                ) : null}
+              </div>
+              <p className="mt-1.5 text-xs text-text-soft">
+                Ex.: São Paulo, SP, Minas Gerais ou MG.
+              </p>
+            </div>
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium text-text">Cidade</span>
               <input
