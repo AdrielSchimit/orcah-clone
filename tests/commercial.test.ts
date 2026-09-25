@@ -102,7 +102,6 @@ describe("commercial checkout calculations", () => {
       discountAmount: 15,
       total: 84.99,
     });
-    if ("error" in result) throw new Error(result.error);
     assert.equal(Math.round((result.discountAmount + result.total) * 100), 9999);
   });
 
@@ -115,7 +114,6 @@ describe("commercial checkout calculations", () => {
       downPaymentAmount: 333.3,
       balanceAmount: 666.7,
     });
-    if ("error" in result) throw new Error(result.error);
     assert.equal(Math.round((result.downPaymentAmount + result.balanceAmount) * 100), 100000);
   });
 
