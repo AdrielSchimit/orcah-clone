@@ -15,9 +15,9 @@ export default async function OnboardingPage() {
       <main className="mx-auto flex w-full max-w-md flex-col px-4 pb-10 pt-8">
         <h1 className="mb-1 text-2xl font-semibold">Sua empresa</h1>
         <p className="mb-6 text-sm text-text-soft">
-          Olá, {user.name.split(" ")[0]}. Escolha o ramo e o estado para começar.
+          Olá, {user.name.split(" ")[0]}. Só o essencial — o Orçah monta o resto com você.
         </p>
-        <div className="rounded-box border border-line bg-card p-4">
+        <div className="rounded-box border border-line bg-card p-4 sm:p-5">
           <OnboardingForm defaultWhatsapp={user.phone ?? ""} />
         </div>
       </main>

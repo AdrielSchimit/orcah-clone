@@ -27,6 +27,7 @@ export async function POST(request: Request) {
     stateId?: number;
     cityName?: string;
     servesRegion?: boolean;
+    description?: string;
   };
 
   const name = body.name?.trim() ?? "";
@@ -35,6 +36,7 @@ export async function POST(request: Request) {
   const stateId = Number(body.stateId);
   const customRamoName = titleCaseName(body.customRamoName ?? "");
   const servesRegion = Boolean(body.servesRegion);
+  const description = body.description?.trim().slice(0, 500) ?? "";
 
   if (name.length < 2) {
     return NextResponse.json({ error: "Informe o nome da empresa." }, { status: 400 });
@@ -61,7 +63,7 @@ export async function POST(request: Request) {
   let slug = slugify(name) || "empresa";
   const taken = await prisma.company.findUnique({ where: { slug } });
   if (taken || isReservedCompanySlug(slug)) {
-    slug = `${slug}-${user.id}`;
+    slug = slug + "-" + user.id;
   }
 
   await prisma.company.create({
@@ -77,6 +79,7 @@ export async function POST(request: Request) {
       stateId: state.id,
       cityId: city?.id ?? null,
       servesRegion,
+      description: description || null,
       slug,
       subscription: {
         create: {
