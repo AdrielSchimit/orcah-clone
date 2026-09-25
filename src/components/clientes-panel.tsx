@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { CustomerForm } from "@/components/customer-form";
+import { MascoteVazio } from "@/components/mascote";
 import { formatPhoneBR } from "@/lib/phone";
 
 type Customer = {
@@ -51,10 +52,13 @@ export function ClientesPanel({ customers }: { customers: Customer[] }) {
         className="mb-4 w-full rounded-btn border border-line bg-card px-4 py-3"
       />
 
-      {listed.length === 0 ? (
-        <p className="text-sm text-text-soft">
-          {customers.length === 0 ? "Nenhum cliente ainda." : "Nenhum resultado."}
-        </p>
+      {customers.length === 0 ? (
+        <>
+          <p className="text-sm text-text-soft">Nenhum cliente ainda.</p>
+          {open ? null : <MascoteVazio pose="boas-vindas">Vamos cadastrar seu primeiro cliente?</MascoteVazio>}
+        </>
+      ) : listed.length === 0 ? (
+        <p className="text-sm text-text-soft">Nenhum resultado.</p>
       ) : (
         <ul className="space-y-2">
           {listed.map((customer) => (

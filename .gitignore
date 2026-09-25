@@ -43,3 +43,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# originais do mascote (pesados); o app usa src/assets/mascote/*.webp
+/src/mascote/
