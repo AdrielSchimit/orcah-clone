@@ -127,8 +127,20 @@ export type CustomerInput = {
   cityId?: number | string;
 };
 
+export type CustomerData = {
+  name: string;
+  phone: string;
+  whatsapp: string;
+  email: string | null;
+  address: string | null;
+  neighborhood: string | null;
+  notes: string | null;
+  stateId: number | null;
+  cityId: number | null;
+};
+
 /** Valida e normaliza os campos do cliente. Mesmas regras do cadastro. */
-export function parseCustomerInput(body: CustomerInput) {
+export function parseCustomerInput(body: CustomerInput): { error: string } | { data: CustomerData } {
   const name = body.name?.trim() ?? "";
   const phone = body.phone?.replace(/\D/g, "") ?? "";
   const stateId = body.stateId ? Number(body.stateId) : null;
