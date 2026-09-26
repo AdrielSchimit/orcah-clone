@@ -10,6 +10,7 @@ import { ramoLabel, serviceAreaLabel } from "@/lib/company-display";
 import { formatDate } from "@/lib/date";
 import { prisma } from "@/lib/db";
 import { formatBRL, moneyString } from "@/lib/money";
+import { publicCanRespond } from "@/lib/budget-cycle";
 import { findPublicBudget, maybeExpire } from "@/lib/public-budget";
 import { companyTemplate, KIND_LABEL, extraDetailLines, itemDetailLines, parseExtras, travelFeeAmount, type ItemKind } from "@/lib/templates";
 import { companyPublicUrl } from "@/lib/urls";
@@ -82,7 +83,10 @@ export default async function PublicOrcamentoPage({
       ? PAYMENT_CONDITION_LABEL[budget.paymentCondition as keyof typeof PAYMENT_CONDITION_LABEL]
       : "";
   const showBreakdown = kinds.some(([kind]) => kind in KIND_LABEL) || travel > 0 || discount > 0;
-  const canRespond = !["approved", "rejected", "waiting", "expired"].includes(status);
+  const canRespond = publicCanRespond(status);
+  const updatedAfterRevision =
+    canRespond &&
+    (await prisma.budgetVersion.count({ where: { budgetId: budget.id } })) > 0;
   const place = companyPlace(budget.company);
   const contextLines = [
     budget.serviceCity && budget.serviceState ? `Serviço em ${budget.serviceCity.name}-${budget.serviceState.uf}` : "",
@@ -123,6 +127,11 @@ export default async function PublicOrcamentoPage({
           {title ? <p className="mt-1 text-2xl font-semibold leading-tight text-text">{title}</p> : null}
           <p className="mt-1 text-sm text-text-soft">{budget.number}</p>
           <p className="mt-4 text-[32px] font-semibold leading-none tracking-tight text-text">{totalLabel}</p>
+          {updatedAfterRevision ? (
+            <p className="mt-2 text-sm font-medium text-gold-deep">
+              Atualizado depois do seu pedido de alteração.
+            </p>
+          ) : null}
           {budget.validityDate ? (
             <p className="mt-2 text-sm text-text-soft">Válido até {formatDate(budget.validityDate)}</p>
           ) : null}

@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { parseBudgetItems, budgetTotals, type ItemInput } from "@/lib/budget";
+import { nextBudgetVersion, republishEventMetadata, statusAfterProviderEdit } from "@/lib/budget-cycle";
 import { extrasJson, mapItemCreates, serializeBudget } from "@/lib/budget-serialize";
 import type { CommercialInput } from "@/lib/commercial";
 import { requireCompany } from "@/lib/company";
 import { requireActivePlan } from "@/lib/plan";
 import { prisma } from "@/lib/db";
 import { moneyString, parseMoney } from "@/lib/money";
+import { recordBudgetEvent } from "@/lib/public-budget";
 import { parseExtras } from "@/lib/templates";
 
 export async function GET(
@@ -128,12 +130,33 @@ export async function PATCH(
   const validityDate = body.validityDate ? new Date(`${body.validityDate}T12:00:00`) : null;
   const estimatedDays = body.estimatedDays ? Number(body.estimatedDays) : null;
 
+  const republish = existing.status === "waiting";
+  let publishedVersion = 0;
   const budget = await prisma.$transaction(async (tx) => {
+    if (republish) {
+      const last = await tx.budgetVersion.findFirst({
+        where: { budgetId: existing.id },
+        orderBy: { version: "desc" },
+        select: { version: true },
+      });
+      publishedVersion = nextBudgetVersion(last?.version);
+      await tx.budgetVersion.create({
+        data: {
+          budgetId: existing.id,
+          version: publishedVersion,
+          subtotal: existing.subtotal,
+          discount: existing.discount,
+          total: existing.total,
+          notes: existing.notes,
+        },
+      });
+    }
     await tx.budgetItem.deleteMany({ where: { budgetId: existing.id } });
     return tx.budget.update({
       where: { id: existing.id },
       data: {
         customerId: customer.id,
+        status: statusAfterProviderEdit(existing.status),
         serviceStateId,
         serviceCityId,
         subtotal: moneyString(subtotal),
@@ -160,6 +183,19 @@ export async function PATCH(
       },
     });
   });
+
+  if (republish) {
+    await recordBudgetEvent(
+      request,
+      budget.id,
+      "sent",
+      republishEventMetadata({
+        version: publishedVersion,
+        total: moneyString(total),
+        previousTotal: moneyString(Number(existing.total)),
+      }),
+    );
+  }
 
   return NextResponse.json({ ok: true, budget: serializeBudget(budget) });
 }

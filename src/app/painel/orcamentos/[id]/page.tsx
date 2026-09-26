@@ -6,6 +6,7 @@ import { CopyLinkButton } from "@/components/copy-link-button";
 import { SendWhatsAppButton } from "@/components/send-whatsapp-button";
 import { StatusPill, budgetStatusTone } from "@/components/status-pill";
 import { groupedItems } from "@/lib/budget";
+import { isRepublishMetadata } from "@/lib/budget-cycle";
 import { prisma } from "@/lib/db";
 import { budgetStatusLabel } from "@/lib/budget-status";
 import { formatDateTime } from "@/lib/date";
@@ -52,6 +53,7 @@ export default async function OrcamentoPage({
       serviceCity: { select: { name: true } },
       serviceState: { select: { uf: true } },
       events: { orderBy: { createdAt: "desc" }, take: 12 },
+      versions: { orderBy: { version: "asc" } },
     },
   });
 
@@ -99,7 +101,7 @@ export default async function OrcamentoPage({
         </div>
       </div>
 
-      {revisionMessage ? (
+      {budget.status === "waiting" && revisionMessage ? (
         <div className="mb-5 rounded-box border border-gold/40 bg-gold-wash p-4">
           <p className="text-sm font-semibold">Pedido de alteração</p>
           <p className="mt-1 whitespace-pre-wrap text-sm text-text-soft">{revisionMessage}</p>
@@ -225,19 +227,49 @@ export default async function OrcamentoPage({
         </ul>
       )}
 
+      {budget.versions.length > 0 ? (
+        <section className="mt-8">
+          <h2 className="mb-3 text-xs font-medium uppercase tracking-[0.04em] text-text-soft">Versões</h2>
+          <ul className="space-y-2">
+            {budget.versions.map((version) => (
+              <li key={version.id} className="rounded-box border border-line bg-card px-4 py-3">
+                <p className="text-sm font-medium">Versão {version.version}</p>
+                <p className="text-sm text-text-soft">
+                  Total {formatBRL(Number(version.total))} · anterior ao ajuste
+                </p>
+                <p className="text-xs text-text-soft">{formatDateTime(version.createdAt)}</p>
+              </li>
+            ))}
+            <li className="rounded-box border border-line bg-card px-4 py-3">
+              <p className="text-sm font-medium">Versão atual</p>
+              <p className="text-sm text-text-soft">Total {formatBRL(Number(budget.total))}</p>
+            </li>
+          </ul>
+        </section>
+      ) : null}
+
       {budget.events.length > 0 ? (
         <section className="mt-8">
           <h2 className="mb-3 text-xs font-medium uppercase tracking-[0.04em] text-text-soft">Acompanhamento</h2>
           <ul className="space-y-0">
-            {budget.events.map((event) => (
-              <li key={event.id} className="flex gap-3 py-2">
-                <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${eventTone[event.event] ?? "bg-line"}`} />
-                <div>
-                  <p className="text-sm font-medium">{eventLabel[event.event]}</p>
-                  <p className="text-xs text-text-soft">{formatDateTime(event.createdAt)}</p>
-                </div>
-              </li>
-            ))}
+            {budget.events.map((event) => {
+              const republish = event.event === "sent" && isRepublishMetadata(event.metadata);
+              const title = republish ? "Nova versão pronta para aprovação" : eventLabel[event.event];
+              return (
+                <li key={event.id} className="flex gap-3 py-2">
+                  <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${eventTone[event.event] ?? "bg-line"}`} />
+                  <div>
+                    <p className="text-sm font-medium">{title}</p>
+                    {republish && event.metadata.previousTotal && event.metadata.total ? (
+                      <p className="text-xs text-text-soft">
+                        {formatBRL(event.metadata.previousTotal)} → {formatBRL(event.metadata.total)}
+                      </p>
+                    ) : null}
+                    <p className="text-xs text-text-soft">{formatDateTime(event.createdAt)}</p>
+                  </div>
+                </li>
+              );
+            })}
           </ul>
         </section>
       ) : null}
