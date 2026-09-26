@@ -108,6 +108,6 @@ export async function POST(request: Request) {
   await createSession(user.id);
   return NextResponse.json({
     ok: true,
-    next: sessionCookieIsShared() ? "/entrando" : "/painel",
+    next: sessionCookieIsShared() ? "/entrando?bemvindo=1" : "/painel?bemvindo=1",
   });
 }

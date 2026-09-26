@@ -31,12 +31,17 @@ export function ServiceForm({ service, categories }: { service?: EditableService
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    if (!photo) return;
-    const url = URL.createObjectURL(photo);
-    setPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [photo]);
+  const objectUrl = useRef<string | null>(null);
+  useEffect(() => () => {
+    if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);
+  }, []);
+
+  function choosePhoto(file: File | null) {
+    if (objectUrl.current) URL.revokeObjectURL(objectUrl.current);
+    objectUrl.current = file ? URL.createObjectURL(file) : null;
+    setPhoto(file);
+    setPreview(objectUrl.current ?? service?.imagePath ?? null);
+  }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -84,7 +89,7 @@ export function ServiceForm({ service, categories }: { service?: EditableService
 
   async function removePhoto() {
     if (!service?.imagePath) {
-      setPhoto(null);
+      choosePhoto(null);
       setPreview(null);
       return;
     }
@@ -169,7 +174,7 @@ export function ServiceForm({ service, categories }: { service?: EditableService
           type="file"
           accept="image/jpeg,image/png,image/webp"
           className="sr-only"
-          onChange={(event) => setPhoto(event.target.files?.[0] ?? null)}
+          onChange={(event) => choosePhoto(event.target.files?.[0] ?? null)}
         />
       </section>
 
