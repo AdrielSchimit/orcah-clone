@@ -16,13 +16,14 @@ const loadPage = cache((slug: string) => getPublicCompanyPage(prisma, slug));
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const page = await loadPage((await params).slug);
-  if (!page) return { title: "Página não encontrada | Orçah" };
+  if (!page) return { title: { absolute: "Página não encontrada | Orçah" } };
   const title = `${page.name} | Orçah`;
   const description =
     page.description?.slice(0, 160) || `${page.ramo} em ${page.areaLabel}. Peça seu orçamento pelo celular.`;
   const image = page.logoPath && /^https?:\/\//.test(page.logoPath) ? [{ url: page.logoPath }] : undefined;
   return {
-    title,
+    // absoluto: o layout raiz acrescentaria "· Orçah" de novo
+    title: { absolute: title },
     description,
     openGraph: { title, description, type: "website", locale: "pt_BR", images: image },
     twitter: { card: "summary", title, description },
@@ -134,7 +135,7 @@ export default async function EmpresaPublicaPage({
             {categories.length > 1 ? (
               <p className="mt-1 text-sm text-text-soft">{categories.join(" · ")}</p>
             ) : null}
-            <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+            <ul className="mt-4 grid items-start gap-3 sm:grid-cols-2">
               {page.services.map((service) => (
                 <li
                   key={service.id}

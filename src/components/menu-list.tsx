@@ -22,7 +22,7 @@ export function MenuList({ items }: { items: MenuItem[] }) {
             <span className="flex shrink-0 items-center gap-2">
               {item.badge && item.badge > 0 ? (
                 <span className="rounded-full bg-gold px-2 py-0.5 text-xs font-bold text-ink">
-                  {item.badge > 9 ? "9+" : item.badge} {item.badge === 1 ? "novo" : "novos"}
+                  {`${item.badge > 9 ? "9+" : item.badge} ${item.badge === 1 ? "novo" : "novos"}`}
                 </span>
               ) : null}
               <span aria-hidden className="text-text-soft">
