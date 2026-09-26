@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isPreviewAdmin } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { getSessionUser } from "@/lib/session";
 import { normalizeSearch } from "@/lib/text";
@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   const q = normalizeSearch(searchParams.get("q") ?? "");
   const wantAll = searchParams.get("all") === "1";
   const user = wantAll ? await getSessionUser() : null;
-  const showAll = Boolean(wantAll && user && isPreviewAdmin(user));
+  const showAll = Boolean(wantAll && user && isAdmin(user));
 
   const rows = await prisma.businessCategory.findMany({
     where: { active: true },

@@ -5,7 +5,7 @@ import { Assistente } from "@/components/assistente";
 import { OrcahLogo } from "@/components/orcah-logo";
 import { PainelNav } from "@/components/painel-nav";
 import { PlanBanner } from "@/components/plan-banner";
-import { isPreviewAdmin } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
 import { ramoLabel, serviceAreaLabel } from "@/lib/company-display";
 import { prisma } from "@/lib/db";
 import { ensureSubscription, planView } from "@/lib/plan";
@@ -17,7 +17,7 @@ export default async function PainelLayout({ children }: { children: React.React
   if (!user) redirect(appUrl("/login"));
   if (!user.company) redirect(appUrl("/onboarding"));
 
-  const admin = isPreviewAdmin(user);
+  const admin = isAdmin(user);
   const host = (await headers()).get("host") ?? "";
   const tenant = tenantSlugFromHost(host);
   if (tenant && tenant !== user.company.slug) {

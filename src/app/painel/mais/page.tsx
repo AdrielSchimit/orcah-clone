@@ -1,6 +1,6 @@
 import { LogoutButton } from "@/components/logout-button";
 import { MenuList, type MenuItem } from "@/components/menu-list";
-import { isPreviewAdmin } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { PLAN_PRICE_LABEL } from "@/lib/plan-constants";
 import { getSessionUser } from "@/lib/session";
@@ -9,7 +9,7 @@ import { companyPublicUrl } from "@/lib/urls";
 export default async function MaisPage() {
   const user = await getSessionUser();
   if (!user?.company) return null;
-  const admin = isPreviewAdmin(user);
+  const admin = isAdmin(user);
 
   const [pedidosNovos, servicos] = await Promise.all([
     prisma.quoteRequest.count({ where: { companyId: user.company.id, status: "new" } }),

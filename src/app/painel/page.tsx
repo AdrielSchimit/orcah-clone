@@ -2,7 +2,7 @@ import Link from "next/link";
 import { CreateBudgetCta } from "@/components/create-budget-cta";
 import { MascoteAvatar, MascoteVazio } from "@/components/mascote";
 import { StatusPill, budgetStatusTone } from "@/components/status-pill";
-import { isPreviewAdmin } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
 import { budgetStatusLabel } from "@/lib/budget-status";
 import { loadDashboard } from "@/lib/business-metrics";
 import { ramoLabel } from "@/lib/company-display";
@@ -131,7 +131,7 @@ export default async function PainelPage({ searchParams }: { searchParams: Promi
 
       <div className="mt-5">
         <CreateBudgetCta
-          isAdmin={isPreviewAdmin(user)}
+          isAdmin={isAdmin(user)}
           currentRamoId={user.company.businessCategoryId}
           currentRamoName={ramoLabel(user.company)}
         />

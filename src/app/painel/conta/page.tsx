@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { LogoutButton } from "@/components/logout-button";
-import { isPreviewAdmin } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
 import { ramoLabel, serviceAreaLabel } from "@/lib/company-display";
 import { ensureSubscription, planView } from "@/lib/plan";
 import { getSessionUser } from "@/lib/session";
@@ -26,7 +26,7 @@ function Line({ label, value }: { label: string; value: string }) {
 export default async function ContaPage() {
   const user = await getSessionUser();
   if (!user?.company) return null;
-  const admin = isPreviewAdmin(user);
+  const admin = isAdmin(user);
   const plan = planView(await ensureSubscription(user.company.id), { isAdmin: admin });
 
   return (

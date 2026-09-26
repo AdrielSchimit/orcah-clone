@@ -103,11 +103,16 @@ model User {
   phone        String?  @db.VarChar(20)
   // sessões emitidas antes desta data deixam de valer (troca de senha)
   passwordChangedAt DateTime? @map("password_changed_at")
+  // null = e-mail ainda não confirmado (não entra no painel)
+  emailVerifiedAt   DateTime? @map("email_verified_at")
+  // só muda por processo interno (migration/banco); o cadastro público sempre cria USER
+  role              UserRole  @default(USER)
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  company             Company?
-  passwordResetTokens PasswordResetToken[]
+  company                 Company?
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
 
   @@map("users")
 }
@@ -465,4 +470,25 @@ model AssistedSetupRequest {
   @@index([companyId, status])
   @@index([status, createdAt])
   @@map("assisted_setup_requests")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+/// Link de confirmação de e-mail. Guarda só o SHA-256 do token; uso único.
+model EmailVerificationToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  tokenHash String    @unique @map("token_hash") @db.Char(64)
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("email_verification_tokens")
 }
