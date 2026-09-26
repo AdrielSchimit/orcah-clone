@@ -17,6 +17,7 @@ export default async function MaisPage() {
   ]);
 
   const negocio: MenuItem[] = [
+    { href: "/painel/orcamentos", title: "Orçamentos", detail: "Todos os orçamentos, com filtros" },
     {
       href: "/painel/pedidos",
       title: "Pedidos",

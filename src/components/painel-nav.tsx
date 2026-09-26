@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { OrcahLogo } from "@/components/orcah-logo";
+import { OrcahIcon, OrcahLogo } from "@/components/orcah-logo";
 
 type NavId = "home" | "clientes" | "orcamentos" | "pagina" | "mais" | "pedidos" | "servicos" | "relatorios";
 
@@ -101,69 +101,139 @@ function Badge({ count }: { count: number }) {
   );
 }
 
+// celular: Início · Clientes · [ORÇAMENTO] · Página · Mais
+const mobileLeft = primary.filter((item) => item.id === "home" || item.id === "clientes");
+const mobileRight = primary.filter((item) => item.id === "pagina" || item.id === "mais");
+
+function MobileItem({ item, active, badge }: { item: (typeof primary)[number]; active: boolean; badge?: number }) {
+  return (
+    <li className="min-w-0 flex-1">
+      <Link
+        href={item.href}
+        aria-current={active ? "page" : undefined}
+        className={`relative flex h-14 flex-col items-center justify-center gap-0.5 rounded-btn px-1 text-[11px] font-medium ${
+          active ? "text-text" : "text-text-soft"
+        }`}
+      >
+        {active ? <span className="absolute inset-x-5 top-0 h-0.5 rounded-full bg-gold" /> : null}
+        <span className="relative">
+          <Icon id={item.id} />
+          {badge ? <Badge count={badge} /> : null}
+        </span>
+        <span className="max-w-full truncate">{item.label}</span>
+      </Link>
+    </li>
+  );
+}
+
+/** Ação principal do app: botão central (preto, borda e brilho dourados, ícone oficial). */
+function BudgetButton({ active, raised }: { active: boolean; raised: boolean }) {
+  return (
+    <li className="flex w-[4.75rem] shrink-0 justify-center">
+      <Link
+        href="/painel/orcamentos/novo"
+        aria-label="Novo orçamento"
+        aria-current={active ? "page" : undefined}
+        className={`flex flex-col items-center gap-0.5 text-[11px] font-semibold ${active ? "text-text" : "text-text-soft"} ${
+          raised ? "-mt-6" : "mt-1"
+        }`}
+      >
+        <span
+          className={`flex items-center justify-center rounded-full border bg-ink transition-shadow ${
+            raised ? "h-[3.75rem] w-[3.75rem]" : "h-10 w-10"
+          } ${
+            active
+              ? "border-gold shadow-[0_0_0_3px_rgb(255_176_32/0.22),0_10px_26px_-6px_rgb(255_176_32/0.75)]"
+              : "border-gold/70 shadow-[0_0_0_2px_rgb(255_176_32/0.12),0_8px_22px_-8px_rgb(255_176_32/0.6)]"
+          }`}
+        >
+          <OrcahIcon className={raised ? "h-8 w-8" : "h-6 w-6"} />
+        </span>
+        <span>Orçamento</span>
+      </Link>
+    </li>
+  );
+}
+
 export function PainelNav({ pedidosNovos }: { pedidosNovos: number }) {
   const pathname = usePathname();
+  const inBudgets = pathname.startsWith("/painel/orcamentos");
+  // no formulário de orçamento a barra de Total fica logo acima: o botão não sobe para não cobri-la
+  const raised = !(pathname.startsWith("/painel/orcamentos/") && pathname !== "/painel/orcamentos/");
 
   return (
-    <nav
-      aria-label="Menu do painel"
-      className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card pb-[env(safe-area-inset-bottom)] text-text-soft shadow-[0_-12px_32px_rgba(21,31,56,0.08)] md:inset-y-0 md:right-auto md:h-full md:w-56 md:overflow-y-auto md:border-r md:border-t-0 md:pb-4 md:shadow-none"
-    >
-      <div className="hidden items-center px-5 pb-6 pt-6 md:flex">
-        <Link href="/painel" aria-label="Orçah" className="flex items-center">
-          <OrcahLogo className="h-8 w-auto" />
-        </Link>
-      </div>
-      <ul className="flex items-stretch justify-around px-1 pt-1 md:flex-col md:gap-1 md:px-3">
-        {primary.map((item) => {
-          const mobileActive = isActive(pathname, item.id);
-          const desktopActive = isActive(pathname, item.id, true);
-          return (
-            <li key={item.href} className="min-w-0 flex-1 md:flex-none">
-              <Link
-                href={item.href}
-                aria-current={mobileActive ? "page" : undefined}
-                className={`relative flex min-h-14 flex-col items-center justify-center gap-0.5 rounded-btn px-1 py-2 text-[11px] font-medium md:min-h-12 md:flex-row md:justify-start md:gap-3 md:px-3 md:text-sm ${
-                  mobileActive ? "bg-gold-wash text-text" : "text-text-soft"
-                } ${desktopActive ? "md:bg-gold-wash md:text-text" : "md:bg-transparent md:text-text-soft"}`}
-              >
-                {mobileActive ? <span className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-gold md:hidden" /> : null}
-                <span className="relative">
+    <>
+      <nav
+        aria-label="Menu do painel"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card pb-[env(safe-area-inset-bottom)] text-text-soft shadow-[0_-12px_32px_rgba(21,31,56,0.08)] md:hidden"
+      >
+        <ul className="mx-auto flex h-[4.25rem] max-w-lg items-center px-1">
+          {mobileLeft.map((item) => (
+            <MobileItem key={item.href} item={item} active={isActive(pathname, item.id)} />
+          ))}
+          <BudgetButton active={inBudgets} raised={raised} />
+          {mobileRight.map((item) => (
+            <MobileItem
+              key={item.href}
+              item={item}
+              active={isActive(pathname, item.id)}
+              badge={item.id === "mais" ? pedidosNovos : undefined}
+            />
+          ))}
+        </ul>
+      </nav>
+
+      <nav
+        aria-label="Menu do painel"
+        className="fixed inset-y-0 left-0 z-30 hidden h-full w-56 overflow-y-auto border-r border-line bg-card pb-4 text-text-soft md:block"
+      >
+        <div className="flex items-center px-5 pb-6 pt-6">
+          <Link href="/painel" aria-label="Orçah" className="flex items-center">
+            <OrcahLogo className="h-8 w-auto" />
+          </Link>
+        </div>
+        <ul className="flex flex-col gap-1 px-3">
+          {primary.map((item) => {
+            const active = isActive(pathname, item.id, true);
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={`flex min-h-12 items-center gap-3 rounded-btn px-3 text-sm font-medium ${
+                    active ? "bg-gold-wash text-text" : "text-text-soft"
+                  }`}
+                >
                   <Icon id={item.id} />
-                  {item.id === "mais" ? (
-                    <span className="md:hidden">
-                      <Badge count={pedidosNovos} />
-                    </span>
-                  ) : null}
-                </span>
-                <span className="max-w-full truncate">{item.label}</span>
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-      <p className="mt-5 hidden px-6 text-[11px] font-medium uppercase tracking-[0.06em] text-text-soft md:block">Negócio</p>
-      <ul className="hidden flex-col gap-1 px-3 pt-2 md:flex">
-        {secondary.map((item) => {
-          const active = isActive(pathname, item.id, true);
-          return (
-            <li key={item.href}>
-              <Link
-                href={item.href}
-                className={`flex min-h-12 items-center gap-3 rounded-btn px-3 text-sm font-medium ${
-                  active ? "bg-gold-wash text-text" : "text-text-soft"
-                }`}
-              >
-                <span className="relative">
-                  <Icon id={item.id} />
-                  {item.id === "pedidos" ? <Badge count={pedidosNovos} /> : null}
-                </span>
-                {item.label}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
+                  {item.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="mt-5 px-6 text-[11px] font-medium uppercase tracking-[0.06em] text-text-soft">Negócio</p>
+        <ul className="flex flex-col gap-1 px-3 pt-2">
+          {secondary.map((item) => {
+            const active = isActive(pathname, item.id, true);
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`flex min-h-12 items-center gap-3 rounded-btn px-3 text-sm font-medium ${
+                    active ? "bg-gold-wash text-text" : "text-text-soft"
+                  }`}
+                >
+                  <span className="relative">
+                    <Icon id={item.id} />
+                    {item.id === "pedidos" ? <Badge count={pedidosNovos} /> : null}
+                  </span>
+                  {item.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </>
   );
 }
