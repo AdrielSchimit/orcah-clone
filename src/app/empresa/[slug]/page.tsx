@@ -5,7 +5,7 @@ import { CompanyGallery } from "@/components/company-gallery";
 import { OrcahLogo } from "@/components/orcah-logo";
 import { PageViewTracker, TrackedLink } from "@/components/page-tracking";
 import { QuoteRequestForm } from "@/components/quote-request-form";
-import { instagramUrl, websiteUrl } from "@/lib/company-display";
+import { facebookUrl, instagramUrl, websiteUrl } from "@/lib/company-display";
 import { prisma } from "@/lib/db";
 import { formatBRL } from "@/lib/money";
 import { getPublicCompanyPage, readableTextColor } from "@/lib/public-page";
@@ -28,13 +28,6 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     openGraph: { title, description, type: "website", locale: "pt_BR", images: image },
     twitter: { card: "summary", title, description },
   };
-}
-
-function facebookUrl(value: string | null) {
-  if (!value) return "";
-  const raw = value.trim();
-  if (raw.startsWith("http")) return raw;
-  return `https://facebook.com/${raw.replace(/^@/, "")}`;
 }
 
 function ZapIcon() {
@@ -138,7 +131,7 @@ export default async function EmpresaPublicaPage({
             <ul className="mt-4 grid items-start gap-3 sm:grid-cols-2">
               {page.services.map((service) => (
                 <li
-                  key={service.id}
+                  key={service.name}
                   className={`flex flex-col overflow-hidden rounded-box border bg-card ${service.featured ? "gold-edge" : "border-line"}`}
                 >
                   {service.imagePath ? (

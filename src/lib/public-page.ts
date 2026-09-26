@@ -55,14 +55,13 @@ export async function getPublicCompanyPage(db: PublicPageDb, slug: string) {
       photos: {
         where: { active: true },
         orderBy: { sortOrder: "asc" },
-        select: { id: true, path: true, title: true },
+        select: { path: true, title: true },
         take: 24,
       },
       services: {
         where: { active: true },
         orderBy: [{ featured: "desc" }, { sortOrder: "asc" }, { name: "asc" }],
         select: {
-          id: true,
           name: true,
           description: true,
           category: true,
@@ -96,11 +95,10 @@ export async function getPublicCompanyPage(db: PublicPageDb, slug: string) {
     logoPath: company.logoPath || null,
     primaryColor: normalizeHexColor(company.primaryColor),
     secondaryColor: normalizeHexColor(company.secondaryColor),
-    photos: company.photos,
+    photos: company.photos.map((photo) => ({ path: photo.path, title: photo.title })),
     services: company.services.map((service) => {
       const price = Number(service.defaultPrice);
       return {
-        id: service.id,
         name: service.name,
         description: service.description,
         category: service.category,

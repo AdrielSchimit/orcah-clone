@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import { findActiveAssistedSetup, requestAssistedSetup, type AssistedSetupDb } from "../src/lib/assisted-setup";
 import { normalizeCompanyPagePatch, pageCompleteness } from "../src/lib/company-page";
+import { facebookUrl } from "../src/lib/company-display";
 import { getPublicCompanyPage, normalizeHexColor, readableTextColor, type PublicPageDb } from "../src/lib/public-page";
 import { table } from "./helpers/fake-db";
 
@@ -68,6 +69,21 @@ describe("página pública", () => {
     for (const secret of ["12345678000190", "dono@pinturanorte.com.br", "Rua Secreta", "14000-000", '"userId"', '"document"', '"email"']) {
       assert.ok(!json.includes(secret), `vazou ${secret}`);
     }
+  });
+
+  it("não expõe ids internos de fotos e serviços", async () => {
+    const page = await getPublicCompanyPage(db, "pintura-norte");
+    assert.ok(page);
+    assert.ok(page.photos.every((photo) => !("id" in photo)));
+    assert.ok(page.services.every((service) => !("id" in service)));
+  });
+
+  it("link do Facebook não duplica o domínio", () => {
+    assert.equal(facebookUrl("facebook.com/pinturanorte"), "https://facebook.com/pinturanorte");
+    assert.equal(facebookUrl("www.facebook.com/pinturanorte"), "https://www.facebook.com/pinturanorte");
+    assert.equal(facebookUrl("@pinturanorte"), "https://facebook.com/pinturanorte");
+    assert.equal(facebookUrl("https://fb.com/x"), "https://fb.com/x");
+    assert.equal(facebookUrl(""), "");
   });
 
   it("preço só sai quando o prestador escolhe mostrar", async () => {

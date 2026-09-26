@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type Photo = { id: number; path: string; title: string | null };
+type Photo = { path: string; title: string | null };
 
 /** Galeria leve da página pública: grade + foto ampliada. Sem slider. */
 export function CompanyGallery({ photos }: { photos: Photo[] }) {
@@ -27,7 +27,7 @@ export function CompanyGallery({ photos }: { photos: Photo[] }) {
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {photos.map((photo, photoIndex) => (
           <button
-            key={photo.id}
+            key={photo.path}
             type="button"
             onClick={() => setIndex(photoIndex)}
             className="group relative aspect-square overflow-hidden rounded-box bg-paper-alt"
