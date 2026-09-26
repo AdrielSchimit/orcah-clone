@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { FormEvent, useState } from "react";
-import { MIN_PASSWORD_LENGTH } from "@/lib/password-rules";
+import { PasswordChecklist } from "@/components/password-checklist";
+import { passwordIsStrong } from "@/lib/password-rules";
 
 export function PasswordResetConfirmForm({ token }: { token: string }) {
   const [password, setPassword] = useState("");
@@ -13,6 +14,10 @@ export function PasswordResetConfirmForm({ token }: { token: string }) {
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    if (!passwordIsStrong(password)) {
+      setError("A senha ainda não cumpre todos os itens abaixo.");
+      return;
+    }
     setLoading(true);
 
     try {
@@ -58,14 +63,14 @@ export function PasswordResetConfirmForm({ token }: { token: string }) {
           name="password"
           type="password"
           autoComplete="new-password"
-          placeholder={`Mínimo ${MIN_PASSWORD_LENGTH} caracteres`}
+          placeholder="Crie uma senha forte"
           required
-          minLength={MIN_PASSWORD_LENGTH}
           value={password}
           onChange={(event) => setPassword(event.target.value)}
           className="w-full rounded-btn border border-line bg-card px-4 py-3 text-base text-text"
         />
       </label>
+      <PasswordChecklist password={password} />
       {error ? <p className="text-sm text-no">{error}</p> : null}
       <button
         type="submit"

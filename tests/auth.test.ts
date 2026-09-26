@@ -110,7 +110,7 @@ const sendEmail = async (input: { email: string; link: string }) => {
 const configured = () => true;
 
 async function addUser(email: string, password: string) {
-  return db.user.create({ data: { email, passwordHash: await hashPassword(password), passwordChangedAt: null } });
+  return db.user.create({ data: { email, passwordHash: await hashPassword(password), passwordChangedAt: null, emailVerifiedAt: new Date("2026-01-01T00:00:00Z") } });
 }
 
 function tokenFromLink(link: string) {
@@ -132,7 +132,9 @@ describe("e-mail e senha", () => {
   it("exige senha mínima de 8 caracteres", () => {
     assert.equal(MIN_PASSWORD_LENGTH, 8);
     assert.equal(passwordIsValid("1234567"), false);
-    assert.equal(passwordIsValid("12345678"), true);
+    // 8 caracteres não bastam mais: precisa maiúscula, minúscula, número e símbolo
+    assert.equal(passwordIsValid("12345678"), false);
+    assert.equal(passwordIsValid("Pintura123!"), true);
   });
 });
 
@@ -140,13 +142,13 @@ describe("e-mail e senha", () => {
 
 describe("login", () => {
   it("aceita e-mail e senha corretos (e-mail sem diferenciar maiúsculas)", async () => {
-    const user = await addUser("ze@teste.com", "senha-forte-1");
-    const result = await authenticateLogin({ email: " ZE@teste.com", password: "senha-forte-1", headers: headers(), db: asDb(db), now: T0 });
+    const user = await addUser("ze@teste.com", "Senha-forte-1");
+    const result = await authenticateLogin({ email: " ZE@teste.com", password: "Senha-forte-1", headers: headers(), db: asDb(db), now: T0 });
     assert.deepEqual(result, { ok: true, user: { id: user.id, hasCompany: false } });
   });
 
   it("recusa senha incorreta com mensagem genérica", async () => {
-    await addUser("ze@teste.com", "senha-forte-1");
+    await addUser("ze@teste.com", "Senha-forte-1");
     const result = await authenticateLogin({ email: "ze@teste.com", password: "errada123", headers: headers(), db: asDb(db), now: T0 });
     assert.deepEqual(result, { ok: false, status: 401, error: LOGIN_INVALID_MESSAGE });
     assert.equal(LOGIN_INVALID_MESSAGE, "E-mail ou senha incorretos.");
@@ -158,16 +160,16 @@ describe("login", () => {
   });
 
   it("bloqueia após 5 tentativas erradas em 10 minutos e libera depois", async () => {
-    await addUser("ze@teste.com", "senha-forte-1");
+    await addUser("ze@teste.com", "Senha-forte-1");
     for (let i = 0; i < 5; i++) {
       const r = await authenticateLogin({ email: "ze@teste.com", password: "errada123", headers: headers(), db: asDb(db), now: minutes(i) });
       assert.equal(r.ok, false);
     }
-    const blocked = await authenticateLogin({ email: "ze@teste.com", password: "senha-forte-1", headers: headers(), db: asDb(db), now: minutes(5) });
+    const blocked = await authenticateLogin({ email: "ze@teste.com", password: "Senha-forte-1", headers: headers(), db: asDb(db), now: minutes(5) });
     assert.deepEqual(blocked, { ok: false, status: 429, error: LOGIN_LIMITED_MESSAGE });
 
     // não é permanente: passada a janela, a senha certa volta a funcionar
-    const later = await authenticateLogin({ email: "ze@teste.com", password: "senha-forte-1", headers: headers(), db: asDb(db), now: minutes(15) });
+    const later = await authenticateLogin({ email: "ze@teste.com", password: "Senha-forte-1", headers: headers(), db: asDb(db), now: minutes(15) });
     assert.equal(later.ok, true);
   });
 
@@ -206,7 +208,7 @@ describe("token de recuperação", () => {
 
 describe("pedido de recuperação", () => {
   it("gera token, salva só o hash, expira em 15 minutos e manda o link", async () => {
-    const user = await addUser("ze@teste.com", "senha-forte-1");
+    const user = await addUser("ze@teste.com", "Senha-forte-1");
     const result = await requestPasswordReset({ email: "Ze@Teste.com", headers: headers(), sendEmail, emailConfigured: configured, db: asDb(db), now: T0 });
 
     assert.deepEqual(result, { ok: true, message: GENERIC_RESET_MESSAGE });
@@ -224,7 +226,7 @@ describe("pedido de recuperação", () => {
   });
 
   it("anti-enumeração: e-mail sem conta recebe a mesma resposta e nada é enviado", async () => {
-    await addUser("ze@teste.com", "senha-forte-1");
+    await addUser("ze@teste.com", "Senha-forte-1");
     const existing = await requestPasswordReset({ email: "ze@teste.com", headers: headers("1.1.1.1"), sendEmail, emailConfigured: configured, db: asDb(db), now: T0 });
     const missing = await requestPasswordReset({ email: "ninguem@teste.com", headers: headers("2.2.2.2"), sendEmail, emailConfigured: configured, db: asDb(db), now: T0 });
     assert.deepEqual(missing, existing);
@@ -234,7 +236,7 @@ describe("pedido de recuperação", () => {
   });
 
   it("falha no envio não revela nada e não deixa token órfão", async () => {
-    await addUser("ze@teste.com", "senha-forte-1");
+    await addUser("ze@teste.com", "Senha-forte-1");
     const failing = async () => {
       throw new Error("Resend recusou o envio (validation_error)");
     };
@@ -250,7 +252,7 @@ describe("pedido de recuperação", () => {
   });
 
   it("sem Resend configurado responde igual para qualquer e-mail", async () => {
-    await addUser("ze@teste.com", "senha-forte-1");
+    await addUser("ze@teste.com", "Senha-forte-1");
     const originalError = console.error;
     console.error = () => undefined;
     try {
@@ -265,7 +267,7 @@ describe("pedido de recuperação", () => {
   });
 
   it("limita a 3 pedidos por e-mail em 10 minutos (sem flood no Resend)", async () => {
-    await addUser("ze@teste.com", "senha-forte-1");
+    await addUser("ze@teste.com", "Senha-forte-1");
     for (let i = 0; i < 3; i++) {
       const r = await requestPasswordReset({ email: "ze@teste.com", headers: headers(), sendEmail, emailConfigured: configured, db: asDb(db), now: minutes(i) });
       assert.equal(r.ok, true);
@@ -294,28 +296,28 @@ describe("redefinição de senha", () => {
   }
 
   it("troca a senha: a antiga falha e a nova funciona", async () => {
-    const user = await addUser("ze@teste.com", "senha-antiga-1");
+    const user = await addUser("ze@teste.com", "Senha-antiga-1");
     const token = await linkFor("ze@teste.com");
 
     assert.equal(await getResetTokenStatus(token, minutes(1), asDb(db)), "valid");
-    const result = await confirmPasswordReset({ token, password: "senha-nova-22", now: minutes(1), db: asDb(db) });
+    const result = await confirmPasswordReset({ token, password: "Senha-nova-22", now: minutes(1), db: asDb(db) });
     assert.deepEqual(result, { ok: true });
 
     const stored = db.user.rows.find((u) => u.id === user.id)!;
-    assert.equal(await verifyPassword("senha-antiga-1", stored.passwordHash as string), false);
-    assert.equal(await verifyPassword("senha-nova-22", stored.passwordHash as string), true);
+    assert.equal(await verifyPassword("Senha-antiga-1", stored.passwordHash as string), false);
+    assert.equal(await verifyPassword("Senha-nova-22", stored.passwordHash as string), true);
     assert.equal((db.passwordResetToken.rows[0].usedAt as Date).getTime(), minutes(1).getTime());
 
-    const oldLogin = await authenticateLogin({ email: "ze@teste.com", password: "senha-antiga-1", headers: headers(), db: asDb(db), now: minutes(2) });
-    const newLogin = await authenticateLogin({ email: "ze@teste.com", password: "senha-nova-22", headers: headers(), db: asDb(db), now: minutes(2) });
+    const oldLogin = await authenticateLogin({ email: "ze@teste.com", password: "Senha-antiga-1", headers: headers(), db: asDb(db), now: minutes(2) });
+    const newLogin = await authenticateLogin({ email: "ze@teste.com", password: "Senha-nova-22", headers: headers(), db: asDb(db), now: minutes(2) });
     assert.equal(oldLogin.ok, false);
     assert.equal(newLogin.ok, true);
   });
 
   it("derruba sessões emitidas antes da troca", async () => {
-    await addUser("ze@teste.com", "senha-antiga-1");
+    await addUser("ze@teste.com", "Senha-antiga-1");
     const token = await linkFor("ze@teste.com");
-    await confirmPasswordReset({ token, password: "senha-nova-22", now: minutes(1), db: asDb(db) });
+    await confirmPasswordReset({ token, password: "Senha-nova-22", now: minutes(1), db: asDb(db) });
     const changedAt = db.user.rows[0].passwordChangedAt as Date;
 
     const oldSessionIat = Math.floor(T0.getTime() / 1000);
@@ -327,34 +329,34 @@ describe("redefinição de senha", () => {
   });
 
   it("token usado não funciona de novo", async () => {
-    await addUser("ze@teste.com", "senha-antiga-1");
+    await addUser("ze@teste.com", "Senha-antiga-1");
     const token = await linkFor("ze@teste.com");
-    await confirmPasswordReset({ token, password: "senha-nova-22", now: minutes(1), db: asDb(db) });
-    const again = await confirmPasswordReset({ token, password: "outra-senha-3", now: minutes(2), db: asDb(db) });
+    await confirmPasswordReset({ token, password: "Senha-nova-22", now: minutes(1), db: asDb(db) });
+    const again = await confirmPasswordReset({ token, password: "Outra-senha-3", now: minutes(2), db: asDb(db) });
     assert.equal(again.ok, false);
     assert.equal(again.ok === false && again.reason, "used");
     assert.equal(await getResetTokenStatus(token, minutes(2), asDb(db)), "used");
   });
 
   it("token expirado é rejeitado", async () => {
-    await addUser("ze@teste.com", "senha-antiga-1");
+    await addUser("ze@teste.com", "Senha-antiga-1");
     const token = await linkFor("ze@teste.com");
-    const late = await confirmPasswordReset({ token, password: "senha-nova-22", now: minutes(16), db: asDb(db) });
+    const late = await confirmPasswordReset({ token, password: "Senha-nova-22", now: minutes(16), db: asDb(db) });
     assert.equal(late.ok === false && late.reason, "expired");
     const stored = db.user.rows[0];
-    assert.equal(await verifyPassword("senha-antiga-1", stored.passwordHash as string), true);
+    assert.equal(await verifyPassword("Senha-antiga-1", stored.passwordHash as string), true);
   });
 
   it("token inexistente ou vazio é rejeitado", async () => {
-    const missing = await confirmPasswordReset({ token: "nao-existe", password: "senha-nova-22", now: T0, db: asDb(db) });
-    const empty = await confirmPasswordReset({ token: "", password: "senha-nova-22", now: T0, db: asDb(db) });
+    const missing = await confirmPasswordReset({ token: "nao-existe", password: "Senha-nova-22", now: T0, db: asDb(db) });
+    const empty = await confirmPasswordReset({ token: "", password: "Senha-nova-22", now: T0, db: asDb(db) });
     assert.equal(missing.ok === false && missing.reason, "invalid");
     assert.equal(empty.ok === false && empty.reason, "invalid");
     assert.equal(await getResetTokenStatus("", T0, asDb(db)), "invalid");
   });
 
   it("senha nova curta é recusada e o token continua válido", async () => {
-    await addUser("ze@teste.com", "senha-antiga-1");
+    await addUser("ze@teste.com", "Senha-antiga-1");
     const token = await linkFor("ze@teste.com");
     const weak = await confirmPasswordReset({ token, password: "curta", now: minutes(1), db: asDb(db) });
     assert.equal(weak.ok === false && weak.reason, "weak_password");
@@ -362,10 +364,10 @@ describe("redefinição de senha", () => {
   });
 
   it("usar um link invalida os outros links pendentes do mesmo usuário", async () => {
-    await addUser("ze@teste.com", "senha-antiga-1");
+    await addUser("ze@teste.com", "Senha-antiga-1");
     const first = await linkFor("ze@teste.com", T0);
     const second = await linkFor("ze@teste.com", minutes(1));
-    await confirmPasswordReset({ token: second, password: "senha-nova-22", now: minutes(2), db: asDb(db) });
+    await confirmPasswordReset({ token: second, password: "Senha-nova-22", now: minutes(2), db: asDb(db) });
     assert.equal(await getResetTokenStatus(first, minutes(2), asDb(db)), "used");
   });
 });

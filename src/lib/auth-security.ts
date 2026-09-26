@@ -6,6 +6,10 @@ export const LOGIN_FAILED_LIMIT = 5;
 export const LOGIN_IP_LIMIT = 20;
 export const PASSWORD_RESET_EMAIL_LIMIT = 3;
 export const PASSWORD_RESET_IP_LIMIT = 10;
+export const EMAIL_VERIFICATION_TTL_MINUTES = 30;
+export const VERIFY_EMAIL_LIMIT = 3;
+export const VERIFY_EMAIL_IP_LIMIT = 10;
+export const REGISTER_IP_LIMIT = 10;
 
 export type ResetTokenStatus = "valid" | "invalid" | "expired" | "used";
 
@@ -19,8 +23,13 @@ export function normalizeEmail(value: string) {
   return value.trim().toLowerCase();
 }
 
+const EMAIL_PATTERN = /^[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?)*\.[a-z]{2,24}$/;
+
+/** Formato razoável (já normalizado). Não prova que a caixa existe: isso é a verificação por e-mail. */
 export function emailIsValid(value: string) {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+  if (value.length < 6 || value.length > 180) return false;
+  if (value.includes("..") || value.startsWith(".") || value.split("@")[0].endsWith(".")) return false;
+  return EMAIL_PATTERN.test(value);
 }
 
 export function generateResetToken() {

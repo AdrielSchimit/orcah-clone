@@ -13,7 +13,7 @@ import {
   resetTokenExpiresAt,
   resetTokenStatus,
 } from "@/lib/auth-security";
-import { hashPassword, MIN_PASSWORD_LENGTH, passwordIsValid } from "@/lib/password";
+import { hashPassword, PASSWORD_POLICY_MESSAGE, passwordIsValid } from "@/lib/password";
 import { resendIsConfigured, sendPasswordResetEmail } from "@/lib/resend";
 import { appUrl } from "@/lib/urls";
 
@@ -27,6 +27,8 @@ export const RESET_LINK_INVALID_MESSAGE = "Este link já foi utilizado ou expiro
 
 /** Só o que o fluxo de auth usa do Prisma; nos testes entra um banco em memória. */
 export type AuthDb = Pick<PrismaClient, "authAttempt" | "passwordResetToken" | "user" | "$transaction">;
+/** Só a tabela de tentativas (rate limit), usada também pela verificação de e-mail. */
+export type AttemptsDb = Pick<PrismaClient, "authAttempt">;
 export type SendResetEmail = (input: { email: string; link: string }) => Promise<void>;
 
 export type PasswordResetRequestResult =
@@ -42,7 +44,7 @@ export function requestIpFromHeaders(headers: Headers) {
   return forwardedFor || headers.get("x-real-ip")?.trim() || "";
 }
 
-function ipHashFromHeaders(headers: Headers) {
+export function ipHashFromHeaders(headers: Headers) {
   const secret = process.env.AUTH_SECRET?.trim() || "";
   if (!secret) return null;
   return hashRequestIp(requestIpFromHeaders(headers), secret);
@@ -59,7 +61,7 @@ export async function countRecentAttempts({
   email: string;
   ipHash?: string | null;
   now?: Date;
-  db?: AuthDb;
+  db?: AttemptsDb;
 }) {
   const createdAt = { gte: authRateWindowStart(now) };
   const [emailCount, ipCount] = await Promise.all([
@@ -80,7 +82,7 @@ export async function recordAuthAttempt({
   email: string;
   ipHash?: string | null;
   now?: Date;
-  db?: AuthDb;
+  db?: AttemptsDb;
 }) {
   await db.authAttempt.create({
     data: { purpose, email, requestIpHash: ipHash ?? null, createdAt: now },
@@ -202,7 +204,7 @@ export async function confirmPasswordReset({
       ok: false,
       status: 400,
       reason: "weak_password",
-      error: `Senha com no mínimo ${MIN_PASSWORD_LENGTH} caracteres.`,
+      error: PASSWORD_POLICY_MESSAGE,
     };
   }
 
@@ -230,6 +232,8 @@ export async function confirmPasswordReset({
       where: { id: record.userId },
       data: { passwordHash, passwordChangedAt: now },
     });
+    // quem redefine pelo link do e-mail prova que tem a caixa: conta fica verificada
+    await tx.user.updateMany({ where: { id: record.userId, emailVerifiedAt: null }, data: { emailVerifiedAt: now } });
     // outros links pendentes do mesmo usuário deixam de valer
     await tx.passwordResetToken.updateMany({
       where: { userId: record.userId, usedAt: null },
