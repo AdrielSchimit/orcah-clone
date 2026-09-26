@@ -139,3 +139,65 @@ Nunca vão para o log: senha, `password_hash`, token, URL com token, API key, co
 - Sessão continua JWT sem estado; a revogação é só por troca de senha (não há "sair de todos os aparelhos" nem lista de sessões).
 - Rate limit fica no banco (sem Redis): suficiente para o volume atual.
 - Pequena diferença de tempo entre e-mail com e sem conta no pedido de recuperação.
+
+---
+
+# Auth 2.0 (verificação de e-mail, senha forte e admin por role)
+
+## Senha forte
+
+`src/lib/password-rules.ts` — a mesma regra no formulário (checklist ao vivo) e no servidor:
+
+- 8 ou mais caracteres, letra maiúscula, letra minúscula, número e símbolo (espaço não conta como símbolo);
+- no máximo 72 bytes (limite do bcrypt).
+
+Vale para cadastro e para a nova senha da recuperação. Exemplo válido: `Pintura123!`.
+
+## E-mail
+
+`normalizeEmail` (trim + minúsculas) e `emailIsValid` (formato razoável: domínio com TLD, sem `..`, sem ponto no início/fim do usuário).
+Formato válido **não prova** que a caixa existe: `BATATA@TESTE.COM` passa no formato, mas a conta fica pendente até alguém abrir o link que chegou lá.
+
+## Cadastro → confirmação → onboarding
+
+1. `POST /api/auth/register` (`src/lib/registration.ts`): cria a conta com `email_verified_at = null` e **role USER sempre** (nada do corpo da requisição define permissão). Não abre sessão.
+2. Envia o link `/verificar-email?token=...` (Resend). Se o envio falhar, a conta existe e a tela oferece reenviar ("Não foi possível enviar o e-mail agora").
+3. Tela "Confira seu e-mail" mostra o endereço mascarado (`jo***@gmail.com`) e o botão **Reenviar e-mail**.
+4. O link abre a página, que confirma por `POST /api/auth/verificar-email` (POST para leitores de link de e-mail não gastarem o token), abre a sessão e segue para `/onboarding`.
+5. Cadastrar de novo um e-mail pendente não troca nome nem senha: só reenvia o link. E-mail já confirmado → "Este e-mail já tem conta".
+
+Token de verificação: 32 bytes aleatórios, só o SHA-256 no banco (`email_verification_tokens`), **30 minutos**, uso único; confirmar um link invalida os outros pendentes da conta.
+
+Login com senha certa em conta não confirmada → `403` "Confirme seu e-mail para continuar." com **Reenviar e-mail**. Senha errada continua "E-mail ou senha incorretos." (não revela se a conta existe ou está pendente). `getSessionUser` também recusa conta sem `email_verified_at`.
+
+Quem redefine a senha pelo link do e-mail prova posse da caixa: a conta fica verificada.
+
+## Limites
+
+| Ação | Limite |
+| --- | --- |
+| Reenviar confirmação, por e-mail | 3 / 10 min |
+| Reenviar confirmação, por IP | 10 / 10 min |
+| Cadastro, por IP | 10 / 10 min |
+
+(somam-se aos limites de login e recuperação acima; tudo na tabela `auth_attempts`, sem Redis).
+
+## Admin por role
+
+- `users.role` (`USER` | `ADMIN`), padrão `USER`. `isAdmin(user)` em `src/lib/admin.ts` só olha a role.
+- **Removidos**: a lista fixa de e-mails, a env `ADMIN_EMAILS` e o slug `cesar-turmina` (`PREVIEW_ADMIN_SLUGS`). Antes, qualquer cadastro com esses e-mails — ou uma empresa chamada "Cesar Turmina" — virava admin (sem trial, todos os ramos).
+- Promover alguém é processo interno (migration/banco), nunca pelo app.
+
+## Migration `20260927100000_auth_verificacao_roles`
+
+Aditiva: enum `UserRole`, colunas `users.email_verified_at` e `users.role` (default `USER`), tabela `email_verification_tokens`.
+Transição (só nas colunas novas):
+
+- contas que já existiam ficam com `email_verified_at = created_at` (ninguém é trancado fora);
+- `role = ADMIN` apenas para `schimitadriel100@gmail.com` e `cesar.turmina1@gmail.com` (e-mail exato).
+
+Ordem no banco: `20260925172000_password_reset` → `20260926120000_pagina_comercial` → `20260927100000_auth_verificacao_roles`.
+
+## Envs
+
+`RESEND_API_KEY` e `AUTH_EMAIL_FROM` (remetente em domínio verificado no Resend). Sem elas, cadastro cria a conta mas não envia o link (a tela avisa e oferece reenviar) e a recuperação responde "indisponível". `ADMIN_EMAILS` não é mais usada.
