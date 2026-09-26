@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { parseBudgetItems, budgetTotals, type ItemInput } from "@/lib/budget";
-import { nextBudgetVersion, republishEventMetadata, statusAfterProviderEdit } from "@/lib/budget-cycle";
+import { BudgetEditConflict, claimRepublish, republishEventMetadata, statusAfterProviderEdit } from "@/lib/budget-cycle";
 import { extrasJson, mapItemCreates, serializeBudget } from "@/lib/budget-serialize";
 import type { CommercialInput } from "@/lib/commercial";
 import { requireCompany } from "@/lib/company";
@@ -132,57 +132,52 @@ export async function PATCH(
 
   const republish = existing.status === "waiting";
   let publishedVersion = 0;
-  const budget = await prisma.$transaction(async (tx) => {
-    if (republish) {
-      const last = await tx.budgetVersion.findFirst({
-        where: { budgetId: existing.id },
-        orderBy: { version: "desc" },
-        select: { version: true },
-      });
-      publishedVersion = nextBudgetVersion(last?.version);
-      await tx.budgetVersion.create({
+  let budget;
+  try {
+    budget = await prisma.$transaction(async (tx) => {
+      if (republish) {
+        const version = await claimRepublish(tx, existing);
+        if (version === null) throw new BudgetEditConflict();
+        publishedVersion = version;
+      }
+      await tx.budgetItem.deleteMany({ where: { budgetId: existing.id } });
+      return tx.budget.update({
+        where: { id: existing.id },
         data: {
-          budgetId: existing.id,
-          version: publishedVersion,
-          subtotal: existing.subtotal,
-          discount: existing.discount,
-          total: existing.total,
-          notes: existing.notes,
+          customerId: customer.id,
+          status: statusAfterProviderEdit(existing.status),
+          serviceStateId,
+          serviceCityId,
+          subtotal: moneyString(subtotal),
+          discount: moneyString(discount),
+          discountType: commercial.discountType,
+          discountValue: moneyString(commercial.discountValue),
+          total: moneyString(total),
+          paymentMethod: commercial.paymentMethod,
+          acceptedPaymentMethods: commercial.acceptedPaymentMethods,
+          paymentCondition: commercial.paymentCondition,
+          downPaymentType: commercial.downPaymentType,
+          downPaymentValue: moneyString(commercial.downPaymentValue),
+          downPaymentAmount: moneyString(commercial.downPaymentAmount),
+          validityDate,
+          estimatedDays: Number.isFinite(estimatedDays) ? estimatedDays : null,
+          serviceAddress: body.serviceAddress?.trim() || null,
+          notes: body.notes?.trim() || null,
+          extras: extrasJson(body.extras),
+          items: { create: mapItemCreates(items) },
+        },
+        include: {
+          customer: { select: { id: true, name: true, phone: true } },
+          items: { orderBy: { sortOrder: "asc" } },
         },
       });
-    }
-    await tx.budgetItem.deleteMany({ where: { budgetId: existing.id } });
-    return tx.budget.update({
-      where: { id: existing.id },
-      data: {
-        customerId: customer.id,
-        status: statusAfterProviderEdit(existing.status),
-        serviceStateId,
-        serviceCityId,
-        subtotal: moneyString(subtotal),
-        discount: moneyString(discount),
-        discountType: commercial.discountType,
-        discountValue: moneyString(commercial.discountValue),
-        total: moneyString(total),
-        paymentMethod: commercial.paymentMethod,
-        acceptedPaymentMethods: commercial.acceptedPaymentMethods,
-        paymentCondition: commercial.paymentCondition,
-        downPaymentType: commercial.downPaymentType,
-        downPaymentValue: moneyString(commercial.downPaymentValue),
-        downPaymentAmount: moneyString(commercial.downPaymentAmount),
-        validityDate,
-        estimatedDays: Number.isFinite(estimatedDays) ? estimatedDays : null,
-        serviceAddress: body.serviceAddress?.trim() || null,
-        notes: body.notes?.trim() || null,
-        extras: extrasJson(body.extras),
-        items: { create: mapItemCreates(items) },
-      },
-      include: {
-        customer: { select: { id: true, name: true, phone: true } },
-        items: { orderBy: { sortOrder: "asc" } },
-      },
     });
-  });
+  } catch (error) {
+    if (error instanceof BudgetEditConflict) {
+      return NextResponse.json({ error: "Este orçamento mudou enquanto você editava. Abra de novo." }, { status: 409 });
+    }
+    throw error;
+  }
 
   if (republish) {
     await recordBudgetEvent(
