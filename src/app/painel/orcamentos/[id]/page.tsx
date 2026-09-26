@@ -253,16 +253,16 @@ export default async function OrcamentoPage({
           <h2 className="mb-3 text-xs font-medium uppercase tracking-[0.04em] text-text-soft">Acompanhamento</h2>
           <ul className="space-y-0">
             {budget.events.map((event) => {
-              const republish = event.event === "sent" && isRepublishMetadata(event.metadata);
+              const republish = event.event === "sent" && isRepublishMetadata(event.metadata) ? event.metadata : null;
               const title = republish ? "Nova versão pronta para aprovação" : eventLabel[event.event];
               return (
                 <li key={event.id} className="flex gap-3 py-2">
                   <span className={`mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full ${eventTone[event.event] ?? "bg-line"}`} />
                   <div>
                     <p className="text-sm font-medium">{title}</p>
-                    {republish && event.metadata.previousTotal && event.metadata.total ? (
+                    {republish?.previousTotal && republish.total ? (
                       <p className="text-xs text-text-soft">
-                        {formatBRL(event.metadata.previousTotal)} → {formatBRL(event.metadata.total)}
+                        {formatBRL(republish.previousTotal)} → {formatBRL(republish.total)}
                       </p>
                     ) : null}
                     <p className="text-xs text-text-soft">{formatDateTime(event.createdAt)}</p>
