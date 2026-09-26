@@ -2,6 +2,14 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  calculateDiscount,
+  calculateDownPayment,
+  type DiscountType,
+  type PaymentCondition,
+  type PaymentMethod,
+} from "@/lib/commercial";
+import { formatBRL, parseMoney } from "@/lib/money";
 import type { BudgetExtras, BudgetFormLayout, CatalogItem, TemplateConfig } from "@/lib/templates";
 import { defaultFormLayout } from "@/lib/templates";
 
@@ -51,14 +59,19 @@ export type BudgetFormValues = {
   serviceAddress?: string;
   notes?: string;
   discount?: string;
+  discountType?: DiscountType;
+  discountValue?: string;
+  paymentMethod?: PaymentMethod | null;
+  acceptedPaymentMethods?: PaymentMethod[];
+  paymentCondition?: PaymentCondition;
+  downPaymentType?: DiscountType | null;
+  downPaymentValue?: string;
   extras?: BudgetExtras | null;
   items?: Item[];
 };
 
 function money(value: string) {
-  const raw = value.replace(",", ".");
-  const n = Number(raw);
-  return Number.isFinite(n) ? n : 0;
+  return parseMoney(value);
 }
 
 function itemTotal(item: Item) {
@@ -95,7 +108,35 @@ function defaultValidity() {
 function formatChipPrice(value: string) {
   const n = money(value);
   if (!n) return "";
-  return n.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  return formatBRL(n);
+}
+
+const paymentMethodOptions: { value: PaymentMethod; label: string; tone: string }[] = [
+  { value: "pix", label: "Pix", tone: "border-ok/30 bg-ok/10 text-text" },
+  { value: "card", label: "Cartão", tone: "border-line bg-card text-text" },
+  { value: "boleto", label: "Boleto", tone: "border-line bg-card text-text" },
+  { value: "cash", label: "Dinheiro", tone: "border-line bg-card text-text" },
+  { value: "transfer", label: "Transferência", tone: "border-line bg-card text-text" },
+];
+
+const paymentConditionOptions: { value: PaymentCondition; label: string }[] = [
+  { value: "cash", label: "À vista" },
+  { value: "deposit_balance", label: "Entrada + saldo" },
+  { value: "installments_2", label: "2x" },
+  { value: "installments_3", label: "3x" },
+  { value: "custom", label: "Personalizado" },
+];
+
+const validityPresets = [
+  { label: "7 dias", days: 7 },
+  { label: "15 dias", days: 15 },
+  { label: "30 dias", days: 30 },
+];
+
+function dateAfter(days: number) {
+  const date = new Date();
+  date.setDate(date.getDate() + days);
+  return date.toISOString().slice(0, 10);
 }
 
 function addressFieldLabel(form: BudgetFormLayout) {
@@ -132,7 +173,20 @@ export function BudgetForm({
   const [items, setItems] = useState<Item[]>(
     defaults?.items?.length ? defaults.items.map((item) => ({ ...emptyItem(template), ...item })) : [emptyItem(template)],
   );
-  const [discount, setDiscount] = useState(defaults?.discount ?? (form.simplified ? "" : "0"));
+  const [discountType, setDiscountType] = useState<DiscountType>(defaults?.discountType ?? "amount");
+  const [discountValue, setDiscountValue] = useState(
+    defaults?.discountValue ?? defaults?.discount ?? (form.simplified ? "" : "0"),
+  );
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(defaults?.paymentMethod ?? "pix");
+  const [acceptedPaymentMethods, setAcceptedPaymentMethods] = useState<PaymentMethod[]>(
+    defaults?.acceptedPaymentMethods?.length ? defaults.acceptedPaymentMethods : [defaults?.paymentMethod ?? "pix"],
+  );
+  const [paymentCondition, setPaymentCondition] = useState<PaymentCondition>(defaults?.paymentCondition ?? "cash");
+  const [downPaymentType, setDownPaymentType] = useState<DiscountType>(defaults?.downPaymentType ?? "percent");
+  const [downPaymentValue, setDownPaymentValue] = useState(defaults?.downPaymentValue ?? "30");
+  const [validityDate, setValidityDate] = useState(defaults?.validityDate ?? defaultValidity());
+  const [estimatedDays, setEstimatedDays] = useState(defaults?.estimatedDays ?? "");
+  const [showMoreOptions, setShowMoreOptions] = useState(Boolean(defaults?.serviceAddress));
   const [catalog, setCatalog] = useState<SavedService[]>([]);
   const [savingCatalogAt, setSavingCatalogAt] = useState<number | null>(null);
   const [extras, setExtras] = useState<BudgetExtras>(() => {
@@ -151,10 +205,7 @@ export function BudgetForm({
   }, [form.showStateCity]);
 
   useEffect(() => {
-    if (!form.showStateCity || !stateId) {
-      setCities([]);
-      return;
-    }
+    if (!form.showStateCity || !stateId) return;
     fetch(`/api/localidades/cidades?stateId=${stateId}`)
       .then((response) => response.json())
       .then((data: City[]) => {
@@ -198,7 +249,21 @@ export function BudgetForm({
 
   const subtotal = items.reduce((sum, item) => sum + itemTotal(item), 0);
   const travel = form.showTravelFee ? money(extras.travelFee ?? "") : 0;
-  const total = Math.max(0, subtotal + travel - money(discount));
+  const commercialSubtotal = subtotal + travel;
+  const discountResult = calculateDiscount(commercialSubtotal, discountType, discountValue);
+  const discountAmount = "error" in discountResult ? 0 : discountResult.discountAmount;
+  const total = "error" in discountResult ? commercialSubtotal : discountResult.total;
+  const downPaymentResult = paymentCondition === "deposit_balance"
+    ? calculateDownPayment(total, downPaymentType, downPaymentValue)
+    : null;
+  const downPaymentAmount = downPaymentResult && !("error" in downPaymentResult)
+    ? downPaymentResult.downPaymentAmount
+    : 0;
+  const balanceAmount = downPaymentResult && !("error" in downPaymentResult)
+    ? downPaymentResult.balanceAmount
+    : total;
+  const discountError = "error" in discountResult ? discountResult.error : "";
+  const downPaymentError = downPaymentResult && "error" in downPaymentResult ? downPaymentResult.error : "";
   const showExtraSection =
     form.showAddress ||
     template.extras.length > 0 ||
@@ -270,9 +335,27 @@ export function BudgetForm({
     return data.customer.id;
   }
 
+  function toggleAcceptedPayment(method: PaymentMethod) {
+    setAcceptedPaymentMethods((current) => {
+      if (current.includes(method)) {
+        const next = current.filter((item) => item !== method);
+        return next.length ? next : [paymentMethod];
+      }
+      return [...current, method];
+    });
+  }
+
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    if (discountError) {
+      setError(discountError);
+      return;
+    }
+    if (downPaymentError) {
+      setError(downPaymentError);
+      return;
+    }
     if (!customerId && !newCustomer) {
       setError("Escolha ou cadastre um cliente.");
       return;
@@ -286,11 +369,17 @@ export function BudgetForm({
         customerId: resolvedCustomerId,
         serviceStateId: stateId,
         serviceCityId: cityId,
-        validityDate: payloadForm.get("validityDate"),
-        estimatedDays: payloadForm.get("estimatedDays"),
+        validityDate,
+        estimatedDays,
         serviceAddress: payloadForm.get("serviceAddress"),
         notes: payloadForm.get("notes"),
-        discount,
+        discountType,
+        discountValue,
+        paymentMethod,
+        acceptedPaymentMethods,
+        paymentCondition,
+        downPaymentType,
+        downPaymentValue,
         extras,
         items,
       };
@@ -631,7 +720,11 @@ export function BudgetForm({
                 <span className="mb-1.5 block text-sm font-medium">Estado</span>
                 <select
                   value={stateId}
-                  onChange={(event) => setStateId(event.target.value)}
+                  onChange={(event) => {
+                    setStateId(event.target.value);
+                    setCities([]);
+                    setCityId("");
+                  }}
                   required
                   className={fieldClass}
                 >
@@ -670,7 +763,8 @@ export function BudgetForm({
                   <input
                     type="date"
                     name="validityDate"
-                    defaultValue={defaults?.validityDate ?? defaultValidity()}
+                    value={validityDate}
+                    onChange={(event) => setValidityDate(event.target.value)}
                     className="w-full rounded-btn border border-line bg-card px-3 py-3"
                   />
                 </label>
@@ -682,7 +776,8 @@ export function BudgetForm({
                     type="number"
                     min={1}
                     name="estimatedDays"
-                    defaultValue={defaults?.estimatedDays}
+                    value={estimatedDays}
+                    onChange={(event) => setEstimatedDays(event.target.value)}
                     placeholder="7"
                     className="w-full rounded-btn border border-line bg-card px-3 py-3"
                   />
@@ -1161,37 +1256,11 @@ export function BudgetForm({
       </section>
 
       <section className="rounded-box border border-line bg-card p-4">
-        <h2 className="mb-3 text-xs font-medium uppercase tracking-[0.04em] text-text-soft">Resumo</h2>
-        {form.validityInSummary && (form.showValidity || form.showPrazo) ? (
-          <div className="mb-3 grid grid-cols-2 gap-3">
-            {form.showValidity ? (
-              <label className="block">
-                <span className="mb-1.5 block text-sm font-medium">Validade (opcional)</span>
-                <input
-                  type="date"
-                  name="validityDate"
-                  defaultValue={defaults?.validityDate}
-                  className="w-full rounded-btn border border-line bg-card px-3 py-3"
-                />
-              </label>
-            ) : null}
-            {form.showPrazo ? (
-              <label className="block">
-                <span className="mb-1.5 block text-sm font-medium">Prazo (opcional)</span>
-                <input
-                  type="number"
-                  min={1}
-                  name="estimatedDays"
-                  defaultValue={defaults?.estimatedDays}
-                  placeholder="dias"
-                  className="w-full rounded-btn border border-line bg-card px-3 py-3"
-                />
-              </label>
-            ) : null}
-          </div>
-        ) : null}
+        <h2 className="text-xs font-medium uppercase tracking-[0.04em] text-text-soft">Fechamento</h2>
+        <p className="mt-1 text-lg font-semibold">Como fica para o cliente?</p>
+
         {form.showTravelFee ? (
-          <label className="mb-3 block">
+          <label className="mt-4 block">
             <span className="mb-1.5 block text-sm font-medium">Deslocamento (opcional)</span>
             <input
               value={extras.travelFee ?? ""}
@@ -1202,42 +1271,212 @@ export function BudgetForm({
             />
           </label>
         ) : null}
-        <label className="mb-3 block">
-          <span className="mb-1.5 block text-sm font-medium">Desconto (opcional)</span>
+
+        <div className="mt-4 rounded-box border border-line bg-paper p-3">
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-sm font-medium">Desconto</span>
+            <div className="grid grid-cols-2 overflow-hidden rounded-btn border border-line text-sm font-semibold">
+              {(["percent", "amount"] as DiscountType[]).map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  onClick={() => setDiscountType(type)}
+                  className={`min-h-10 px-4 ${discountType === type ? "bg-gold text-ink" : "bg-card text-text"}`}
+                >
+                  {type === "percent" ? "%" : "R$"}
+                </button>
+              ))}
+            </div>
+          </div>
           <input
-            value={discount}
-            onChange={(event) => setDiscount(event.target.value)}
+            value={discountValue}
+            onChange={(event) => setDiscountValue(event.target.value)}
             inputMode="decimal"
-            placeholder="0,00"
-            className={fieldClass}
+            placeholder={discountType === "percent" ? "10" : "0,00"}
+            className={`${fieldClass} mt-3 bg-card`}
           />
-        </label>
-        <label className="block">
-          <span className="mb-1.5 block text-sm font-medium">Observações (opcional)</span>
-          <textarea
-            name="notes"
-            rows={3}
-            defaultValue={defaults?.notes}
-            placeholder="Condições, o que está incluso…"
-            className={fieldClass}
-          />
-        </label>
+          {discountError ? <p className="mt-2 text-sm text-no">{discountError}</p> : null}
+        </div>
+
+        <div className="mt-4 rounded-box border border-line bg-paper p-3">
+          <p className="text-sm font-semibold">Como o cliente vai pagar?</p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {paymentMethodOptions.map((option) => {
+              const selected = paymentMethod === option.value;
+              const accepted = acceptedPaymentMethods.includes(option.value);
+              return (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => {
+                    setPaymentMethod(option.value);
+                    setAcceptedPaymentMethods((current) =>
+                      current.includes(option.value) ? current : [option.value, ...current],
+                    );
+                  }}
+                  className={`min-h-12 rounded-btn border px-3 text-sm font-semibold ${
+                    selected ? "border-gold bg-gold text-ink" : option.tone
+                  }`}
+                >
+                  {option.label}
+                  {accepted && !selected ? <span className="ml-1 text-xs text-text-soft">aceita</span> : null}
+                </button>
+              );
+            })}
+          </div>
+          <p className="mt-3 text-xs text-text-soft">Toque para escolher a forma principal.</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {paymentMethodOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => toggleAcceptedPayment(option.value)}
+                className={`rounded-full border px-3 py-1.5 text-xs ${
+                  acceptedPaymentMethods.includes(option.value)
+                    ? "border-gold bg-gold-wash text-text"
+                    : "border-line text-text-soft"
+                }`}
+              >
+                {acceptedPaymentMethods.includes(option.value) ? "✓ " : "+ "}
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-4 rounded-box border border-line bg-paper p-3">
+          <p className="text-sm font-semibold">Condição de pagamento</p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            {paymentConditionOptions.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setPaymentCondition(option.value)}
+                className={`min-h-11 rounded-btn border px-3 text-sm font-medium ${
+                  paymentCondition === option.value ? "border-gold bg-gold text-ink" : "border-line bg-card"
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+          {paymentCondition === "deposit_balance" ? (
+            <div className="mt-3 rounded-btn border border-line bg-card p-3">
+              <div className="mb-2 grid grid-cols-2 overflow-hidden rounded-btn border border-line text-sm font-semibold">
+                {(["percent", "amount"] as DiscountType[]).map((type) => (
+                  <button
+                    key={type}
+                    type="button"
+                    onClick={() => setDownPaymentType(type)}
+                    className={`min-h-10 px-4 ${downPaymentType === type ? "bg-gold text-ink" : "bg-card text-text"}`}
+                  >
+                    {type === "percent" ? "%" : "R$"}
+                  </button>
+                ))}
+              </div>
+              <input
+                value={downPaymentValue}
+                onChange={(event) => setDownPaymentValue(event.target.value)}
+                inputMode="decimal"
+                placeholder={downPaymentType === "percent" ? "30" : "500,00"}
+                className={fieldClass}
+              />
+              {downPaymentError ? <p className="mt-2 text-sm text-no">{downPaymentError}</p> : null}
+              {!downPaymentError ? (
+                <div className="mt-3 space-y-1 text-sm">
+                  <p className="flex justify-between">
+                    <span>Entrada</span>
+                    <span className="font-semibold">{formatBRL(downPaymentAmount)}</span>
+                  </p>
+                  <p className="flex justify-between text-text-soft">
+                    <span>Saldo restante</span>
+                    <span>{formatBRL(balanceAmount)}</span>
+                  </p>
+                </div>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+
         <div className="mt-4 space-y-1 text-sm">
           <p className="flex justify-between text-text-soft">
             <span>Subtotal</span>
-            <span>{subtotal.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
+            <span>{formatBRL(subtotal)}</span>
           </p>
           {travel > 0 ? (
             <p className="flex justify-between text-text-soft">
               <span>Deslocamento</span>
-              <span>{travel.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
+              <span>{formatBRL(travel)}</span>
             </p>
           ) : null}
+          <p className="flex justify-between text-text-soft">
+            <span>Você está dando</span>
+            <span>- {formatBRL(discountAmount)}</span>
+          </p>
           <p className="flex justify-between text-xl font-semibold">
-            <span>Total</span>
-            <span>{total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
+            <span>Total final</span>
+            <span>{formatBRL(total)}</span>
           </p>
         </div>
+
+        <button
+          type="button"
+          onClick={() => setShowMoreOptions((current) => !current)}
+          className="mt-4 min-h-12 w-full rounded-btn border border-line bg-card text-sm font-semibold"
+        >
+          {showMoreOptions ? "Ocultar opções" : "Mais opções"}
+        </button>
+
+        {showMoreOptions || form.validityInSummary ? (
+          <div className="mt-4 space-y-3">
+            <div>
+              <p className="mb-2 text-sm font-medium">Validade da proposta</p>
+              <div className="grid grid-cols-3 gap-2">
+                {validityPresets.map((preset) => (
+                  <button
+                    key={preset.days}
+                    type="button"
+                    onClick={() => setValidityDate(dateAfter(preset.days))}
+                    className="min-h-11 rounded-btn border border-line bg-card text-sm font-medium"
+                  >
+                    {preset.label}
+                  </button>
+                ))}
+              </div>
+              <input
+                type="date"
+                name="validityDate"
+                value={validityDate}
+                onChange={(event) => setValidityDate(event.target.value)}
+                className={`${fieldClass} mt-2`}
+              />
+            </div>
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium">Prazo de execução</span>
+              <input
+                type="number"
+                min={1}
+                name="estimatedDays"
+                value={estimatedDays}
+                onChange={(event) => setEstimatedDays(event.target.value)}
+                placeholder="Ex: 5 dias úteis"
+                className={fieldClass}
+              />
+            </label>
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium">Observações (opcional)</span>
+              <textarea
+                name="notes"
+                rows={3}
+                defaultValue={defaults?.notes}
+                placeholder="Ex: material incluso, prazo de execução de 5 dias úteis, garantia de 30 dias..."
+                className={fieldClass}
+              />
+            </label>
+          </div>
+        ) : (
+          <input type="hidden" name="notes" defaultValue={defaults?.notes} />
+        )}
       </section>
 
       {error ? <p className="text-sm text-no">{error}</p> : null}
@@ -1246,12 +1485,12 @@ export function BudgetForm({
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-medium uppercase tracking-[0.04em] text-gold-deep">Total</p>
             <p className="truncate text-lg font-semibold">
-              {total.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+              {formatBRL(total)}
             </p>
           </div>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || Boolean(discountError || downPaymentError)}
             className="min-h-12 shrink-0 rounded-btn bg-gold px-5 text-sm font-semibold text-ink hover:bg-gold-press disabled:opacity-60 md:px-6 md:text-base"
           >
             {loading ? "Salvando…" : budgetId ? "Salvar alterações" : "Salvar orçamento"}

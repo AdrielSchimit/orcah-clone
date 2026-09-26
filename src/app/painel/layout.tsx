@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import Link from "next/link";
+import { Assistente } from "@/components/assistente";
 import { OrcahLogo } from "@/components/orcah-logo";
 import { PainelNav } from "@/components/painel-nav";
 import { PlanBanner } from "@/components/plan-banner";
@@ -32,9 +33,11 @@ export default async function PainelLayout({ children }: { children: React.React
     redirect("/painel/plano");
   }
 
-  const pedidosNovos = await prisma.quoteRequest.count({
-    where: { companyId: user.company.id, status: "new" },
-  });
+  const [pedidosNovos, orcamentos, clientes] = await Promise.all([
+    prisma.quoteRequest.count({ where: { companyId: user.company.id, status: "new" } }),
+    prisma.budget.count({ where: { companyId: user.company.id } }),
+    prisma.customer.count({ where: { companyId: user.company.id } }),
+  ]);
 
   const firstName = user.name.split(" ")[0];
 
@@ -66,13 +69,22 @@ export default async function PainelLayout({ children }: { children: React.React
           </Link>
         </div>
       </header>
-      <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pb-28 pt-5 md:max-w-4xl md:pb-10">
+      <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pb-36 pt-5 md:max-w-4xl md:pb-10">
         {plan.kind === "admin" ? null : (
           <PlanBanner kind={plan.kind} label={plan.label} detail={plan.detail} />
         )}
         {children}
       </div>
       <PainelNav pedidosNovos={pedidosNovos} />
+      <Assistente
+        contexto={{
+          orcamentos,
+          clientes,
+          pedidosNovos,
+          temLogo: Boolean(user.company.logoPath),
+          temDescricao: Boolean(user.company.description?.trim()),
+        }}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import path from "path";
 import PDFDocument from "pdfkit";
 import { groupedItems, kindSubtotals } from "@/lib/budget";
+import { PAYMENT_CONDITION_LABEL, PAYMENT_METHOD_LABEL, type PaymentCondition, type PaymentMethod } from "@/lib/commercial";
 import { formatDate } from "@/lib/date";
 import { formatBRL, moneyString } from "@/lib/money";
 import { KIND_LABEL, extraDetailLines, itemDetailLines, parseExtras, travelFeeAmount, type ItemKind, type TemplateConfig } from "@/lib/templates";
@@ -16,6 +17,10 @@ type PdfBudget = {
   subtotal: { toString(): string } | number | string;
   discount: { toString(): string } | number | string;
   total: { toString(): string } | number | string;
+  paymentMethod?: string | null;
+  acceptedPaymentMethods?: unknown;
+  paymentCondition?: string | null;
+  downPaymentAmount?: { toString(): string } | number | string;
   customer: {
     name: string;
     phone: string;
@@ -60,6 +65,14 @@ function n(value: { toString(): string } | number | string) {
   return Number(value);
 }
 
+function paymentMethodLabel(value: string | null | undefined) {
+  return value && value in PAYMENT_METHOD_LABEL ? PAYMENT_METHOD_LABEL[value as PaymentMethod] : "";
+}
+
+function paymentConditionLabel(value: string | null | undefined) {
+  return value && value in PAYMENT_CONDITION_LABEL ? PAYMENT_CONDITION_LABEL[value as PaymentCondition] : "";
+}
+
 function publicFile(rel: string) {
   return path.join(process.cwd(), "public", rel.replace(/^\//, ""));
 }
@@ -81,9 +94,9 @@ export async function buildBudgetPdf(budget: PdfBudget, template?: TemplateConfi
   });
 
   try {
-    doc.image(publicFile("brand/orcah-pdf.png"), 48, 40, { height: 36 });
+    doc.image(publicFile("brand/png/orcah-logo-uma-cor-1744.png"), 48, 40, { height: 36 });
   } catch {
-    doc.fillColor(GOLD).font("Helvetica-Bold").fontSize(18).text("Orcah", 48, 48);
+    doc.fillColor(GOLD).font("Helvetica-Bold").fontSize(18).text("Orçah", 48, 48);
   }
 
   doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(16).text(budget.company.name, 48, 90);
@@ -160,6 +173,20 @@ export async function buildBudgetPdf(budget: PdfBudget, template?: TemplateConfi
   doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(13);
   doc.text(`Total  ${formatBRL(n(budget.total))}`, { align: "right" });
 
+  const payment = paymentMethodLabel(budget.paymentMethod);
+  const condition = paymentConditionLabel(budget.paymentCondition);
+  if (payment || condition) {
+    doc.moveDown(0.5);
+    doc.fillColor(SOFT).font("Helvetica").fontSize(10);
+    if (payment) doc.text(`Pagamento: ${payment}`, { align: "right" });
+    if (condition) doc.text(`Condição: ${condition}`, { align: "right" });
+    if (budget.paymentCondition === "deposit_balance" && budget.downPaymentAmount) {
+      const downPayment = n(budget.downPaymentAmount);
+      doc.text(`Entrada: ${formatBRL(downPayment)}`, { align: "right" });
+      doc.text(`Saldo restante: ${formatBRL(n(budget.total) - downPayment)}`, { align: "right" });
+    }
+  }
+
   if (budget.notes) {
     doc.moveDown(1.2);
     doc.font("Helvetica-Bold").fontSize(11).text("Observações");
@@ -171,7 +198,7 @@ export async function buildBudgetPdf(budget: PdfBudget, template?: TemplateConfi
   }
 
   doc.moveDown(2);
-  doc.fillColor(GOLD).font("Helvetica").fontSize(8).text("Feito com Orcah  ·  orcah.com.br", { align: "center" });
+  doc.fillColor(GOLD).font("Helvetica").fontSize(8).text("Feito com Orçah  ·  orcah.com.br", { align: "center" });
 
   doc.end();
   return done;

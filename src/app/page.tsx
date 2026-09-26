@@ -1,11 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { FlowSection } from "@/components/home/flow-stepper";
 import { HeroQuoteDemo } from "@/components/home/hero-quote-demo";
 import { PagePhoneDemo } from "@/components/home/page-phone-demo";
 import { StatusSection } from "@/components/home/status-flow-demo";
 import { OrcahLogo } from "@/components/orcah-logo";
 import { PLAN_PRICE_LABEL, TRIAL_DAYS } from "@/lib/plan-constants";
+import { SESSION_COOKIE, readSessionToken } from "@/lib/session-token";
 import { appUrl, companyPublicUrl } from "@/lib/urls";
 
 const DEMO_SLUG = "pintura-norte";
@@ -68,13 +70,25 @@ const faqs = [
   ],
 ];
 
-export default function Home() {
+async function viewerIsLoggedIn() {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (!token) return false;
+  try {
+    return Boolean(await readSessionToken(token));
+  } catch {
+    return false;
+  }
+}
+
+export default async function Home() {
+  const loggedIn = await viewerIsLoggedIn();
+
   return (
     <div className="flex flex-1 flex-col bg-paper">
       <header className="sticky top-0 z-20 border-b border-line bg-card/80 px-4 py-3 backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3">
           <Link href="/" aria-label="Orçah" className="flex min-h-12 shrink-0 items-center">
-            <OrcahLogo />
+            <OrcahLogo priority />
           </Link>
           <nav aria-label="Seções" className="hidden items-center lg:flex">
             {nav.map(([label, href]) => (
@@ -104,15 +118,26 @@ export default function Home() {
                 ))}
               </nav>
             </details>
-            <Link href={appUrl("/login")} className="inline-flex min-h-12 items-center px-3 text-sm font-medium text-text">
-              Entrar
-            </Link>
-            <Link
-              href={appUrl("/cadastro")}
-              className="hidden min-h-12 items-center rounded-btn bg-gold px-4 text-sm font-semibold text-ink sm:inline-flex"
-            >
-              Começar grátis
-            </Link>
+            {loggedIn ? (
+              <Link
+                href={appUrl("/painel")}
+                className="inline-flex min-h-12 items-center rounded-btn bg-gold px-4 text-sm font-semibold text-ink"
+              >
+                Acessar painel
+              </Link>
+            ) : (
+              <>
+                <Link href={appUrl("/login")} className="inline-flex min-h-12 items-center px-3 text-sm font-medium text-text">
+                  Entrar
+                </Link>
+                <Link
+                  href={appUrl("/cadastro")}
+                  className="hidden min-h-12 items-center rounded-btn bg-gold px-4 text-sm font-semibold text-ink sm:inline-flex"
+                >
+                  Começar grátis
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -357,7 +382,7 @@ export default function Home() {
       <footer className="bg-ink-deep px-4 pb-[max(6.5rem,calc(env(safe-area-inset-bottom)+5.25rem))] pt-4 text-ink-text md:pb-16 md:pt-0">
         <div className="mx-auto grid w-full max-w-5xl gap-10 border-t border-ink-line pt-10 md:grid-cols-4 md:pt-14">
           <div>
-            <p className="text-lg font-semibold">Orçah</p>
+            <OrcahLogo variant="dark" className="h-8 w-auto" />
             <p className="mt-1 text-sm text-ink-soft">Seu trabalho. Sua página. Seus orçamentos.</p>
             <p className="mt-3 max-w-xs text-sm text-ink-soft">
               Para prestadores de serviço criarem páginas profissionais, receberem pedidos de orçamento, enviarem

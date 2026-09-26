@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createPublicToken, nextBudgetNumber, parseBudgetItems, budgetTotals } from "@/lib/budget";
 import { extrasJson, mapItemCreates, serializeBudget } from "@/lib/budget-serialize";
+import type { CommercialInput } from "@/lib/commercial";
 import { requireCompany } from "@/lib/company";
 import { requireActivePlan } from "@/lib/plan";
 import { prisma } from "@/lib/db";
@@ -39,6 +40,13 @@ export async function POST(request: Request) {
     serviceAddress?: string;
     notes?: string;
     discount?: string | number;
+    discountType?: string;
+    discountValue?: string | number;
+    paymentMethod?: string;
+    acceptedPaymentMethods?: string[];
+    paymentCondition?: string;
+    downPaymentType?: string;
+    downPaymentValue?: string | number;
     extras?: unknown;
     items?: ItemInput[];
   };
@@ -74,15 +82,25 @@ export async function POST(request: Request) {
   }
 
   const extras = parseExtras(body.extras);
+  const commercialInput: CommercialInput = {
+    discountType: body.discountType ?? "amount",
+    discountValue: body.discountValue ?? body.discount,
+    paymentMethod: body.paymentMethod,
+    acceptedPaymentMethods: body.acceptedPaymentMethods,
+    paymentCondition: body.paymentCondition,
+    downPaymentType: body.downPaymentType,
+    downPaymentValue: body.downPaymentValue,
+  };
   const totals = budgetTotals(
     items.reduce((sum, item) => sum + item.subtotal, 0),
     parseMoney(body.discount),
     extras,
+    commercialInput,
   );
   if ("error" in totals) {
     return NextResponse.json({ error: totals.error }, { status: 400 });
   }
-  const { subtotal, discount, total } = totals;
+  const { subtotal, discount, total, commercial } = totals;
 
   let publicToken = createPublicToken();
   for (let attempt = 0; attempt < 5; attempt += 1) {
@@ -106,7 +124,15 @@ export async function POST(request: Request) {
       status: "draft",
       subtotal: moneyString(subtotal),
       discount: moneyString(discount),
+      discountType: commercial.discountType,
+      discountValue: moneyString(commercial.discountValue),
       total: moneyString(total),
+      paymentMethod: commercial.paymentMethod,
+      acceptedPaymentMethods: commercial.acceptedPaymentMethods,
+      paymentCondition: commercial.paymentCondition,
+      downPaymentType: commercial.downPaymentType,
+      downPaymentValue: moneyString(commercial.downPaymentValue),
+      downPaymentAmount: moneyString(commercial.downPaymentAmount),
       validityDate,
       estimatedDays: Number.isFinite(estimatedDays) ? estimatedDays : null,
       serviceAddress: body.serviceAddress?.trim() || null,

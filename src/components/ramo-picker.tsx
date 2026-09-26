@@ -64,7 +64,7 @@ export function RamoPicker({
     setOpen(false);
   }
 
-  function useTypedRamo(nameOverride?: string) {
+  function applyTypedRamo(nameOverride?: string) {
     if (!outro) return;
     const name = titleCaseName(nameOverride || outroDraft || query);
     if (name.length < 2) return;
@@ -110,7 +110,7 @@ export function RamoPicker({
               <button
                 type="button"
                 className="w-full px-4 py-3 text-left text-sm font-medium text-text hover:bg-paper"
-                onClick={() => useTypedRamo(query)}
+                onClick={() => applyTypedRamo(query)}
               >
                 Usar “{titleCaseName(query)}” como meu ramo
               </button>
@@ -144,7 +144,7 @@ export function RamoPicker({
             />
             <button
               type="button"
-              onClick={() => useTypedRamo()}
+              onClick={() => applyTypedRamo()}
               className="rounded-btn bg-gold px-3 py-2 text-sm font-semibold text-ink"
             >
               Usar este ramo

@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { MascoteVazio } from "@/components/mascote";
 import { StatusPill, pedidoStatusTone } from "@/components/status-pill";
 import { formatRelativeTime } from "@/lib/date";
 import { formatPhoneBR } from "@/lib/phone";
@@ -40,7 +41,12 @@ export function PedidosList({ pedidos }: { pedidos: Pedido[] }) {
   }
 
   if (pedidos.length === 0) {
-    return <p className="text-sm text-text-soft">Nenhum pedido ainda. Compartilhe o link da sua página.</p>;
+    return (
+      <>
+        <p className="text-sm text-text-soft">Nenhum pedido ainda. Compartilhe o link da sua página.</p>
+        <MascoteVazio pose="pensando">Quando chegar um pedido, eu te aviso por aqui!</MascoteVazio>
+      </>
+    );
   }
 
   return (

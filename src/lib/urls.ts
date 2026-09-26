@@ -24,6 +24,9 @@ export function isReservedCompanySlug(slug: string) {
 
 export function appOrigin() {
   const raw =
+    (process.env.VERCEL_ENV === "preview"
+      ? process.env.VERCEL_URL?.trim()
+      : process.env.NEXT_PUBLIC_APP_URL?.trim()) ||
     process.env.NEXT_PUBLIC_APP_URL?.trim() ||
     process.env.VERCEL_PROJECT_PRODUCTION_URL?.trim() ||
     process.env.VERCEL_URL?.trim() ||

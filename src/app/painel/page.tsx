@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { CreateBudgetCta } from "@/components/create-budget-cta";
+import { MascoteVazio } from "@/components/mascote";
 import { StatusPill, budgetStatusTone } from "@/components/status-pill";
 import { isPreviewAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
@@ -109,7 +110,19 @@ export default async function PainelPage() {
           Últimos orçamentos
         </h2>
         {empty ? (
-          <p className="text-sm text-text-soft">Nenhum ainda. Monte o primeiro em um minuto.</p>
+          <>
+            <p className="text-sm text-text-soft">Nenhum ainda. Monte o primeiro em um minuto.</p>
+            <MascoteVazio
+              pose="boas-vindas"
+              action={
+                <Link href="/painel/orcamentos/novo" className="text-gold-deep underline underline-offset-4">
+                  Criar agora
+                </Link>
+              }
+            >
+              Vamos montar seu primeiro orçamento?
+            </MascoteVazio>
+          </>
         ) : (
           <ul className="grid gap-2 md:grid-cols-2">
             {budgets.map((budget) => (

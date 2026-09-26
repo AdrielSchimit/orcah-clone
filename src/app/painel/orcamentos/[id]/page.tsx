@@ -142,6 +142,38 @@ export default async function OrcamentoPage({
             serviceAddress: budget.serviceAddress ?? undefined,
             notes: budget.notes ?? undefined,
             discount: moneyString(Number(budget.discount)),
+            discountType: budget.discountType === "percent" ? "percent" : "amount",
+            discountValue: moneyString(Number(budget.discountValue)),
+            paymentMethod:
+              budget.paymentMethod === "card" ||
+              budget.paymentMethod === "boleto" ||
+              budget.paymentMethod === "cash" ||
+              budget.paymentMethod === "transfer" ||
+              budget.paymentMethod === "pix"
+                ? budget.paymentMethod
+                : "pix",
+            acceptedPaymentMethods: Array.isArray(budget.acceptedPaymentMethods)
+              ? budget.acceptedPaymentMethods.filter(
+                  (method): method is "pix" | "card" | "boleto" | "cash" | "transfer" =>
+                    method === "pix" ||
+                    method === "card" ||
+                    method === "boleto" ||
+                    method === "cash" ||
+                    method === "transfer",
+                )
+              : undefined,
+            paymentCondition:
+              budget.paymentCondition === "deposit_balance" ||
+              budget.paymentCondition === "installments_2" ||
+              budget.paymentCondition === "installments_3" ||
+              budget.paymentCondition === "custom" ||
+              budget.paymentCondition === "cash"
+                ? budget.paymentCondition
+                : "cash",
+            downPaymentType: budget.downPaymentType === "amount" || budget.downPaymentType === "percent"
+              ? budget.downPaymentType
+              : undefined,
+            downPaymentValue: moneyString(Number(budget.downPaymentValue)),
             extras,
             items: budget.items.map((item) => ({
               description: item.description,

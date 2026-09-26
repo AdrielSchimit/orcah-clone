@@ -1,5 +1,6 @@
 import { randomBytes } from "crypto";
 import { prisma } from "@/lib/db";
+import { normalizeCommercialTerms, type CommercialInput } from "@/lib/commercial";
 import { parseMoney, roundMoney } from "@/lib/money";
 import { isItemKind, travelFeeAmount, type BudgetExtras } from "@/lib/templates";
 
@@ -91,18 +92,31 @@ export function parseBudgetItems(raw: ItemInput[] | undefined) {
     .filter((item) => item.description.length > 0);
 }
 
-export function budgetTotals(subtotal: number, discount: number, extras?: BudgetExtras | null) {
+export function budgetTotals(
+  subtotal: number,
+  discount: number,
+  extras?: BudgetExtras | null,
+  commercial?: CommercialInput,
+) {
   const itemsSubtotal = roundMoney(subtotal);
   const travel = travelFeeAmount(extras);
   const ceiling = roundMoney(itemsSubtotal + travel);
-  if (discount > ceiling) {
+  if (discount < 0) {
+    return { error: "Desconto inválido." as const };
+  }
+  const terms = commercial
+    ? normalizeCommercialTerms(ceiling, commercial)
+    : normalizeCommercialTerms(ceiling, { discountType: "amount", discountValue: discount });
+  if ("error" in terms) return terms;
+  if (terms.discountAmount > ceiling) {
     return { error: "Desconto maior que o subtotal." as const };
   }
   return {
     subtotal: itemsSubtotal,
-    discount,
+    discount: terms.discountAmount,
     travel,
-    total: roundMoney(Math.max(0, ceiling - discount)),
+    total: roundMoney(Math.max(0, ceiling - terms.discountAmount)),
+    commercial: terms,
   };
 }
 

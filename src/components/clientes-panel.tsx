@@ -1,7 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import Link from "next/link";
 import { CustomerForm } from "@/components/customer-form";
+import { MascoteVazio } from "@/components/mascote";
 import { formatPhoneBR } from "@/lib/phone";
 
 type Customer = {
@@ -51,21 +53,29 @@ export function ClientesPanel({ customers }: { customers: Customer[] }) {
         className="mb-4 w-full rounded-btn border border-line bg-card px-4 py-3"
       />
 
-      {listed.length === 0 ? (
-        <p className="text-sm text-text-soft">
-          {customers.length === 0 ? "Nenhum cliente ainda." : "Nenhum resultado."}
-        </p>
+      {customers.length === 0 ? (
+        <>
+          <p className="text-sm text-text-soft">Nenhum cliente ainda.</p>
+          {open ? null : <MascoteVazio pose="boas-vindas">Vamos cadastrar seu primeiro cliente?</MascoteVazio>}
+        </>
+      ) : listed.length === 0 ? (
+        <p className="text-sm text-text-soft">Nenhum resultado.</p>
       ) : (
         <ul className="space-y-2">
           {listed.map((customer) => (
-            <li key={customer.id} className="rounded-box border border-line bg-card p-4">
-              <p className="font-medium">{customer.name}</p>
-              <p className="text-sm font-medium">{formatPhoneBR(customer.phone)}</p>
-              {customer.city && customer.state ? (
-                <p className="text-xs text-text-soft">
-                  {customer.city.name} - {customer.state.uf}
-                </p>
-              ) : null}
+            <li key={customer.id}>
+              <Link
+                href={`/painel/clientes/${customer.id}`}
+                className="block rounded-box border border-line bg-card p-4 hover:border-ink-line"
+              >
+                <p className="font-medium">{customer.name}</p>
+                <p className="text-sm font-medium">{formatPhoneBR(customer.phone)}</p>
+                {customer.city && customer.state ? (
+                  <p className="text-xs text-text-soft">
+                    {customer.city.name} - {customer.state.uf}
+                  </p>
+                ) : null}
+              </Link>
             </li>
           ))}
         </ul>

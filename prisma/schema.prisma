@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum BudgetStatus {
@@ -210,7 +211,15 @@ model Budget {
   status         BudgetStatus @default(draft)
   subtotal       Decimal      @default(0) @db.Decimal(12, 2)
   discount       Decimal      @default(0) @db.Decimal(12, 2)
+  discountType   String       @default("amount") @map("discount_type") @db.VarChar(12)
+  discountValue  Decimal      @default(0) @map("discount_value") @db.Decimal(12, 2)
   total          Decimal      @default(0) @db.Decimal(12, 2)
+  paymentMethod  String?      @map("payment_method") @db.VarChar(24)
+  acceptedPaymentMethods Json? @map("accepted_payment_methods")
+  paymentCondition String     @default("cash") @map("payment_condition") @db.VarChar(24)
+  downPaymentType String?     @map("down_payment_type") @db.VarChar(12)
+  downPaymentValue Decimal    @default(0) @map("down_payment_value") @db.Decimal(12, 2)
+  downPaymentAmount Decimal   @default(0) @map("down_payment_amount") @db.Decimal(12, 2)
   validityDate   DateTime?    @map("validity_date") @db.Date
   estimatedDays  Int?         @map("estimated_days")
   serviceAddress String?      @map("service_address") @db.VarChar(255)

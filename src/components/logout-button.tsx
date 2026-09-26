@@ -1,11 +1,14 @@
 "use client";
 
-import { appUrl } from "@/lib/urls";
+import { useRouter } from "next/navigation";
 
 export function LogoutButton({ className }: { className?: string }) {
+  const router = useRouter();
+
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
-    window.location.assign(`${appUrl("/api/auth/logout")}`);
+    router.replace("/login");
+    router.refresh();
   }
 
   return (
