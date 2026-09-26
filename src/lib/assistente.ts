@@ -12,6 +12,8 @@ export type AssistenteContexto = {
   pedidosNovos: number;
   temLogo: boolean;
   temDescricao: boolean;
+  servicos: number;
+  fotos: number;
 };
 
 export type AssistenteAcao = { label: string; href: string };
@@ -69,14 +71,41 @@ export function dicaDaTela(pathname: string, ctx: AssistenteContexto): Assistent
       ? { id: "clientes-vazio", pose: "boas-vindas", texto: "Vamos cadastrar seu primeiro cliente? Também dá para cadastrar direto ao criar um orçamento." }
       : { id: "clientes", pose: "dicas", texto: "Busque pelo nome ou telefone. Todo cliente de orçamento entra aqui sozinho." };
   }
-  if (pathname.startsWith("/painel/empresa")) {
-    if (!ctx.temLogo) {
-      return { id: "empresa-logo", pose: "dicas", texto: "Coloque sua logo: o orçamento e a sua página ficam com a sua cara." };
+  if (pathname.startsWith("/painel/pagina") || pathname.startsWith("/painel/empresa")) {
+    if (ctx.servicos === 0) {
+      return {
+        id: "pagina-servicos",
+        pose: "explicando",
+        texto: "Cadastre seu primeiro serviço para ele aparecer na sua página.",
+        acao: { label: "Cadastrar serviço", href: "/painel/servicos/novo" },
+      };
     }
-    if (!ctx.temDescricao) {
-      return { id: "empresa-descricao", pose: "dicas", texto: "Escreva uma descrição curta do que você faz. Ajuda o cliente a confiar em você." };
+    if (ctx.fotos === 0) {
+      return { id: "pagina-fotos", pose: "dicas", texto: "Uma foto boa ajuda seu cliente a entender o que você faz." };
     }
-    return { id: "empresa", pose: "sucesso", texto: "Sua página está caprichada! Compartilhe o link no Instagram e no status do WhatsApp." };
+    if (!ctx.temLogo || !ctx.temDescricao) {
+      return { id: "pagina-confianca", pose: "dicas", texto: "Uma página com fotos e serviços passa mais confiança 👀" };
+    }
+    return {
+      id: "pagina-pronta",
+      pose: "sucesso",
+      texto: "Sua página tá ficando profissional 😎 Compartilhe o link no Instagram e no status do WhatsApp.",
+    };
+  }
+  if (pathname.startsWith("/painel/servicos")) {
+    return ctx.servicos === 0
+      ? { id: "servicos-vazio", pose: "explicando", texto: "Mostre o que você faz. O serviço aparece na sua página e já vem pronto no orçamento." }
+      : { id: "servicos", pose: "dicas", texto: "Marque 1 ou 2 serviços como destaque: eles aparecem primeiro na sua página." };
+  }
+  if (pathname.startsWith("/painel/relatorios")) {
+    return {
+      id: "relatorios",
+      pose: "pensando",
+      texto: "Acesso é cada vez que a página abre (atualizar conta de novo). Não é número de pessoas.",
+    };
+  }
+  if (pathname.startsWith("/painel/conta")) {
+    return { id: "conta", pose: "dicas", texto: "Aqui ficam seus dados de acesso e o plano. O visual da página fica em Página." };
   }
   if (pathname.startsWith("/painel/plano")) {
     return {
@@ -134,7 +163,7 @@ export const perguntasRapidas: AssistentePergunta[] = [
       id: "r-pagina",
       pose: "dicas",
       texto: "Em Página você coloca logo, descrição, fotos dos seus trabalhos e contatos. Tudo aparece para o cliente.",
-      acao: { label: "Editar página", href: "/painel/empresa" },
+      acao: { label: "Editar página", href: "/painel/pagina" },
     },
   },
   {
