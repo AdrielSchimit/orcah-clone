@@ -44,7 +44,11 @@ export default async function ServicosPage({ searchParams }: { searchParams: Pro
           Mostre o que você faz. Cadastre seus serviços para eles aparecerem na sua página.
         </MascoteVazio>
       ) : (
-        <ServiceList services={services.map(serializeService)} />
+        // a chave muda quando o servidor devolve ordem/destaque/ativo novos: a lista recomeça com os dados atuais
+        <ServiceList
+          key={services.map((s) => `${s.id}:${s.sortOrder}:${s.featured}:${s.active}`).join(",")}
+          services={services.map(serializeService)}
+        />
       )}
     </>
   );
