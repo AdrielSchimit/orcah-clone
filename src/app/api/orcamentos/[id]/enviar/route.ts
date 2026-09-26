@@ -51,7 +51,14 @@ export async function POST(
       data: { status: "sent", sentAt: new Date() },
     });
     await recordBudgetEvent(request, budget.id, "sent");
+  } else if (budget.status === "waiting") {
+    await prisma.budget.update({
+      where: { id: budget.id },
+      data: { status: "sent" },
+    });
+    await recordBudgetEvent(request, budget.id, "sent", { republished: true });
   }
 
-  return NextResponse.json({ ok: true, href, url, status: budget.status === "draft" ? "sent" : budget.status });
+  const status = budget.status === "draft" || budget.status === "waiting" ? "sent" : budget.status;
+  return NextResponse.json({ ok: true, href, url, status });
 }
