@@ -104,6 +104,7 @@ export default async function RelatoriosPage({ searchParams }: { searchParams: P
 
       <section className="grid grid-cols-2 gap-3 md:grid-cols-4">
         <Stat label="Cliques no WhatsApp" value={String(summary.whatsappClicks)} />
+        <Stat label="Cliques em pedir orçamento" value={String(summary.quoteClicks)} />
         <Stat label="Pedidos recebidos" value={String(summary.quoteRequests)} />
         <Stat label="Orçamentos criados" value={String(summary.budgetsCreated)} hint={`${summary.budgetsSent} enviados`} />
         <Stat label="Aprovados" value={String(summary.approvedCount)} />
