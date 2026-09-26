@@ -53,7 +53,8 @@ export function isApexAuthPath(pathname: string) {
     pathname === "/onboarding" ||
     pathname === "/entrando" ||
     pathname === "/recuperar-senha" ||
-    pathname === "/redefinir-senha"
+    pathname === "/redefinir-senha" ||
+    pathname === "/verificar-email"
   );
 }
 

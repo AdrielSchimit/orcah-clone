@@ -4,6 +4,7 @@ import { verifyPassword } from "@/lib/password";
 import { loginRateIsLimited, recordFailedLogin, type AuthDb } from "@/lib/password-reset";
 
 export const LOGIN_INVALID_MESSAGE = "E-mail ou senha incorretos.";
+export const EMAIL_NOT_VERIFIED_MESSAGE = "Confirme seu e-mail para continuar.";
 export const LOGIN_LIMITED_MESSAGE = "Muitas tentativas. Aguarde alguns minutos e tente novamente.";
 
 // hash bcrypt de uma senha aleatória: usuário inexistente também paga o custo do bcrypt,
@@ -12,7 +13,8 @@ const DUMMY_PASSWORD_HASH = "$2b$10$SKFCoF9y6kXTnSLfTjwIb.fQ5qxNV1gBKAaeSG7CovI0
 
 export type LoginResult =
   | { ok: true; user: { id: number; hasCompany: boolean } }
-  | { ok: false; status: 401 | 429; error: string };
+  | { ok: false; status: 401 | 429; error: string }
+  | { ok: false; status: 403; code: "email_not_verified"; error: string };
 
 export async function authenticateLogin({
   email: rawEmail,
@@ -34,13 +36,18 @@ export async function authenticateLogin({
   }
 
   const user = email
-    ? await db.user.findUnique({ where: { email }, select: { id: true, passwordHash: true, company: { select: { id: true } } } })
+    ? await db.user.findUnique({ where: { email }, select: { id: true, passwordHash: true, emailVerifiedAt: true, company: { select: { id: true } } } })
     : null;
   const passwordOk = await verifyPassword(password, user?.passwordHash ?? DUMMY_PASSWORD_HASH);
 
   if (!user || !passwordOk) {
     await recordFailedLogin(email, headers, db, now);
     return { ok: false, status: 401, error: LOGIN_INVALID_MESSAGE };
+  }
+
+  // só depois da senha certa: não revela nada para quem não sabe a senha
+  if (!user.emailVerifiedAt) {
+    return { ok: false, status: 403, code: "email_not_verified", error: EMAIL_NOT_VERIFIED_MESSAGE };
   }
 
   return { ok: true, user: { id: user.id, hasCompany: Boolean(user.company) } };

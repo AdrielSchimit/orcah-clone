@@ -99,6 +99,7 @@ export const config = {
     "/cadastro",
     "/recuperar-senha",
     "/redefinir-senha",
+    "/verificar-email",
     "/orcamento/:path*",
   ],
 };

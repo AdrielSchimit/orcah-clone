@@ -1,5 +1,5 @@
 import { Resend } from "resend";
-import { PASSWORD_RESET_TTL_MINUTES } from "@/lib/auth-security";
+import { EMAIL_VERIFICATION_TTL_MINUTES, PASSWORD_RESET_TTL_MINUTES } from "@/lib/auth-security";
 
 function resendConfig() {
   const apiKey = process.env.RESEND_API_KEY?.trim();
@@ -53,5 +53,45 @@ export async function sendPasswordResetEmail({ email, link }: { email: string; l
   const { subject, text, html } = passwordResetEmailContent(link);
   const { error } = await new Resend(config.apiKey).emails.send({ from: config.from, to: email, subject, text, html });
   // o SDK não lança exceção em erro de API: devolve { error }. Só o nome do erro vai para o log.
+  if (error) throw new Error(`Resend recusou o envio (${error.name})`);
+}
+
+export function verificationEmailContent(link: string) {
+  const subject = "Confirme seu e-mail no Orçah";
+  const text = [
+    "Confirme seu e-mail",
+    "",
+    "Só falta um passo para começar a usar o Orçah.",
+    "",
+    `Confirmar meu e-mail: ${link}`,
+    "",
+    `Este link expira em ${EMAIL_VERIFICATION_TTL_MINUTES} minutos.`,
+    "",
+    "Se você não criou esta conta, ignore esta mensagem.",
+  ].join("\n");
+  const href = escapeHtml(link);
+  const html = `
+    <div style="font-family: Arial, sans-serif; color: #151f38; line-height: 1.5; max-width: 480px;">
+      <p style="margin: 0 0 16px; font-size: 20px; font-weight: 700;">Orçah</p>
+      <h1 style="font-size: 22px; margin: 0 0 12px;">Confirme seu e-mail</h1>
+      <p>Só falta um passo para começar a usar o Orçah.</p>
+      <p style="margin: 24px 0;">
+        <a href="${href}" style="background: #ffb020; color: #151f38; display: inline-block; font-weight: 700; padding: 12px 18px; text-decoration: none; border-radius: 8px;">
+          Confirmar meu e-mail
+        </a>
+      </p>
+      <p>Este link expira em ${EMAIL_VERIFICATION_TTL_MINUTES} minutos.</p>
+      <p style="color: #5f687a; font-size: 13px;">Se você não criou esta conta, ignore esta mensagem.</p>
+    </div>
+  `;
+  return { subject, text, html };
+}
+
+export async function sendVerificationEmail({ email, link }: { email: string; link: string }) {
+  const config = resendConfig();
+  if (!config) throw new Error("Resend não configurado");
+
+  const { subject, text, html } = verificationEmailContent(link);
+  const { error } = await new Resend(config.apiKey).emails.send({ from: config.from, to: email, subject, text, html });
   if (error) throw new Error(`Resend recusou o envio (${error.name})`);
 }
