@@ -5,7 +5,15 @@ import { titleCaseName } from "@/lib/text";
 
 type State = { id: number; name: string; uf: string };
 
-export function QuoteRequestForm({ slug }: { slug: string }) {
+export function QuoteRequestForm({
+  slug,
+  defaultService = "",
+  services = [],
+}: {
+  slug: string;
+  defaultService?: string;
+  services?: string[];
+}) {
   const [states, setStates] = useState<State[]>([]);
   const [stateId, setStateId] = useState("");
   const [cityName, setCityName] = useState("");
@@ -80,8 +88,17 @@ export function QuoteRequestForm({ slug }: { slug: string }) {
       <input
         name="desiredService"
         placeholder="Serviço desejado"
+        defaultValue={defaultService}
+        list={services.length > 0 ? "servicos-da-empresa" : undefined}
         className="rounded-btn border border-line bg-card px-4 py-3"
       />
+      {services.length > 0 ? (
+        <datalist id="servicos-da-empresa">
+          {services.map((name) => (
+            <option key={name} value={name} />
+          ))}
+        </datalist>
+      ) : null}
       <textarea
         name="description"
         rows={3}

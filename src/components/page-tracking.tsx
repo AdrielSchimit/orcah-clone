@@ -21,6 +21,8 @@ export function PageViewTracker({ slug }: { slug: string }) {
   useEffect(() => {
     if (sent.current) return;
     sent.current = true;
+    // "?servico=" vem do botão de um serviço na própria página: não é um acesso novo
+    if (new URLSearchParams(window.location.search).has("servico")) return;
     track(slug, "view");
   }, [slug]);
   return null;
