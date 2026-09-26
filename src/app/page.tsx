@@ -1,11 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { FlowSection } from "@/components/home/flow-stepper";
 import { HeroQuoteDemo } from "@/components/home/hero-quote-demo";
 import { PagePhoneDemo } from "@/components/home/page-phone-demo";
 import { StatusSection } from "@/components/home/status-flow-demo";
 import { OrcahLogo } from "@/components/orcah-logo";
 import { PLAN_PRICE_LABEL, TRIAL_DAYS } from "@/lib/plan-constants";
+import { SESSION_COOKIE, readSessionToken } from "@/lib/session-token";
 import { appUrl, companyPublicUrl } from "@/lib/urls";
 
 const DEMO_SLUG = "pintura-norte";
@@ -68,7 +70,19 @@ const faqs = [
   ],
 ];
 
-export default function Home() {
+async function viewerIsLoggedIn() {
+  const token = (await cookies()).get(SESSION_COOKIE)?.value;
+  if (!token) return false;
+  try {
+    return Boolean(await readSessionToken(token));
+  } catch {
+    return false;
+  }
+}
+
+export default async function Home() {
+  const loggedIn = await viewerIsLoggedIn();
+
   return (
     <div className="flex flex-1 flex-col bg-paper">
       <header className="sticky top-0 z-20 border-b border-line bg-card/80 px-4 py-3 backdrop-blur-md">
@@ -104,15 +118,26 @@ export default function Home() {
                 ))}
               </nav>
             </details>
-            <Link href={appUrl("/login")} className="inline-flex min-h-12 items-center px-3 text-sm font-medium text-text">
-              Entrar
-            </Link>
-            <Link
-              href={appUrl("/cadastro")}
-              className="hidden min-h-12 items-center rounded-btn bg-gold px-4 text-sm font-semibold text-ink sm:inline-flex"
-            >
-              Começar grátis
-            </Link>
+            {loggedIn ? (
+              <Link
+                href={appUrl("/painel")}
+                className="inline-flex min-h-12 items-center rounded-btn bg-gold px-4 text-sm font-semibold text-ink"
+              >
+                Acessar painel
+              </Link>
+            ) : (
+              <>
+                <Link href={appUrl("/login")} className="inline-flex min-h-12 items-center px-3 text-sm font-medium text-text">
+                  Entrar
+                </Link>
+                <Link
+                  href={appUrl("/cadastro")}
+                  className="hidden min-h-12 items-center rounded-btn bg-gold px-4 text-sm font-semibold text-ink sm:inline-flex"
+                >
+                  Começar grátis
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
