@@ -14,7 +14,7 @@ export default function RecuperarSenhaPage() {
         <div className="rounded-box border border-line bg-card p-4">
           <PasswordResetRequestForm />
         </div>
-        <Link href="/login" className="mt-6 inline-block font-medium text-gold-deep">
+        <Link href="/login" className="mt-4 inline-flex min-h-11 items-center font-medium text-gold-deep">
           Voltar ao login
         </Link>
       </main>

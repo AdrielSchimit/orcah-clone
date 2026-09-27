@@ -55,7 +55,7 @@ export function QuoteRequestForm({
       }
       setDone(true);
     } catch {
-      setError("Falha de conexão.");
+      setError("Falha de conexão. Tente de novo.");
     } finally {
       setLoading(false);
     }
@@ -76,17 +76,20 @@ export function QuoteRequestForm({
       <input
         name="customerName"
         required
+        aria-label="Seu nome"
         placeholder="Seu nome"
         className="rounded-btn border border-line bg-card px-4 py-3"
       />
       <input
         name="customerPhone"
         required
+        aria-label="WhatsApp"
         placeholder="WhatsApp"
         className="rounded-btn border border-line bg-card px-4 py-3"
       />
       <input
         name="desiredService"
+        aria-label="Serviço desejado"
         placeholder="Serviço desejado"
         defaultValue={defaultService}
         list={services.length > 0 ? "servicos-da-empresa" : undefined}
@@ -102,10 +105,12 @@ export function QuoteRequestForm({
       <textarea
         name="description"
         rows={3}
+        aria-label="Descreva o que precisa"
         placeholder="Descreva o que precisa"
         className="rounded-btn border border-line bg-card px-4 py-3"
       />
       <select
+        aria-label="Estado"
         value={stateId}
         onChange={(event) => setStateId(event.target.value)}
         className="rounded-btn border border-line bg-card px-4 py-3"
@@ -122,16 +127,19 @@ export function QuoteRequestForm({
         onChange={(event) => setCityName(event.target.value)}
         onBlur={() => setCityName((current) => titleCaseName(current))}
         disabled={!stateId}
+        aria-label="Cidade"
         placeholder={stateId ? "Cidade (opcional)" : "Escolha o estado para informar a cidade"}
         className="rounded-btn border border-line bg-card px-4 py-3 disabled:opacity-50"
       />
       <input
         name="neighborhood"
+        aria-label="Bairro"
         placeholder="Bairro"
         className="rounded-btn border border-line bg-card px-4 py-3"
       />
       <input
         name="preferredTime"
+        aria-label="Melhor horário para contato"
         placeholder="Melhor horário para contato"
         className="rounded-btn border border-line bg-card px-4 py-3"
       />

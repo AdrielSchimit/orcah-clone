@@ -77,7 +77,7 @@ export function PasswordResetConfirmForm({ token }: { token: string }) {
         disabled={loading}
         className="mt-2 min-h-12 rounded-btn bg-gold px-4 text-base font-semibold text-ink hover:bg-gold-press disabled:opacity-60"
       >
-        {loading ? "Salvando..." : "Salvar nova senha"}
+        {loading ? "Salvando…" : "Salvar nova senha"}
       </button>
     </form>
   );

@@ -10,7 +10,7 @@ export const PASSWORD_POLICY_MESSAGE =
 export type PasswordRuleKey = "length" | "upper" | "lower" | "number" | "symbol";
 
 export const PASSWORD_RULES: { key: PasswordRuleKey; label: string; test: (password: string) => boolean }[] = [
-  { key: "length", label: "8 caracteres", test: (password) => password.length >= MIN_PASSWORD_LENGTH },
+  { key: "length", label: "8 ou mais caracteres", test: (password) => password.length >= MIN_PASSWORD_LENGTH },
   { key: "upper", label: "Letra maiúscula", test: (password) => /\p{Lu}/u.test(password) },
   { key: "lower", label: "Letra minúscula", test: (password) => /\p{Ll}/u.test(password) },
   { key: "number", label: "Número", test: (password) => /\p{Nd}/u.test(password) },

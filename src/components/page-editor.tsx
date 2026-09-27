@@ -437,6 +437,7 @@ export function GalleryManager({ photos, limit }: { photos: Photo[]; limit: numb
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             maxLength={120}
+            aria-label="Legenda da foto"
             placeholder="Legenda (opcional): Fachada pintada no Centro"
             className={inputClass}
           />

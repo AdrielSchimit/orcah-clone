@@ -49,6 +49,7 @@ export function ClientesPanel({ customers }: { customers: Customer[] }) {
       <input
         value={query}
         onChange={(event) => setQuery(event.target.value)}
+        aria-label="Buscar cliente"
         placeholder="Buscar por nome ou telefone"
         className="mb-4 w-full rounded-btn border border-line bg-card px-4 py-3"
       />

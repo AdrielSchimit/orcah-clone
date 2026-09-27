@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { PENDING_EMAIL_KEY } from "@/components/auth-form";
+import { Mascote } from "@/components/mascote";
 
 function mask(email: string) {
   const [user, domain] = email.split("@");
@@ -56,6 +57,7 @@ function ResendBox({ initialEmail }: { initialEmail: string }) {
           inputMode="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
+          aria-label="Seu e-mail"
           placeholder="Seu e-mail"
           className="w-full rounded-btn border border-line bg-card px-4 py-3 text-base text-text"
         />
@@ -116,15 +118,16 @@ export function VerifyEmail({ token, sendFailed }: { token: string; sendFailed: 
           </>
         ) : state === "ok" ? (
           <>
-            <h1 className="text-2xl font-semibold">E-mail confirmado ✓</h1>
-            <p className="mt-2 text-sm text-text-soft">Levando você para montar sua empresa…</p>
+            <Mascote pose="sucesso" className="mx-auto mb-2 h-28 w-auto" priority />
+            <h1 className="text-center text-2xl font-semibold">E-mail confirmado ✓</h1>
+            <p className="mt-2 text-center text-sm text-text-soft">Levando você para montar sua empresa…</p>
           </>
         ) : (
           <>
             <h1 className="text-2xl font-semibold">{error}</h1>
             <p className="mt-2 text-sm text-text-soft">Peça um novo link de confirmação.</p>
             <ResendBox initialEmail={pending ?? ""} />
-            <Link href="/login" className="mt-4 inline-block text-sm font-medium text-gold-deep">
+            <Link href="/login" className="mt-2 inline-flex min-h-11 items-center text-sm font-medium text-gold-deep">
               Já confirmei, quero entrar
             </Link>
           </>
@@ -135,7 +138,8 @@ export function VerifyEmail({ token, sendFailed }: { token: string; sendFailed: 
 
   return (
     <div className="rounded-box border border-line bg-card p-5 shadow-card">
-      <h1 className="text-2xl font-semibold">Confira seu e-mail</h1>
+      <Mascote pose="explicando" className="mx-auto mb-2 h-28 w-auto" priority />
+      <h1 className="text-center text-2xl font-semibold">Confira seu e-mail</h1>
       {sendFailed ? (
         <p className="mt-2 text-sm text-no">Não foi possível enviar o e-mail agora. Tente reenviar em instantes.</p>
       ) : pending ? (
@@ -145,9 +149,12 @@ export function VerifyEmail({ token, sendFailed }: { token: string; sendFailed: 
       ) : (
         <p className="mt-2 text-sm text-text-soft">Enviamos um link de confirmação para o seu e-mail.</p>
       )}
-      <p className="mt-2 text-sm text-text-soft">Abra o e-mail e toque em “Confirmar meu e-mail”. O link vale por 30 minutos.</p>
+      <p className="mt-2 text-sm text-text-soft">
+        Abra o e-mail e toque em <span className="whitespace-nowrap">“Confirmar meu e-mail”</span>. O link vale por 30
+        minutos. Não achou? Olhe também o spam.
+      </p>
       {pending === null ? null : <ResendBox initialEmail={pending} />}
-      <Link href="/login" className="mt-4 inline-block text-sm font-medium text-gold-deep">
+      <Link href="/login" className="mt-2 inline-flex min-h-11 items-center text-sm font-medium text-gold-deep">
         Voltar ao login
       </Link>
     </div>
