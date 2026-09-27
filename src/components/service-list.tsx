@@ -57,7 +57,7 @@ export function ServiceList({ services }: { services: Item[] }) {
   return (
     <>
       {error ? <p className="mb-3 text-sm text-no">{error}</p> : null}
-      <ul className="grid gap-3 md:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2">
         {items.map((item, index) => (
           <li
             key={item.id}
@@ -80,7 +80,7 @@ export function ServiceList({ services }: { services: Item[] }) {
                   <p className="mt-0.5 truncate text-xs text-text-soft">
                     {[item.category, Number(item.defaultPrice) > 0 ? `${formatBRL(item.defaultPrice)}/${item.unit}` : null]
                       .filter(Boolean)
-                      .join(" · ") || "Sem categoria"}
+                      .join(" · ") || "Preço a combinar"}
                   </p>
                 </Link>
                 <div className="mt-2 flex flex-wrap gap-1.5 text-[11px] font-medium">
@@ -90,8 +90,10 @@ export function ServiceList({ services }: { services: Item[] }) {
                   ) : (
                     <span className="rounded-full bg-paper-alt px-2 py-0.5 text-text-soft">Desativado</span>
                   )}
-                  {item.showPrice && Number(item.defaultPrice) > 0 ? (
-                    <span className="rounded-full bg-paper px-2 py-0.5 text-text-soft">Preço visível</span>
+                  {Number(item.defaultPrice) > 0 ? (
+                    <span className="rounded-full bg-paper px-2 py-0.5 text-text-soft">
+                      {item.showPrice ? "Preço visível" : "Preço oculto na página"}
+                    </span>
                   ) : null}
                 </div>
               </div>

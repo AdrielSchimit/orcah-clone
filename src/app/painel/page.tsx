@@ -153,7 +153,7 @@ export default async function PainelPage({ searchParams }: { searchParams: Promi
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 className="text-xs font-medium uppercase tracking-[0.04em] text-text-soft">Últimos orçamentos</h2>
           {budgets.length > 0 ? (
-            <Link href="/painel/orcamentos" className="min-h-10 text-sm font-medium text-gold-deep">
+            <Link href="/painel/orcamentos" className="inline-flex min-h-10 items-center text-sm font-medium text-gold-deep">
               Ver todos ›
             </Link>
           ) : null}
@@ -173,7 +173,7 @@ export default async function PainelPage({ searchParams }: { searchParams: Promi
             </MascoteVazio>
           </>
         ) : (
-          <ul className="grid gap-2 md:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
             {budgets.map((budget) => (
               <li key={budget.id}>
                 <Link href={`/painel/orcamentos/${budget.id}`} className="block rounded-box border border-line bg-card p-4">
