@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireActivePlan } from "@/lib/plan";
 import { prisma } from "@/lib/db";
-import { saveUpload } from "@/lib/upload";
+import { UploadError, uploadCompanyImage } from "@/lib/storage";
 
 export async function POST(
   request: Request,
@@ -35,7 +35,7 @@ export async function POST(
 
   const caption = String(form.get("caption") ?? "").trim();
   try {
-    const path = await saveUpload(file, `orcamentos/${auth.company.id}/${budget.id}`);
+    const path = await uploadCompanyImage({ companyId: auth.company.id, kind: "budget", budgetId: budget.id, file });
     const photo = await prisma.budgetPhoto.create({
       data: {
         budgetId: budget.id,
@@ -46,9 +46,8 @@ export async function POST(
     });
     return NextResponse.json({ ok: true, photo });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Não foi possível enviar a foto." },
-      { status: 400 },
-    );
+    if (error instanceof UploadError) return NextResponse.json({ error: error.message }, { status: 400 });
+    console.error("[orcamento-foto] falha ao salvar:", error instanceof Error ? error.name : "erro");
+    return NextResponse.json({ error: "Não foi possível enviar a foto. Tente de novo." }, { status: 500 });
   }
 }

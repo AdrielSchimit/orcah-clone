@@ -67,6 +67,8 @@ describe("dono do arquivo", () => {
     assert.match(buildAssetPath(7, "service", 3), /^companies\/7\/services\/3\//);
     assert.throws(() => buildAssetPath(0, "logo"), UploadError);
     assert.throws(() => buildAssetPath(7, "service"), UploadError);
+    assert.match(buildAssetPath(7, "budget", 12), /^companies\/7\/budgets\/12\/[\w-]+\.webp$/);
+    assert.throws(() => buildAssetPath(7, "budget"), UploadError);
   });
 
   it("não reconhece como seu o caminho de outra empresa", () => {
@@ -98,6 +100,15 @@ describe("envio para o Supabase Storage", () => {
     assert.match(calls[0].url, /\/storage\/v1\/object\/company-assets\/companies\/7\/gallery\//);
     assert.equal(calls[0].headers.Authorization, `Bearer ${config.key}`);
     assert.ok(!url.includes(config.key), "a chave nunca vai para a URL");
+  });
+
+  it("foto de orçamento vai para a pasta do orçamento, dentro da empresa", async () => {
+    const { calls, impl } = fakeFetch();
+    const url = await uploadCompanyImage({ companyId: 7, kind: "budget", budgetId: 12, file: await pngFile() }, { config, fetchImpl: impl, production: true });
+    assert.match(url, /\/company-assets\/companies\/7\/budgets\/12\/.+\.webp$/);
+    assert.match(calls[0].url, /\/companies\/7\/budgets\/12\//);
+    assert.equal(await removeCompanyImage(7, url, { config, fetchImpl: impl }), true);
+    assert.equal(await removeCompanyImage(8, url, { config, fetchImpl: impl }), false);
   });
 
   it("em produção sem storage configurado não salva no disco", async () => {

@@ -4,7 +4,7 @@ import path from "path";
 import sharp from "sharp";
 
 /**
- * Imagens da página comercial (logo, galeria, serviços) no Supabase Storage.
+ * Imagens da empresa (logo, galeria, serviços, fotos de orçamento) no Supabase Storage.
  * Upload só no servidor com a service role; o caminho é sempre montado a partir
  * da empresa da sessão, nunca do que o navegador mandar.
  */
@@ -18,9 +18,9 @@ const ALLOWED: Record<string, string[]> = {
   "image/webp": ["webp"],
 };
 
-export type ImageKind = "logo" | "gallery" | "service";
+export type ImageKind = "logo" | "gallery" | "service" | "budget";
 
-const MAX_SIDE: Record<ImageKind, number> = { logo: 512, gallery: 1600, service: 1200 };
+const MAX_SIDE: Record<ImageKind, number> = { logo: 512, gallery: 1600, service: 1200, budget: 1600 };
 
 export class UploadError extends Error {}
 
@@ -50,12 +50,15 @@ export function companyAssetPrefix(companyId: number) {
   return `companies/${companyId}/`;
 }
 
-export function buildAssetPath(companyId: number, kind: ImageKind, serviceId?: number) {
+/** `parentId`: id do serviço (kind "service") ou do orçamento (kind "budget"). */
+export function buildAssetPath(companyId: number, kind: ImageKind, parentId?: number) {
   if (!Number.isInteger(companyId) || companyId <= 0) throw new UploadError("Empresa inválida.");
   const name = `${Date.now()}-${randomBytes(6).toString("hex")}.webp`;
-  if (kind === "service") {
-    if (!Number.isInteger(serviceId) || !serviceId || serviceId <= 0) throw new UploadError("Serviço inválido.");
-    return `${companyAssetPrefix(companyId)}services/${serviceId}/${name}`;
+  if (kind === "service" || kind === "budget") {
+    if (!Number.isInteger(parentId) || !parentId || parentId <= 0) {
+      throw new UploadError(kind === "service" ? "Serviço inválido." : "Orçamento inválido.");
+    }
+    return `${companyAssetPrefix(companyId)}${kind === "service" ? "services" : "budgets"}/${parentId}/${name}`;
   }
   return `${companyAssetPrefix(companyId)}${kind}/${name}`;
 }
@@ -133,13 +136,19 @@ async function putObject(config: StorageConfig, assetPath: string, body: Buffer,
 
 /** Envia a imagem e devolve o valor a salvar no banco (URL pública). */
 export async function uploadCompanyImage(
-  { companyId, kind, serviceId, file }: { companyId: number; kind: ImageKind; serviceId?: number; file: File },
+  {
+    companyId,
+    kind,
+    serviceId,
+    budgetId,
+    file,
+  }: { companyId: number; kind: ImageKind; serviceId?: number; budgetId?: number; file: File },
   { config = storageConfig(), fetchImpl = fetch, production = process.env.NODE_ENV === "production" }: StorageDeps = {},
 ) {
   const invalid = validateImageFile(file);
   if (invalid) throw new UploadError(invalid);
 
-  const assetPath = buildAssetPath(companyId, kind, serviceId);
+  const assetPath = buildAssetPath(companyId, kind, serviceId ?? budgetId);
   const image = await processImage(Buffer.from(await file.arrayBuffer()), kind);
 
   if (!config) {

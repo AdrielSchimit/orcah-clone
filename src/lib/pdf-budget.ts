@@ -1,9 +1,12 @@
+import { readFile } from "fs/promises";
 import path from "path";
 import PDFDocument from "pdfkit";
+import sharp from "sharp";
 import { groupedItems, kindSubtotals } from "@/lib/budget";
 import { PAYMENT_CONDITION_LABEL, PAYMENT_METHOD_LABEL, type PaymentCondition, type PaymentMethod } from "@/lib/commercial";
 import { formatDate } from "@/lib/date";
 import { formatBRL, moneyString } from "@/lib/money";
+import { storageConfig } from "@/lib/storage";
 import { KIND_LABEL, extraDetailLines, itemDetailLines, parseExtras, travelFeeAmount, type ItemKind, type TemplateConfig } from "@/lib/templates";
 
 type PdfBudget = {
@@ -77,11 +80,43 @@ function publicFile(rel: string) {
   return path.join(process.cwd(), "public", rel.replace(/^\//, ""));
 }
 
+type PdfPhoto = { image: Buffer | null; caption: string | null };
+
+/**
+ * O PDF só embute JPEG/PNG e as fotos agora ficam no storage em WebP: baixa (só do nosso bucket)
+ * ou lê do disco (fotos antigas em /uploads) e converte para JPEG. Foto que falhar vira só a legenda.
+ */
+async function loadPhotos(photos: PdfBudget["photos"]): Promise<PdfPhoto[]> {
+  const config = storageConfig();
+  const bucketPrefix = config ? `${config.url}/storage/v1/object/public/${config.bucket}/` : null;
+  return Promise.all(
+    (photos ?? []).slice(0, 6).map(async (photo) => {
+      try {
+        let input: Buffer;
+        if (bucketPrefix && photo.path.startsWith(bucketPrefix)) {
+          const response = await fetch(photo.path, { signal: AbortSignal.timeout(6000) });
+          if (!response.ok) throw new Error("download");
+          input = Buffer.from(await response.arrayBuffer());
+        } else if (photo.path.startsWith("/uploads/") && !photo.path.includes("..")) {
+          input = await readFile(publicFile(photo.path));
+        } else {
+          return { image: null, caption: photo.caption };
+        }
+        const image = await sharp(input).rotate().jpeg({ quality: 80 }).toBuffer();
+        return { image, caption: photo.caption };
+      } catch {
+        return { image: null, caption: photo.caption };
+      }
+    }),
+  );
+}
+
 export function pdfFileName(number: string) {
   return `orcah-${number.replace(/[^\w-]+/g, "")}.pdf`;
 }
 
 export async function buildBudgetPdf(budget: PdfBudget, template?: TemplateConfig) {
+  const photos = await loadPhotos(budget.photos);
   const doc = new PDFDocument({ size: "A4", margin: 48 });
   const chunks: Buffer[] = [];
   const extras = parseExtras(budget.extras);
@@ -128,7 +163,7 @@ export async function buildBudgetPdf(budget: PdfBudget, template?: TemplateConfi
   if (budget.serviceAddress) doc.text(budget.serviceAddress);
 
   if (template?.photos.placement === "before-items") {
-    drawPhotos(doc, budget.photos, template.photos.sectionTitle);
+    drawPhotos(doc, photos, template.photos.sectionTitle);
   }
 
   doc.moveDown(1);
@@ -151,7 +186,7 @@ export async function buildBudgetPdf(budget: PdfBudget, template?: TemplateConfi
   }
 
   if (template?.photos.placement === "after-items") {
-    drawPhotos(doc, budget.photos, template.photos.sectionTitle);
+    drawPhotos(doc, photos, template.photos.sectionTitle);
   }
 
   doc.moveTo(320, doc.y).lineTo(547, doc.y).strokeColor(LINE).stroke();
@@ -242,17 +277,18 @@ function drawTable(
 
 function drawPhotos(
   doc: PDFKit.PDFDocument,
-  photos: PdfBudget["photos"] | undefined,
+  photos: PdfPhoto[],
   title: string,
 ) {
-  if (!photos?.length) return;
+  if (!photos.length) return;
   doc.moveDown(0.8);
   doc.fillColor(NAVY).font("Helvetica-Bold").fontSize(11).text(title);
   doc.moveDown(0.3);
-  for (const photo of photos.slice(0, 6)) {
+  for (const photo of photos) {
     if (doc.y > 620) doc.addPage();
     try {
-      doc.image(publicFile(photo.path), { fit: [500, 160], align: "center" });
+      if (!photo.image) throw new Error("sem imagem");
+      doc.image(photo.image, { fit: [500, 160], align: "center" });
       if (photo.caption) {
         doc.fillColor(SOFT).font("Helvetica").fontSize(8).text(photo.caption);
       }
