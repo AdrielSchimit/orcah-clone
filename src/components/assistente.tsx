@@ -82,6 +82,47 @@ export function Assistente({ contexto }: { contexto: AssistenteContexto }) {
     fimRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [mensagens.length]);
 
+  // o botão flutuante nunca fica em cima de botão, link ou campo: some enquanto houver um embaixo dele
+  const [livre, setLivre] = useState(true);
+  useEffect(() => {
+    if (aberto) return;
+    let frame = 0;
+    const checar = () => {
+      frame = 0;
+      const botao = botaoRef.current;
+      if (!botao) return;
+      const r = botao.getBoundingClientRect();
+      if (!r.width) return;
+      const pontos: [number, number][] = [
+        [r.left + 4, r.top + 4],
+        [r.right - 4, r.top + 4],
+        [r.left + 4, r.bottom - 4],
+        [r.right - 4, r.bottom - 4],
+        [r.left + r.width / 2, r.top + r.height / 2],
+      ];
+      const cobre = pontos.some(([x, y]) =>
+        document
+          .elementsFromPoint(x, y)
+          .some((el) => !botao.contains(el) && el.closest("a[href], button, input, select, textarea, label, [role=button]")),
+      );
+      setLivre(!cobre);
+    };
+    const agendar = () => {
+      if (!frame) frame = requestAnimationFrame(checar);
+    };
+    agendar();
+    const observer = new ResizeObserver(agendar);
+    observer.observe(document.body);
+    window.addEventListener("scroll", agendar, { passive: true });
+    window.addEventListener("resize", agendar);
+    return () => {
+      cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener("scroll", agendar);
+      window.removeEventListener("resize", agendar);
+    };
+  }, [aberto, pathname]);
+
   function abrir() {
     setAberto(true);
     marcarVisto(dica.id);
@@ -183,9 +224,11 @@ export function Assistente({ contexto }: { contexto: AssistenteContexto }) {
           type="button"
           onClick={abrir}
           aria-label={novidade ? "Abrir assistente (dica nova)" : "Abrir assistente"}
-          className={`fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 h-14 w-14 items-center justify-center rounded-full border-2 border-gold bg-gold-wash shadow-float transition-transform hover:scale-105 active:scale-95 md:bottom-6 md:right-6 md:flex ${
+          aria-hidden={livre ? undefined : true}
+          tabIndex={livre ? undefined : -1}
+          className={`fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 h-14 w-14 items-center justify-center rounded-full border-2 border-gold bg-gold-wash shadow-float transition-[opacity,transform] duration-200 hover:scale-105 active:scale-95 md:bottom-6 md:right-6 md:flex ${
             escondeNoCelular ? "hidden" : "flex"
-          }`}
+          } ${livre ? "" : "pointer-events-none opacity-0"}`}
         >
           <MascoteAvatar className="h-full w-full" />
           {novidade ? (
