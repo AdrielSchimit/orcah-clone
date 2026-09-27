@@ -134,20 +134,22 @@ function BudgetButton({ active, raised }: { active: boolean; raised: boolean }) 
         href="/painel/orcamentos/novo"
         aria-label="Novo orçamento"
         aria-current={active ? "page" : undefined}
-        className={`flex flex-col items-center gap-0.5 text-[11px] font-semibold ${active ? "text-text" : "text-text-soft"} ${
-          raised ? "-mt-6" : "mt-1"
+        className={`relative flex h-14 w-full flex-col items-center justify-center gap-0.5 text-[11px] font-semibold ${
+          active ? "text-text" : "text-text-soft"
         }`}
       >
+        {/* o círculo ocupa o lugar de um ícone (h-5): o rótulo fica na mesma linha dos outros itens */}
+        <span aria-hidden className="h-5 w-5" />
         <span
-          className={`flex items-center justify-center rounded-full border bg-ink transition-shadow ${
-            raised ? "h-[3.75rem] w-[3.75rem]" : "h-10 w-10"
+          className={`absolute left-1/2 flex -translate-x-1/2 items-center justify-center rounded-full border bg-ink transition-shadow ${
+            raised ? "top-[-1.875rem] h-[3.75rem] w-[3.75rem]" : "top-[-0.5rem] h-9 w-9"
           } ${
             active
               ? "border-gold shadow-[0_0_0_3px_rgb(255_176_32/0.22),0_10px_26px_-6px_rgb(255_176_32/0.75)]"
               : "border-gold/70 shadow-[0_0_0_2px_rgb(255_176_32/0.12),0_8px_22px_-8px_rgb(255_176_32/0.6)]"
           }`}
         >
-          <OrcahIcon className={raised ? "h-8 w-8" : "h-6 w-6"} />
+          <OrcahIcon className={raised ? "h-8 w-8" : "h-5 w-5"} />
         </span>
         <span>Orçamento</span>
       </Link>
