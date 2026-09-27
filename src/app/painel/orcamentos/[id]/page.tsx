@@ -10,8 +10,9 @@ import { isRepublishMetadata } from "@/lib/budget-cycle";
 import { prisma } from "@/lib/db";
 import { budgetStatusLabel } from "@/lib/budget-status";
 import { formatDateTime } from "@/lib/date";
-import { formatBRL, moneyString } from "@/lib/money";
+import { formatBRL, formatQuantity, moneyString } from "@/lib/money";
 import { getSessionUser } from "@/lib/session";
+import { formatPhoneBR } from "@/lib/phone";
 import { companyTemplate, KIND_LABEL, itemDetailLines, parseExtras, type ItemKind } from "@/lib/templates";
 import { budgetPublicUrl } from "@/lib/whatsapp";
 
@@ -68,6 +69,9 @@ export default async function OrcamentoPage({
     revision && revision.metadata && typeof revision.metadata === "object" && "message" in revision.metadata
       ? String((revision.metadata as { message?: string }).message ?? "")
       : "";
+  const lastEvent = budget.events[0];
+  const republishedNow =
+    budget.status === "sent" && lastEvent?.event === "sent" && isRepublishMetadata(lastEvent.metadata);
 
   return (
     <>
@@ -101,10 +105,24 @@ export default async function OrcamentoPage({
         </div>
       </div>
 
-      {budget.status === "waiting" && revisionMessage ? (
+      {budget.status === "waiting" ? (
         <div className="mb-5 rounded-box border border-gold/40 bg-gold-wash p-4">
-          <p className="text-sm font-semibold">Pedido de alteração</p>
-          <p className="mt-1 whitespace-pre-wrap text-sm text-text-soft">{revisionMessage}</p>
+          <p className="text-sm font-semibold">O cliente pediu uma alteração</p>
+          {revisionMessage ? (
+            <p className="mt-2 whitespace-pre-wrap rounded-btn bg-card px-3 py-2 text-sm">“{revisionMessage}”</p>
+          ) : null}
+          <p className="mt-2 text-sm text-text-soft">
+            Ajuste o orçamento abaixo e toque em <strong className="font-semibold text-text">Salvar nova versão</strong>. O
+            cliente aprova a versão nova pelo mesmo link.
+          </p>
+        </div>
+      ) : republishedNow ? (
+        <div className="mb-5 rounded-box border border-ok/30 bg-ok-wash p-4">
+          <p className="text-sm font-semibold text-ok">Nova versão pronta para aprovação</p>
+          <p className="mt-1 text-sm text-text-soft">
+            Avise o cliente: toque em <strong className="font-semibold text-text">Enviar pelo WhatsApp</strong>. O link é o
+            mesmo e já mostra a versão nova.
+          </p>
         </div>
       ) : null}
 
@@ -131,10 +149,11 @@ export default async function OrcamentoPage({
       {canEdit ? (
         <BudgetForm
           budgetId={budget.id}
+          submitLabel={budget.status === "waiting" ? "Salvar nova versão" : undefined}
           template={template}
           defaults={{
             customerId: budget.customerId,
-            customerName: `${budget.customer.name} · ${budget.customer.phone}`,
+            customerName: `${budget.customer.name} · ${formatPhoneBR(budget.customer.phone)}`,
             serviceStateId: budget.serviceStateId,
             serviceCityId: budget.serviceCityId,
             validityDate: budget.validityDate
@@ -217,7 +236,7 @@ export default async function OrcamentoPage({
                     </p>
                   ))}
                   <p className="text-sm text-text-soft">
-                    {moneyString(Number(item.quantity))} {item.unit} × {formatBRL(Number(item.unitPrice))}
+                    {formatQuantity(Number(item.quantity))} {item.unit} × {formatBRL(Number(item.unitPrice))}
                   </p>
                   <p className="mt-1 font-semibold">{formatBRL(Number(item.subtotal))}</p>
                 </div>
@@ -235,7 +254,7 @@ export default async function OrcamentoPage({
               <li key={version.id} className="rounded-box border border-line bg-card px-4 py-3">
                 <p className="text-sm font-medium">Versão {version.version}</p>
                 <p className="text-sm text-text-soft">
-                  Total {formatBRL(Number(version.total))} · anterior ao ajuste
+                  Total {formatBRL(Number(version.total))} · antes do ajuste
                 </p>
                 <p className="text-xs text-text-soft">{formatDateTime(version.createdAt)}</p>
               </li>
@@ -262,7 +281,9 @@ export default async function OrcamentoPage({
                     <p className="text-sm font-medium">{title}</p>
                     {republish?.previousTotal && republish.total ? (
                       <p className="text-xs text-text-soft">
-                        {formatBRL(republish.previousTotal)} → {formatBRL(republish.total)}
+                        {Number(republish.previousTotal) === Number(republish.total)
+                          ? `Valor mantido: ${formatBRL(republish.total)}`
+                          : `${formatBRL(republish.previousTotal)} → ${formatBRL(republish.total)}`}
                       </p>
                     ) : null}
                     <p className="text-xs text-text-soft">{formatDateTime(event.createdAt)}</p>

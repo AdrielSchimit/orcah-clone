@@ -9,7 +9,7 @@ import { PAYMENT_CONDITION_LABEL, PAYMENT_METHOD_LABEL, type PaymentMethod } fro
 import { ramoLabel, serviceAreaLabel } from "@/lib/company-display";
 import { formatDate } from "@/lib/date";
 import { prisma } from "@/lib/db";
-import { formatBRL, moneyString } from "@/lib/money";
+import { formatBRL, formatQuantity } from "@/lib/money";
 import { publicCanRespond } from "@/lib/budget-cycle";
 import { findPublicBudget, maybeExpire } from "@/lib/public-budget";
 import { companyTemplate, KIND_LABEL, extraDetailLines, itemDetailLines, parseExtras, travelFeeAmount, type ItemKind } from "@/lib/templates";
@@ -164,7 +164,7 @@ export default async function PublicOrcamentoPage({
                       </p>
                     ))}
                     <p className="text-sm text-text-soft">
-                      {moneyString(Number(item.quantity))} {item.unit} × {formatBRL(Number(item.unitPrice))}
+                      {formatQuantity(Number(item.quantity))} {item.unit} × {formatBRL(Number(item.unitPrice))}
                     </p>
                     <p className="mt-1 font-semibold">{formatBRL(Number(item.subtotal))}</p>
                   </div>
