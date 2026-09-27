@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isPreviewAdmin } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
 import { requireCompany } from "@/lib/company";
 import { prisma } from "@/lib/db";
 import { titleCaseName } from "@/lib/text";
@@ -7,7 +7,7 @@ import { titleCaseName } from "@/lib/text";
 export async function POST(request: Request) {
   const auth = await requireCompany();
   if ("error" in auth) return auth.error;
-  if (!isPreviewAdmin(auth.user)) {
+  if (!isAdmin(auth.user)) {
     return NextResponse.json({ error: "Só a conta de análise troca o molde." }, { status: 403 });
   }
 

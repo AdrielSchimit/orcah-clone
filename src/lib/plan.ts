@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isPreviewAdmin } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
 import { requireCompany } from "@/lib/company";
 import { prisma } from "@/lib/db";
 import { PLAN_PRICE, PLAN_PRICE_LABEL, TRIAL_DAYS } from "@/lib/plan-constants";
@@ -83,7 +83,7 @@ export function planView(
 export async function requireActivePlan() {
   const auth = await requireCompany();
   if ("error" in auth) return auth;
-  if (isPreviewAdmin(auth.user)) return auth;
+  if (isAdmin(auth.user)) return auth;
 
   const subscription = await ensureSubscription(auth.company.id);
   const plan = planView(subscription);

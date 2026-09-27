@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { publicCanRespond } from "@/lib/budget-cycle";
 import { prisma } from "@/lib/db";
 import { findPublicBudget, isClosed, maybeExpire, recordBudgetEvent } from "@/lib/public-budget";
 
@@ -30,6 +31,10 @@ export async function POST(
 
   if (isClosed(budget.status)) {
     return NextResponse.json({ error: "Este orçamento já foi respondido." }, { status: 409 });
+  }
+  if (!publicCanRespond(budget.status)) {
+    // pedido de alteração em aberto: a resposta vale para a versão nova, depois do ajuste
+    return NextResponse.json({ error: "A empresa está ajustando este orçamento. Aguarde a nova versão." }, { status: 409 });
   }
 
   const body = (await request.json()) as {

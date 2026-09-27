@@ -5,7 +5,7 @@ import { Assistente } from "@/components/assistente";
 import { OrcahLogo } from "@/components/orcah-logo";
 import { PainelNav } from "@/components/painel-nav";
 import { PlanBanner } from "@/components/plan-banner";
-import { isPreviewAdmin } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
 import { ramoLabel, serviceAreaLabel } from "@/lib/company-display";
 import { prisma } from "@/lib/db";
 import { ensureSubscription, planView } from "@/lib/plan";
@@ -17,7 +17,7 @@ export default async function PainelLayout({ children }: { children: React.React
   if (!user) redirect(appUrl("/login"));
   if (!user.company) redirect(appUrl("/onboarding"));
 
-  const admin = isPreviewAdmin(user);
+  const admin = isAdmin(user);
   const host = (await headers()).get("host") ?? "";
   const tenant = tenantSlugFromHost(host);
   if (tenant && tenant !== user.company.slug) {
@@ -33,10 +33,12 @@ export default async function PainelLayout({ children }: { children: React.React
     redirect("/painel/plano");
   }
 
-  const [pedidosNovos, orcamentos, clientes] = await Promise.all([
+  const [pedidosNovos, orcamentos, clientes, servicos, fotos] = await Promise.all([
     prisma.quoteRequest.count({ where: { companyId: user.company.id, status: "new" } }),
     prisma.budget.count({ where: { companyId: user.company.id } }),
     prisma.customer.count({ where: { companyId: user.company.id } }),
+    prisma.service.count({ where: { companyId: user.company.id, active: true } }),
+    prisma.companyPhoto.count({ where: { companyId: user.company.id, active: true } }),
   ]);
 
   const firstName = user.name.split(" ")[0];
@@ -83,6 +85,8 @@ export default async function PainelLayout({ children }: { children: React.React
           pedidosNovos,
           temLogo: Boolean(user.company.logoPath),
           temDescricao: Boolean(user.company.description?.trim()),
+          servicos,
+          fotos,
         }}
       />
     </div>

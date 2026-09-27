@@ -72,7 +72,7 @@ export function AdminRamoSwitcher({
       }
       router.refresh();
     } catch {
-      setError("Falha de conexão.");
+      setError("Falha de conexão. Tente de novo.");
     } finally {
       setLoadingId(null);
     }

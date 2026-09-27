@@ -98,6 +98,8 @@ export const config = {
     "/login",
     "/cadastro",
     "/recuperar-senha",
+    "/redefinir-senha",
+    "/verificar-email",
     "/orcamento/:path*",
   ],
 };

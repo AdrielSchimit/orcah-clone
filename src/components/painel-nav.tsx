@@ -2,113 +2,240 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { OrcahLogo } from "@/components/orcah-logo";
+import { OrcahIcon, OrcahLogo } from "@/components/orcah-logo";
 
-const items = [
+type NavId = "home" | "clientes" | "orcamentos" | "pagina" | "mais" | "pedidos" | "servicos" | "relatorios";
+
+// celular: 5 destinos. Pedidos, Serviços e Relatórios moram em "Mais" (e na lateral do desktop).
+const primary: { href: string; label: string; id: NavId }[] = [
   { href: "/painel", label: "Início", id: "home" },
-  { href: "/painel/pedidos", label: "Pedidos", id: "pedidos" },
   { href: "/painel/clientes", label: "Clientes", id: "clientes" },
-  { href: "/painel/empresa", label: "Página", id: "pagina" },
+  { href: "/painel/orcamentos", label: "Orçamentos", id: "orcamentos" },
+  { href: "/painel/pagina", label: "Página", id: "pagina" },
   { href: "/painel/mais", label: "Mais", id: "mais" },
-] as const;
+];
 
-function isActive(pathname: string, id: (typeof items)[number]["id"]) {
-  if (id === "home") return pathname === "/painel" || pathname.startsWith("/painel/orcamentos");
-  if (id === "pedidos") return pathname.startsWith("/painel/pedidos");
+const secondary: { href: string; label: string; id: NavId }[] = [
+  { href: "/painel/pedidos", label: "Pedidos", id: "pedidos" },
+  { href: "/painel/servicos", label: "Serviços", id: "servicos" },
+  { href: "/painel/relatorios", label: "Relatórios", id: "relatorios" },
+];
+
+const moreRoutes = ["/painel/mais", "/painel/plano", "/painel/conta", "/painel/pedidos", "/painel/servicos", "/painel/relatorios"];
+
+function isActive(pathname: string, id: NavId, desktop = false) {
+  if (id === "home") return pathname === "/painel";
   if (id === "clientes") return pathname.startsWith("/painel/clientes");
-  if (id === "pagina") return pathname.startsWith("/painel/empresa");
-  return pathname.startsWith("/painel/mais") || pathname.startsWith("/painel/plano");
+  if (id === "orcamentos") return pathname.startsWith("/painel/orcamentos");
+  if (id === "pagina") return pathname.startsWith("/painel/pagina") || pathname.startsWith("/painel/empresa");
+  if (id === "pedidos") return pathname.startsWith("/painel/pedidos");
+  if (id === "servicos") return pathname.startsWith("/painel/servicos");
+  if (id === "relatorios") return pathname.startsWith("/painel/relatorios");
+  // no desktop os itens de "Mais" têm entrada própria na lateral
+  const routes = desktop ? ["/painel/mais", "/painel/plano", "/painel/conta"] : moreRoutes;
+  return routes.some((route) => pathname.startsWith(route));
 }
 
-function Icon({ id, active }: { id: (typeof items)[number]["id"]; active: boolean }) {
-  const stroke = active ? "currentColor" : "currentColor";
+function Icon({ id }: { id: NavId }) {
   const common = {
     fill: "none",
-    stroke,
+    stroke: "currentColor",
     strokeWidth: 1.8,
     strokeLinecap: "round" as const,
     strokeLinejoin: "round" as const,
   };
-  if (id === "home") {
-    return (
-      <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
-        <path {...common} d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z" />
-      </svg>
-    );
-  }
-  if (id === "pedidos") {
-    return (
-      <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
-        <path {...common} d="M7 7h10M7 12h10M7 17h6" />
-        <rect {...common} x="4" y="3" width="16" height="18" rx="2" />
-      </svg>
-    );
-  }
-  if (id === "clientes") {
-    return (
-      <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
+  const paths: Record<NavId, React.ReactNode> = {
+    home: <path {...common} d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6H10v6H5a1 1 0 0 1-1-1z" />,
+    clientes: (
+      <>
         <circle {...common} cx="9" cy="8" r="3" />
         <path {...common} d="M4 19c.5-3 2.5-5 5-5s4.5 2 5 5" />
         <circle {...common} cx="17" cy="9" r="2.2" />
         <path {...common} d="M16.5 14.2c2 .4 3.5 2 3.8 4.3" />
-      </svg>
-    );
-  }
-  if (id === "pagina") {
-    return (
-      <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
-        <rect {...common} x="5" y="3" width="14" height="18" rx="2" />
-        <path {...common} d="M9 8h6M9 12h6M9 16h3" />
-      </svg>
-    );
-  }
+      </>
+    ),
+    orcamentos: (
+      <>
+        <path {...common} d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+        <path {...common} d="M14 3v5h5M9 13h6M9 17h4" />
+      </>
+    ),
+    pagina: (
+      <>
+        <rect {...common} x="3" y="4" width="18" height="16" rx="2" />
+        <path {...common} d="M3 9h18M7 13h4M7 16h7" />
+        <circle cx="6" cy="6.5" r=".9" fill="currentColor" />
+      </>
+    ),
+    pedidos: (
+      <>
+        <path {...common} d="M4 13h4l1.5 3h5L16 13h4" />
+        <path {...common} d="M5.5 6.5 4 13v5a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-5l-1.5-6.5A1 1 0 0 0 17.5 6h-11a1 1 0 0 0-1 .5z" />
+      </>
+    ),
+    servicos: (
+      <path {...common} d="M14.7 6.3a4 4 0 0 0-5.4 5.2l-5 5a1.7 1.7 0 0 0 2.4 2.4l5-5a4 4 0 0 0 5.2-5.4l-2.4 2.4-2.1-.6-.6-2.1z" />
+    ),
+    relatorios: <path {...common} d="M4 20V10M10 20V4M16 20v-7M22 20H2" />,
+    mais: (
+      <>
+        <circle cx="6" cy="12" r="1.6" fill="currentColor" />
+        <circle cx="12" cy="12" r="1.6" fill="currentColor" />
+        <circle cx="18" cy="12" r="1.6" fill="currentColor" />
+      </>
+    ),
+  };
   return (
     <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
-      <circle cx="6" cy="12" r="1.6" fill="currentColor" />
-      <circle cx="12" cy="12" r="1.6" fill="currentColor" />
-      <circle cx="18" cy="12" r="1.6" fill="currentColor" />
+      {paths[id]}
     </svg>
+  );
+}
+
+function Badge({ count }: { count: number }) {
+  if (count <= 0) return null;
+  return (
+    <span className="absolute -right-2.5 -top-1 min-w-4 rounded-full bg-gold px-1 text-center text-[10px] font-bold leading-4 text-ink">
+      {count > 9 ? "9+" : count}
+    </span>
+  );
+}
+
+// celular: Início · Clientes · [ORÇAMENTO] · Página · Mais
+const mobileLeft = primary.filter((item) => item.id === "home" || item.id === "clientes");
+const mobileRight = primary.filter((item) => item.id === "pagina" || item.id === "mais");
+
+function MobileItem({ item, active, badge }: { item: (typeof primary)[number]; active: boolean; badge?: number }) {
+  return (
+    <li className="min-w-0 flex-1">
+      <Link
+        href={item.href}
+        aria-current={active ? "page" : undefined}
+        className={`relative flex h-14 flex-col items-center justify-center gap-0.5 rounded-btn px-1 text-[11px] font-medium ${
+          active ? "text-text" : "text-text-soft"
+        }`}
+      >
+        {active ? <span className="absolute inset-x-5 top-0 h-0.5 rounded-full bg-gold" /> : null}
+        <span className="relative">
+          <Icon id={item.id} />
+          {badge ? <Badge count={badge} /> : null}
+        </span>
+        <span className="max-w-full truncate">{item.label}</span>
+      </Link>
+    </li>
+  );
+}
+
+/** Ação principal do app: botão central (preto, borda e brilho dourados, ícone oficial). */
+function BudgetButton({ active, raised }: { active: boolean; raised: boolean }) {
+  return (
+    <li className="flex w-[4.75rem] shrink-0 justify-center">
+      <Link
+        href="/painel/orcamentos/novo"
+        aria-label="Novo orçamento"
+        aria-current={active ? "page" : undefined}
+        className={`relative flex h-14 w-full flex-col items-center justify-center gap-0.5 text-[11px] font-semibold ${
+          active ? "text-text" : "text-text-soft"
+        }`}
+      >
+        {/* o círculo ocupa o lugar de um ícone (h-5): o rótulo fica na mesma linha dos outros itens */}
+        <span aria-hidden className="h-5 w-5" />
+        <span
+          className={`absolute left-1/2 flex -translate-x-1/2 items-center justify-center rounded-full border bg-ink transition-shadow ${
+            raised ? "top-[-1.875rem] h-[3.75rem] w-[3.75rem]" : "top-[-0.5rem] h-9 w-9"
+          } ${
+            active
+              ? "border-gold shadow-[0_0_0_3px_rgb(255_176_32/0.22),0_10px_26px_-6px_rgb(255_176_32/0.75)]"
+              : "border-gold/70 shadow-[0_0_0_2px_rgb(255_176_32/0.12),0_8px_22px_-8px_rgb(255_176_32/0.6)]"
+          }`}
+        >
+          <OrcahIcon className={raised ? "h-8 w-8" : "h-5 w-5"} />
+        </span>
+        <span>Orçamento</span>
+      </Link>
+    </li>
   );
 }
 
 export function PainelNav({ pedidosNovos }: { pedidosNovos: number }) {
   const pathname = usePathname();
+  const inBudgets = pathname.startsWith("/painel/orcamentos");
+  // no formulário de orçamento a barra de Total fica logo acima: o botão não sobe para não cobri-la
+  const raised = !(pathname.startsWith("/painel/orcamentos/") && pathname !== "/painel/orcamentos/");
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card pb-[env(safe-area-inset-bottom)] text-text-soft shadow-[0_-12px_32px_rgba(21,31,56,0.08)] md:inset-y-0 md:right-auto md:h-full md:w-56 md:border-r md:border-t-0 md:pb-4 md:shadow-none">
-      <div className="hidden items-center px-5 pb-6 pt-6 md:flex">
-        <Link href="/painel" aria-label="Orçah" className="flex items-center">
-          <OrcahLogo className="h-8 w-auto" />
-        </Link>
-      </div>
-      <ul className="flex items-stretch justify-around px-1 pt-1 md:flex-col md:gap-1 md:px-3">
-        {items.map((item) => {
-          const active = isActive(pathname, item.id);
-          return (
-            <li key={item.href} className="flex-1 md:flex-none">
-              <Link
-                href={item.href}
-                className={`relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-btn px-2 py-2 text-[11px] font-medium md:min-h-12 md:flex-row md:justify-start md:gap-3 md:px-3 md:text-sm ${
-                  active ? "bg-gold-wash text-text" : "text-text-soft"
-                }`}
-              >
-                {active ? (
-                  <span className="absolute inset-x-4 top-0 h-0.5 rounded-full bg-gold md:hidden" />
-                ) : null}
-                <span className="relative">
-                  <Icon id={item.id} active={active} />
-                  {item.id === "pedidos" && pedidosNovos > 0 ? (
-                    <span className="absolute -right-2.5 -top-1 min-w-4 rounded-full bg-gold px-1 text-center text-[10px] font-bold leading-4 text-ink">
-                      {pedidosNovos > 9 ? "9+" : pedidosNovos}
-                    </span>
-                  ) : null}
-                </span>
-                {item.label}
-              </Link>
-            </li>
-          );
-        })}
-      </ul>
-    </nav>
+    <>
+      <nav
+        aria-label="Menu do painel"
+        className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card pb-[env(safe-area-inset-bottom)] text-text-soft shadow-[0_-12px_32px_rgba(21,31,56,0.08)] md:hidden"
+      >
+        <ul className="mx-auto flex h-[4.25rem] max-w-lg items-center px-1">
+          {mobileLeft.map((item) => (
+            <MobileItem key={item.href} item={item} active={isActive(pathname, item.id)} />
+          ))}
+          <BudgetButton active={inBudgets} raised={raised} />
+          {mobileRight.map((item) => (
+            <MobileItem
+              key={item.href}
+              item={item}
+              active={isActive(pathname, item.id)}
+              badge={item.id === "mais" ? pedidosNovos : undefined}
+            />
+          ))}
+        </ul>
+      </nav>
+
+      <nav
+        aria-label="Menu do painel"
+        className="fixed inset-y-0 left-0 z-30 hidden h-full w-56 overflow-y-auto border-r border-line bg-card pb-4 text-text-soft md:block"
+      >
+        <div className="flex items-center px-5 pb-6 pt-6">
+          <Link href="/painel" aria-label="Orçah" className="flex items-center">
+            <OrcahLogo className="h-8 w-auto" />
+          </Link>
+        </div>
+        <ul className="flex flex-col gap-1 px-3">
+          {primary.map((item) => {
+            const active = isActive(pathname, item.id, true);
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  aria-current={active ? "page" : undefined}
+                  className={`flex min-h-12 items-center gap-3 rounded-btn px-3 text-sm font-medium ${
+                    active ? "bg-gold-wash text-text" : "text-text-soft"
+                  }`}
+                >
+                  <Icon id={item.id} />
+                  {item.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+        <p className="mt-5 px-6 text-[11px] font-medium uppercase tracking-[0.06em] text-text-soft">Negócio</p>
+        <ul className="flex flex-col gap-1 px-3 pt-2">
+          {secondary.map((item) => {
+            const active = isActive(pathname, item.id, true);
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  className={`flex min-h-12 items-center gap-3 rounded-btn px-3 text-sm font-medium ${
+                    active ? "bg-gold-wash text-text" : "text-text-soft"
+                  }`}
+                >
+                  <span className="relative">
+                    <Icon id={item.id} />
+                    {item.id === "pedidos" ? <Badge count={pedidosNovos} /> : null}
+                  </span>
+                  {item.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </nav>
+    </>
   );
 }

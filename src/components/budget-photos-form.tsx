@@ -45,7 +45,7 @@ export function BudgetPhotosForm({
       form.reset();
       router.refresh();
     } catch {
-      setError("Falha de conexão.");
+      setError("Falha de conexão. Tente de novo.");
     } finally {
       setLoading(false);
     }
@@ -72,6 +72,7 @@ export function BudgetPhotosForm({
           <input
             name="caption"
             list={`captions-${budgetId}`}
+            aria-label="Subtítulo da foto"
             placeholder="Subtítulo da foto"
             className="rounded-btn border border-line px-4 py-3"
           />

@@ -101,12 +101,48 @@ model User {
   email        String   @unique @db.VarChar(180)
   passwordHash String   @map("password_hash") @db.VarChar(255)
   phone        String?  @db.VarChar(20)
+  // sessões emitidas antes desta data deixam de valer (troca de senha)
+  passwordChangedAt DateTime? @map("password_changed_at")
+  // null = e-mail ainda não confirmado (não entra no painel)
+  emailVerifiedAt   DateTime? @map("email_verified_at")
+  // só muda por processo interno (migration/banco); o cadastro público sempre cria USER
+  role              UserRole  @default(USER)
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  company Company?
+  company                 Company?
+  passwordResetTokens     PasswordResetToken[]
+  emailVerificationTokens EmailVerificationToken[]
 
   @@map("users")
+}
+
+model PasswordResetToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  tokenHash String    @unique @map("token_hash") @db.Char(64)
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("password_reset_tokens")
+}
+
+model AuthAttempt {
+  id            Int      @id @default(autoincrement())
+  purpose       String   @db.VarChar(40)
+  email         String   @db.VarChar(180)
+  requestIpHash String?  @map("request_ip_hash") @db.Char(64)
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@index([purpose, email, createdAt])
+  @@index([purpose, requestIpHash, createdAt])
+  @@index([createdAt])
+  @@map("auth_attempts")
 }
 
 model Company {
@@ -148,6 +184,8 @@ model Company {
   photos           CompanyPhoto[]
   quoteRequests    QuoteRequest[]
   subscription     Subscription?
+  pageDailyStats   CompanyPageDailyStat[]
+  assistedSetups   AssistedSetupRequest[]
 
   @@index([cityId])
   @@index([stateId])
@@ -191,6 +229,12 @@ model Service {
   unit         String   @default("un") @db.VarChar(20)
   defaultPrice Decimal  @default(0) @map("default_price") @db.Decimal(12, 2)
   active       Boolean  @default(true)
+  // página pública
+  category     String?  @db.VarChar(80)
+  imagePath    String?  @map("image_path") @db.VarChar(500)
+  featured     Boolean  @default(false)
+  showPrice    Boolean  @default(false) @map("show_price")
+  sortOrder    Int      @default(0) @map("sort_order")
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
@@ -385,4 +429,66 @@ model Subscription {
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@map("subscriptions")
+}
+
+enum AssistedSetupStatus {
+  requested
+  contacted
+  in_progress
+  completed
+  canceled
+}
+
+/// Acessos da página pública agregados por dia (sem IP, sem identificar pessoa).
+model CompanyPageDailyStat {
+  id             Int      @id @default(autoincrement())
+  companyId      Int      @map("company_id")
+  date           DateTime @db.Date
+  views          Int      @default(0)
+  whatsappClicks Int      @default(0) @map("whatsapp_clicks")
+  quoteClicks    Int      @default(0) @map("quote_clicks")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, date])
+  @@map("company_page_daily_stats")
+}
+
+/// Pedido de configuração assistida da página ("façam pra mim"). Sem cobrança por enquanto.
+model AssistedSetupRequest {
+  id        Int                 @id @default(autoincrement())
+  companyId Int                 @map("company_id")
+  status    AssistedSetupStatus @default(requested)
+  notes     String?             @db.Text
+  createdAt DateTime            @default(now()) @map("created_at")
+  updatedAt DateTime            @updatedAt @map("updated_at")
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, status])
+  @@index([status, createdAt])
+  @@map("assisted_setup_requests")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+/// Link de confirmação de e-mail. Guarda só o SHA-256 do token; uso único.
+model EmailVerificationToken {
+  id        Int       @id @default(autoincrement())
+  userId    Int       @map("user_id")
+  tokenHash String    @unique @map("token_hash") @db.Char(64)
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("email_verification_tokens")
 }

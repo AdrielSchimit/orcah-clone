@@ -1,3 +1,5 @@
+import type { Prisma } from "@prisma/client";
+
 export type CycleStatus =
   | "draft"
   | "sent"
@@ -45,3 +47,40 @@ export function isRepublishMetadata(metadata: unknown): metadata is {
       (metadata as { republished?: unknown }).republished === true,
   );
 }
+
+type RepublishDb = Pick<Prisma.TransactionClient, "budget" | "budgetVersion">;
+
+/**
+ * Dentro da transação da edição: tira o orçamento de "waiting" só se ele ainda estiver lá
+ * (trava a linha; um segundo salvar simultâneo, ou uma resposta do cliente no meio, perde)
+ * e guarda a versão anterior. Devolve o número da versão, ou null se já não estava em "waiting".
+ */
+export async function claimRepublish(
+  tx: RepublishDb,
+  existing: { id: number; subtotal: Prisma.Decimal | string; discount: Prisma.Decimal | string; total: Prisma.Decimal | string; notes: string | null },
+) {
+  const claimed = await tx.budget.updateMany({
+    where: { id: existing.id, status: "waiting" },
+    data: { status: "sent" },
+  });
+  if (claimed.count === 0) return null;
+  const last = await tx.budgetVersion.findFirst({
+    where: { budgetId: existing.id },
+    orderBy: { version: "desc" },
+    select: { version: true },
+  });
+  const version = nextBudgetVersion(last?.version);
+  await tx.budgetVersion.create({
+    data: {
+      budgetId: existing.id,
+      version,
+      subtotal: existing.subtotal,
+      discount: existing.discount,
+      total: existing.total,
+      notes: existing.notes,
+    },
+  });
+  return version;
+}
+
+export class BudgetEditConflict extends Error {}

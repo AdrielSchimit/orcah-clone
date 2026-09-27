@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isPreviewAdmin } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
 import { asaasConfigured, clientIp, createCardSubscription, findOrCreateAsaasCustomer } from "@/lib/asaas";
 import { markPaid } from "@/lib/asaas-billing";
 import { requireCompany } from "@/lib/company";
@@ -10,7 +10,7 @@ import { ensureSubscription } from "@/lib/plan";
 export async function POST(request: Request) {
   const auth = await requireCompany();
   if ("error" in auth) return auth.error;
-  if (isPreviewAdmin(auth.user)) {
+  if (isAdmin(auth.user)) {
     return NextResponse.json({ error: "Esta conta não tem cobrança." }, { status: 400 });
   }
   if (!asaasConfigured()) {

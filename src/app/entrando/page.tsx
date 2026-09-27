@@ -10,15 +10,16 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
-export default async function EntrandoPage() {
+export default async function EntrandoPage({ searchParams }: { searchParams: Promise<{ bemvindo?: string }> }) {
   const user = await getSessionUser();
   if (!user) redirect(appUrl("/login"));
   if (!user.company) redirect(appUrl("/onboarding"));
 
   const host = (await headers()).get("host") ?? "";
+  const suffix = (await searchParams).bemvindo === "1" ? "?bemvindo=1" : "";
   if (!sessionCookieIsShared() || tenantSlugFromHost(host) === user.company.slug) {
-    redirect("/painel");
+    redirect(`/painel${suffix}`);
   }
 
-  return <StoreGate href={`${companyPublicUrl(user.company.slug)}/painel`} />;
+  return <StoreGate href={`${companyPublicUrl(user.company.slug)}/painel${suffix}`} />;
 }

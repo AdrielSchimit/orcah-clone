@@ -1,6 +1,6 @@
 import { AdminRamoSwitcher } from "@/components/admin-ramo-switcher";
 import { BudgetForm } from "@/components/budget-form";
-import { isPreviewAdmin } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
 import { ramoLabel } from "@/lib/company-display";
 import { companyCustomerWhere, parseId } from "@/lib/crm";
 import { prisma } from "@/lib/db";
@@ -24,7 +24,7 @@ export default async function NovoOrcamentoPage({
       })
     : null;
   const template = companyTemplate(user.company);
-  const admin = isPreviewAdmin(user);
+  const admin = isAdmin(user);
 
   return (
     <>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireActivePlan } from "@/lib/plan";
 import { prisma } from "@/lib/db";
+import { removeCompanyImage } from "@/lib/storage";
 import { removeUpload } from "@/lib/upload";
 
 export async function DELETE(
@@ -23,6 +24,8 @@ export async function DELETE(
   }
 
   await prisma.budgetPhoto.delete({ where: { id: photo.id } });
-  await removeUpload(photo.path);
+  // fotos novas ficam no storage; as antigas, em /uploads/orcamentos/...
+  const removed = await removeCompanyImage(auth.company.id, photo.path).catch(() => false);
+  if (!removed) await removeUpload(photo.path);
   return NextResponse.json({ ok: true });
 }

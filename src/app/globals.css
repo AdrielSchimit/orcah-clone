@@ -181,3 +181,17 @@ textarea:focus,
 .bg-ink-tile :focus-visible {
   outline-color: currentColor;
 }
+
+/* dourado como detalhe: borda fina + brilho baixo ("neon premium", nunca RGB) */
+@utility gold-glow {
+  box-shadow:
+    0 0 0 1px rgb(255 176 32 / 0.55),
+    0 6px 22px -8px rgb(255 176 32 / 0.55);
+}
+
+@utility gold-edge {
+  border-color: rgb(255 176 32 / 0.45);
+  box-shadow:
+    0 0 0 1px rgb(255 176 32 / 0.18),
+    0 10px 30px -14px rgb(255 176 32 / 0.5);
+}

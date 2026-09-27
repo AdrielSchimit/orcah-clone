@@ -22,6 +22,11 @@ export function moneyString(value: number) {
   return roundMoney(value).toFixed(2);
 }
 
+/** Quantidade para leitura: 380 · 12,5 · 1,25 (sem ".00"). */
+export function formatQuantity(value: number | string) {
+  return Number(value).toLocaleString("pt-BR", { maximumFractionDigits: 2 });
+}
+
 export function formatBRL(value: number | string) {
   return Number(value).toLocaleString("pt-BR", {
     style: "currency",

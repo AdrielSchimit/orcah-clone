@@ -15,7 +15,7 @@ export function StatusPill({
           : "bg-paper text-text-soft";
 
   return (
-    <span className={`inline-flex rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${className}`}>
+    <span className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-semibold ${className}`}>
       {children}
     </span>
   );

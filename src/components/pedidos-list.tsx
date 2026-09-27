@@ -43,8 +43,17 @@ export function PedidosList({ pedidos }: { pedidos: Pedido[] }) {
   if (pedidos.length === 0) {
     return (
       <>
-        <p className="text-sm text-text-soft">Nenhum pedido ainda. Compartilhe o link da sua página.</p>
-        <MascoteVazio pose="pensando">Quando chegar um pedido, eu te aviso por aqui!</MascoteVazio>
+        <p className="text-sm text-text-soft">Ainda não chegou nenhum pedido por aqui. Compartilhe sua página para começar.</p>
+        <MascoteVazio
+          pose="pensando"
+          action={
+            <a href="/painel/pagina" className="text-gold-deep underline underline-offset-4">
+              Compartilhar minha página
+            </a>
+          }
+        >
+          Quando chegar um pedido, eu te aviso por aqui!
+        </MascoteVazio>
       </>
     );
   }

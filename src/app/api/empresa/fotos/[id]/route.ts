@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireActivePlan } from "@/lib/plan";
 import { prisma } from "@/lib/db";
-import { removeUpload } from "@/lib/upload";
+import { removeCompanyImage } from "@/lib/storage";
 
 export async function DELETE(
   _request: Request,
@@ -11,6 +11,9 @@ export async function DELETE(
   if ("error" in auth) return auth.error;
 
   const id = Number((await context.params).id);
+  if (!Number.isInteger(id) || id <= 0) {
+    return NextResponse.json({ error: "Foto não encontrada." }, { status: 404 });
+  }
   const photo = await prisma.companyPhoto.findFirst({
     where: { id, companyId: auth.company.id },
   });
@@ -19,6 +22,6 @@ export async function DELETE(
   }
 
   await prisma.companyPhoto.delete({ where: { id: photo.id } });
-  await removeUpload(photo.path);
+  await removeCompanyImage(auth.company.id, photo.path).catch(() => false);
   return NextResponse.json({ ok: true });
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BudgetListFilters } from "@/components/budget-list-filters";
+import { MascoteVazio } from "@/components/mascote";
 import { StatusPill, budgetStatusTone } from "@/components/status-pill";
 import { budgetStatusLabel } from "@/lib/budget-status";
 import {
@@ -58,16 +59,7 @@ export default async function OrcamentosPage({
       </div>
 
       {companyTotal === 0 ? (
-        <div className="rounded-box border border-line bg-card p-6 text-center">
-          <p className="font-semibold">Nenhum orçamento ainda.</p>
-          <p className="mt-1 text-sm text-text-soft">Crie seu primeiro orçamento e acompanhe tudo por aqui.</p>
-          <Link
-            href="/painel/orcamentos/novo"
-            className="mt-4 inline-flex min-h-12 items-center rounded-btn bg-gold px-5 font-semibold text-ink hover:bg-gold-press"
-          >
-            Criar orçamento
-          </Link>
-        </div>
+        <MascoteVazio pose="pensando">Nenhum Orçamento por aqui ainda!!</MascoteVazio>
       ) : (
         <>
           <BudgetListFilters filters={filters} statusLabels={budgetStatusLabel} />

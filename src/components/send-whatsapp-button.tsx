@@ -18,7 +18,7 @@ export function SendWhatsAppButton({ budgetId }: { budgetId: number }) {
       }
       window.location.href = data.href;
     } catch {
-      setError("Falha de conexão.");
+      setError("Falha de conexão. Tente de novo.");
     } finally {
       setLoading(false);
     }

@@ -37,3 +37,13 @@ export function websiteUrl(value?: string | null) {
   if (raw.startsWith("http")) return raw;
   return `https://${raw}`;
 }
+
+export function facebookUrl(value?: string | null) {
+  if (!value) return "";
+  const raw = value.trim();
+  if (!raw) return "";
+  if (/^https?:\/\//i.test(raw)) return raw;
+  // quem digita "facebook.com/pagina" não pode virar facebook.com/facebook.com/pagina
+  if (/^(www\.|m\.)?(facebook|fb)\.com\//i.test(raw)) return `https://${raw}`;
+  return `https://facebook.com/${raw.replace(/^@/, "")}`;
+}

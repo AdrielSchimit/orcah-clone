@@ -86,7 +86,7 @@ export function CustomerForm({ customer }: { customer?: EditableCustomer } = {})
       setMore(false);
       router.refresh();
     } catch {
-      setError("Falha de conexão.");
+      setError("Falha de conexão. Tente de novo.");
     } finally {
       setLoading(false);
     }

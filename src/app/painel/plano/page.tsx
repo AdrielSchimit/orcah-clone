@@ -1,5 +1,5 @@
 import { PlanCheckout } from "@/components/plan-checkout";
-import { isPreviewAdmin } from "@/lib/admin";
+import { isAdmin } from "@/lib/admin";
 import { asaasConfigured } from "@/lib/asaas";
 import { PLAN_PRICE_LABEL } from "@/lib/plan-constants";
 import { ensureSubscription, planView } from "@/lib/plan";
@@ -9,7 +9,7 @@ export default async function PlanoPage() {
   const user = await getSessionUser();
   if (!user?.company) return null;
 
-  const admin = isPreviewAdmin(user);
+  const admin = isAdmin(user);
   const subscription = await ensureSubscription(user.company.id);
   const plan = planView(subscription, { isAdmin: admin });
 

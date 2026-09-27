@@ -2,7 +2,9 @@ import { NextResponse } from "next/server";
 import { requireActivePlan } from "@/lib/plan";
 import { requireCompany } from "@/lib/company";
 import { prisma } from "@/lib/db";
-import { saveUpload } from "@/lib/upload";
+import { UploadError, uploadCompanyImage } from "@/lib/storage";
+
+const GALLERY_LIMIT = 12;
 
 export async function GET() {
   const auth = await requireCompany();
@@ -22,8 +24,8 @@ export async function POST(request: Request) {
   const count = await prisma.companyPhoto.count({
     where: { companyId: auth.company.id, active: true },
   });
-  if (count >= 12) {
-    return NextResponse.json({ error: "Limite de 12 fotos na galeria." }, { status: 400 });
+  if (count >= GALLERY_LIMIT) {
+    return NextResponse.json({ error: `Limite de ${GALLERY_LIMIT} fotos na galeria.` }, { status: 400 });
   }
 
   const form = await request.formData();
@@ -33,21 +35,20 @@ export async function POST(request: Request) {
   }
 
   try {
-    const path = await saveUpload(file, `empresa/${auth.company.id}`);
+    const path = await uploadCompanyImage({ companyId: auth.company.id, kind: "gallery", file });
     const photo = await prisma.companyPhoto.create({
       data: {
         companyId: auth.company.id,
         path,
-        title: String(form.get("title") ?? "").trim() || null,
-        description: String(form.get("description") ?? "").trim() || null,
+        title: String(form.get("title") ?? "").trim().slice(0, 120) || null,
+        description: String(form.get("description") ?? "").trim().slice(0, 255) || null,
         sortOrder: count,
       },
     });
     return NextResponse.json({ ok: true, photo });
   } catch (error) {
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Não foi possível enviar a foto." },
-      { status: 400 },
-    );
+    if (error instanceof UploadError) return NextResponse.json({ error: error.message }, { status: 400 });
+    console.error("[galeria] falha no upload");
+    return NextResponse.json({ error: "Não foi possível enviar a foto." }, { status: 500 });
   }
 }

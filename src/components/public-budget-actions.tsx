@@ -51,7 +51,7 @@ export function PublicBudgetActions({
       setMessage("");
       setReason("");
     } catch {
-      setError("Falha de conexão.");
+      setError("Falha de conexão. Tente de novo.");
     } finally {
       setLoading(false);
     }

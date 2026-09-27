@@ -10,6 +10,7 @@ import {
   type PaymentMethod,
 } from "@/lib/commercial";
 import { formatBRL, parseMoney } from "@/lib/money";
+import { formatPhoneBR } from "@/lib/phone";
 import type { BudgetExtras, BudgetFormLayout, CatalogItem, TemplateConfig } from "@/lib/templates";
 import { defaultFormLayout } from "@/lib/templates";
 
@@ -154,8 +155,11 @@ export function BudgetForm({
   budgetId,
   defaults,
   template,
+  submitLabel,
 }: {
   budgetId?: number;
+  /** texto do botão salvar (ex.: "Salvar nova versão" no pedido de alteração) */
+  submitLabel?: string;
   defaults?: BudgetFormValues;
   template: TemplateConfig;
 }) {
@@ -389,15 +393,15 @@ export function BudgetForm({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
-      const data = (await response.json()) as { error?: string; budget?: { id: number } };
+      const data = (await response.json().catch(() => ({}))) as { error?: string; budget?: { id: number } };
       if (!response.ok || !data.budget) {
         setError(data.error ?? "Não foi possível salvar o orçamento.");
         return;
       }
       router.push(`/painel/orcamentos/${data.budget.id}`);
       router.refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Falha de conexão.");
+    } catch {
+      setError("Não foi possível salvar. Confira a internet e tente de novo.");
     } finally {
       setLoading(false);
     }
@@ -420,6 +424,7 @@ export function BudgetForm({
                 setCustomerLabel("");
                 setCustomerId("");
               }}
+              aria-label="Buscar cliente"
               placeholder="Buscar por nome ou telefone"
               className={fieldClass}
             />
@@ -431,13 +436,13 @@ export function BudgetForm({
                       type="button"
                       onClick={() => {
                         setCustomerId(customer.id);
-                        setCustomerLabel(`${customer.name} · ${customer.phone}`);
+                        setCustomerLabel(`${customer.name} · ${formatPhoneBR(customer.phone)}`);
                         setQuery("");
                       }}
                       className="w-full px-3 py-2 text-left text-sm hover:bg-paper"
                     >
                       <span className="block font-medium">{customer.name}</span>
-                      <span className="text-text-soft">{customer.phone}</span>
+                      <span className="text-text-soft">{formatPhoneBR(customer.phone)}</span>
                     </button>
                   </li>
                 ))}
@@ -451,7 +456,7 @@ export function BudgetForm({
                 setCustomerId("");
                 setCustomerLabel("");
               }}
-              className="mt-3 text-sm font-medium text-gold-deep"
+              className="mt-2 inline-flex min-h-10 items-center text-sm font-medium text-gold-deep"
             >
               + Novo cliente
             </button>
@@ -837,7 +842,7 @@ export function BudgetForm({
                     key={suggestion.name}
                     type="button"
                     onClick={() => addSuggestion(suggestion)}
-                    className="rounded-full bg-gold-wash px-3 py-1.5 text-xs font-medium text-text"
+                    className="min-h-9 rounded-full bg-gold-wash px-3 py-1.5 text-xs font-medium text-text"
                   >
                     {suggestion.name}
                     {suggestion.unitPrice && money(suggestion.unitPrice) > 0
@@ -1221,7 +1226,7 @@ export function BudgetForm({
                     <button
                       type="button"
                       onClick={() => saveToCatalog(index)}
-                      className="text-gold-deep"
+                      className="inline-flex min-h-9 items-center text-gold-deep"
                     >
                       {savingCatalogAt === index ? "Salvando…" : "Salvar no catálogo"}
                     </button>
@@ -1292,6 +1297,7 @@ export function BudgetForm({
             value={discountValue}
             onChange={(event) => setDiscountValue(event.target.value)}
             inputMode="decimal"
+            aria-label={discountType === "percent" ? "Desconto em %" : "Desconto em reais"}
             placeholder={discountType === "percent" ? "10" : "0,00"}
             className={`${fieldClass} mt-3 bg-card`}
           />
@@ -1331,7 +1337,7 @@ export function BudgetForm({
                 key={option.value}
                 type="button"
                 onClick={() => toggleAcceptedPayment(option.value)}
-                className={`rounded-full border px-3 py-1.5 text-xs ${
+                className={`min-h-9 rounded-full border px-3 py-1.5 text-xs ${
                   acceptedPaymentMethods.includes(option.value)
                     ? "border-gold bg-gold-wash text-text"
                     : "border-line text-text-soft"
@@ -1378,6 +1384,7 @@ export function BudgetForm({
                 value={downPaymentValue}
                 onChange={(event) => setDownPaymentValue(event.target.value)}
                 inputMode="decimal"
+                aria-label={downPaymentType === "percent" ? "Entrada em %" : "Entrada em reais"}
                 placeholder={downPaymentType === "percent" ? "30" : "500,00"}
                 className={fieldClass}
               />
@@ -1446,6 +1453,7 @@ export function BudgetForm({
               <input
                 type="date"
                 name="validityDate"
+                aria-label="Válido até"
                 value={validityDate}
                 onChange={(event) => setValidityDate(event.target.value)}
                 className={`${fieldClass} mt-2`}
@@ -1493,7 +1501,7 @@ export function BudgetForm({
             disabled={loading || Boolean(discountError || downPaymentError)}
             className="min-h-12 shrink-0 rounded-btn bg-gold px-5 text-sm font-semibold text-ink hover:bg-gold-press disabled:opacity-60 md:px-6 md:text-base"
           >
-            {loading ? "Salvando…" : budgetId ? "Salvar alterações" : "Salvar orçamento"}
+            {loading ? "Salvando…" : submitLabel ?? (budgetId ? "Salvar alterações" : "Salvar orçamento")}
           </button>
         </div>
       </div>
