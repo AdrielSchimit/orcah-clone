@@ -10,6 +10,7 @@
     "lint": "eslint",
     "db:migrate": "prisma migrate dev",
     "db:seed": "prisma db seed",
+    "catalog:ramos": "tsx scripts/export-ramo-catalog.ts",
     "db:seed-demo": "tsx prisma/seed-demo.ts",
     "db:studio": "prisma studio",
     "typecheck": "tsc --noEmit",

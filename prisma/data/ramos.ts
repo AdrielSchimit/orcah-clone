@@ -7,7 +7,7 @@ export type RamoSeed = {
 
 export const ramos: RamoSeed[] = [
   { name: "Pedreiro", slug: "pedreiro", templateKey: "equipe-obra", aliases: ["alvenaria", "obra", "reforma"] },
-  { name: "Equipe de obra", slug: "equipe-obra", templateKey: "equipe-obra", aliases: ["pedreiro", "reforma"] },
+  { name: "Equipe de obra", slug: "equipe-obra", templateKey: "equipe-obra", aliases: ["reforma"] },
   { name: "Mestre de obras", slug: "mestre-de-obras", templateKey: "equipe-obra", aliases: ["encarregado", "fiscal de obra"] },
   { name: "Construtora", slug: "construtora", templateKey: "construtora", aliases: ["construtor", "construção"] },
   { name: "Empreiteira", slug: "empreiteira", templateKey: "construtora", aliases: ["empreiteiro"] },
@@ -31,7 +31,7 @@ export const ramos: RamoSeed[] = [
     name: "Técnico de ar-condicionado",
     slug: "ar-condicionado",
     templateKey: "oficina-tecnico",
-    aliases: ["climatização", "split", "AC", "refrigeração", "ar condicionado"],
+    aliases: ["climatização", "split", "AC", "ar condicionado"],
   },
   { name: "Gás", slug: "gas", templateKey: "equipe-obra", aliases: ["gás encanado", "fogão", "aquecedor a gás"] },
   {
@@ -51,7 +51,7 @@ export const ramos: RamoSeed[] = [
   { name: "Antenista", slug: "antenista", templateKey: "oficina-tecnico", aliases: ["antena", "TV digital", "parabólica"] },
   { name: "Redes e internet", slug: "redes", templateKey: "oficina-tecnico", aliases: ["cabeamento", "Wi-Fi", "wifi", "rack"] },
   { name: "Irrigação", slug: "irrigacao", templateKey: "equipe-obra", aliases: ["aspersor", "gotejo"] },
-  { name: "Pintor", slug: "pintor", templateKey: "acabamento-visual", aliases: ["pintura", "tinta", "textura"] },
+  { name: "Pintor", slug: "pintor", templateKey: "acabamento-visual", aliases: ["pintura", "tinta"] },
   { name: "Azulejista", slug: "azulejista", templateKey: "revestimento", aliases: ["porcelanato", "cerâmica", "pastilha", "piso"] },
   {
     name: "Impermeabilizador",
@@ -83,7 +83,7 @@ export const ramos: RamoSeed[] = [
     aliases: ["computador", "notebook", "TI", "formatação"],
   },
   { name: "Assistência técnica", slug: "assistencia-tecnica", templateKey: "oficina-tecnico", aliases: ["conserto", "aparelho"] },
-  { name: "Técnico de celular", slug: "celular", templateKey: "oficina-tecnico", aliases: ["smartphone", "tela", "iPhone"] },
+  { name: "Técnico de celular", slug: "celular", templateKey: "oficina-tecnico", aliases: ["smartphone", "troca de tela", "iPhone"] },
   {
     name: "Técnico de eletrodomésticos",
     slug: "eletrodomesticos",

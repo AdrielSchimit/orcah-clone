@@ -42,7 +42,7 @@ Nome na tela = o que a pessoa fala no Brasil. Alias (ex.: hidráulico) entra na 
 | Nome | Slug | Molde | Busca também |
 | --- | --- | --- | --- |
 | Pedreiro | `pedreiro` | `equipe-obra` | alvenaria, obra, reforma |
-| Equipe de obra | `equipe-obra` | `equipe-obra` | pedreiro, reforma |
+| Equipe de obra | `equipe-obra` | `equipe-obra` | reforma |
 | Mestre de obras | `mestre-de-obras` | `equipe-obra` | encarregado, fiscal de obra |
 | Construtora | `construtora` | `construtora` | construtor, construção |
 | Empreiteira | `empreiteira` | `construtora` | empreiteiro |
@@ -64,7 +64,7 @@ Nome na tela = o que a pessoa fala no Brasil. Alias (ex.: hidráulico) entra na 
 | Encanador / hidráulico | `encanador` | `equipe-obra` | hidraulico, hidraulica, hidráulico, hidráulica, bombeiro hidráulico, cano, vazamento |
 | Gesseiro | `gesseiro` | `equipe-obra` | gesso, drywall, forro, sanca |
 | Instalador | `instalador` | `equipe-obra` | instalação em geral |
-| Técnico de ar-condicionado | `ar-condicionado` | `oficina-tecnico` | climatização, split, AC, refrigeração |
+| Técnico de ar-condicionado | `ar-condicionado` | `oficina-tecnico` | climatização, split, AC |
 | Gás | `gas` | `equipe-obra` | gás encanado, fogão, aquecedor a gás |
 | Energia solar | `energia-solar` | `oficina-tecnico` | painel solar, fotovoltaico, aquecedor solar |
 | Automação residencial | `automacao` | `oficina-tecnico` | casa inteligente, automação |
@@ -80,7 +80,7 @@ Nome na tela = o que a pessoa fala no Brasil. Alias (ex.: hidráulico) entra na 
 
 | Nome | Slug | Molde | Busca também |
 | --- | --- | --- | --- |
-| Pintor | `pintor` | `acabamento-visual` | pintura, tinta, textura |
+| Pintor | `pintor` | `acabamento-visual` | pintura, tinta |
 | Azulejista | `azulejista` | `revestimento` | porcelanato, cerâmica, pastilha, piso |
 | Impermeabilizador | `impermeabilizador` | `revestimento` | infiltração, manta, impermeabilização |
 | Aplicador de textura | `textura` | `acabamento-visual` | grafiato, textura, chapisco |
@@ -116,7 +116,7 @@ Nome na tela = o que a pessoa fala no Brasil. Alias (ex.: hidráulico) entra na 
 | --- | --- | --- | --- |
 | Técnico de informática | `informatica` | `oficina-tecnico` | computador, notebook, TI, formatação |
 | Assistência técnica | `assistencia-tecnica` | `oficina-tecnico` | conserto, aparelho |
-| Técnico de celular | `celular` | `oficina-tecnico` | smartphone, tela, iPhone |
+| Técnico de celular | `celular` | `oficina-tecnico` | smartphone, troca de tela, iPhone |
 | Técnico de eletrodomésticos | `eletrodomesticos` | `oficina-tecnico` | máquina, geladeira, fogão |
 | Mecânico | `mecanico` | `oficina-tecnico` | carro, oficina, revisão |
 | Funileiro | `funileiro` | `oficina-tecnico` | lataria, martelinho, funilaria |

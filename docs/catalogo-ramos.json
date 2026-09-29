@@ -1,0 +1,4371 @@
+{
+  "familias": [
+    {
+      "key": "equipe-obra",
+      "nome": "Equipe de obra",
+      "clienteVe": "Ambiente, mão de obra e material",
+      "ramos": [
+        "calceteiro",
+        "concretagem",
+        "demolicao",
+        "eletricista",
+        "encanador",
+        "equipe-obra",
+        "fossa",
+        "gas",
+        "gesseiro",
+        "instalador",
+        "irrigacao",
+        "isolamento",
+        "manutencao",
+        "manutencao-predial",
+        "marido-de-aluguel",
+        "mestre-de-obras",
+        "pavimentacao",
+        "pedreiro",
+        "telhadista"
+      ]
+    },
+    {
+      "key": "construtora",
+      "nome": "Construtora",
+      "clienteVe": "Etapas da obra, material e prazo",
+      "ramos": [
+        "construtora",
+        "empreiteira",
+        "poco-artesiano",
+        "terraplanagem"
+      ]
+    },
+    {
+      "key": "acabamento-visual",
+      "nome": "Acabamento visual",
+      "clienteVe": "Cor, demãos, área e fotos",
+      "ramos": [
+        "textura",
+        "decorador",
+        "papel-de-parede",
+        "pintor"
+      ]
+    },
+    {
+      "key": "revestimento",
+      "nome": "Revestimento",
+      "clienteVe": "Área em m², peça e base",
+      "ramos": [
+        "azulejista",
+        "impermeabilizador",
+        "piso-laminado",
+        "polimento-pisos"
+      ]
+    },
+    {
+      "key": "peca-sob-medida",
+      "nome": "Peça sob medida",
+      "clienteVe": "Medidas, material e ambiente",
+      "ramos": [
+        "carpinteiro",
+        "esquadrias",
+        "marceneiro",
+        "marmorista",
+        "montador-de-moveis",
+        "moveis-planejados",
+        "redes-protecao",
+        "serralheiro",
+        "soldador",
+        "tapeceiro",
+        "toldos",
+        "vidraceiro"
+      ]
+    },
+    {
+      "key": "oficina-tecnico",
+      "nome": "Oficina e técnico",
+      "clienteVe": "Diagnóstico, peça e serviço",
+      "ramos": [
+        "antenista",
+        "assistencia-tecnica",
+        "automacao",
+        "borracharia",
+        "chaveiro",
+        "desentupidor",
+        "energia-solar",
+        "funileiro",
+        "mecanico",
+        "pintor-automotivo",
+        "portao-automatico",
+        "redes",
+        "refrigeracao",
+        "seguranca-eletronica",
+        "ar-condicionado",
+        "celular",
+        "eletrodomesticos",
+        "informatica"
+      ]
+    },
+    {
+      "key": "projeto",
+      "nome": "Projeto",
+      "clienteVe": "Pacote, entregas e prazo",
+      "ramos": [
+        "agencia",
+        "arquiteto",
+        "designer",
+        "interiores",
+        "engenheiro-civil",
+        "fotografo",
+        "paisagista",
+        "social-media",
+        "topografo",
+        "videomaker"
+      ]
+    },
+    {
+      "key": "recorrente",
+      "nome": "Recorrente",
+      "clienteVe": "Frequência e pacote",
+      "ramos": [
+        "dedetizador",
+        "diarista",
+        "higienizacao",
+        "jardineiro",
+        "limpeza",
+        "limpeza-pos-obra",
+        "piscineiro"
+      ]
+    },
+    {
+      "key": "base",
+      "nome": "Base",
+      "clienteVe": "Lista de serviços e total",
+      "ramos": [
+        "eventos",
+        "mudancas",
+        "outro",
+        "personal-organizer",
+        "sonorizacao"
+      ]
+    }
+  ],
+  "duplicidades": [
+    {
+      "termo": "ambientacao",
+      "slugs": [
+        "decorador",
+        "interiores"
+      ],
+      "tipo": "alias-compartilhado"
+    },
+    {
+      "termo": "cobertura",
+      "slugs": [
+        "telhadista",
+        "toldos"
+      ],
+      "tipo": "alias-compartilhado"
+    },
+    {
+      "termo": "fogao",
+      "slugs": [
+        "eletrodomesticos",
+        "gas"
+      ],
+      "tipo": "alias-compartilhado"
+    },
+    {
+      "termo": "janela",
+      "slugs": [
+        "esquadrias",
+        "redes-protecao"
+      ],
+      "tipo": "alias-compartilhado"
+    },
+    {
+      "termo": "madeira",
+      "slugs": [
+        "carpinteiro",
+        "marceneiro"
+      ],
+      "tipo": "alias-compartilhado"
+    },
+    {
+      "termo": "reforma",
+      "slugs": [
+        "equipe-obra",
+        "pedreiro"
+      ],
+      "tipo": "alias-compartilhado"
+    },
+    {
+      "termo": "sacada",
+      "slugs": [
+        "redes-protecao",
+        "vidraceiro"
+      ],
+      "tipo": "alias-compartilhado"
+    },
+    {
+      "termo": "sofa",
+      "slugs": [
+        "higienizacao",
+        "tapeceiro"
+      ],
+      "tipo": "alias-compartilhado"
+    }
+  ],
+  "excecoes": {
+    "outro": "Ofício fora da lista. O prestador usa o nome que digitou.",
+    "mudancas": "Frete não cabe em obra nem em oficina.",
+    "eventos": "Pacote de evento ainda sem família de projeto.",
+    "sonorizacao": "Som e palco ainda sem família própria.",
+    "personal-organizer": "Organização ainda sem família recorrente."
+  },
+  "casosPrincipais": {
+    "equipe-obra": "pedreiro",
+    "construtora": "construtora",
+    "acabamento-visual": "pintor",
+    "revestimento": "azulejista",
+    "peca-sob-medida": "marceneiro",
+    "oficina-tecnico": "informatica",
+    "projeto": "arquiteto",
+    "recorrente": "jardineiro",
+    "base": "outro"
+  },
+  "ramos": [
+    {
+      "nome": "Agência",
+      "slug": "agencia",
+      "familia": "projeto",
+      "familiaNome": "Projeto",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "un",
+        "serviço",
+        "h",
+        "pacote"
+      ],
+      "unidadePadrao": "un",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "un",
+          "regra": "Padrão un. Também aceita: un, serviço, h, pacote."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Antenista",
+      "slug": "antenista",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "unidade",
+        "ponto"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, unidade, ponto."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Aplicador de textura",
+      "slug": "textura",
+      "familia": "acabamento-visual",
+      "familiaNome": "Acabamento visual",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m²."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "A quantidade do item é a área em m²."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Arquiteto",
+      "slug": "arquiteto",
+      "familia": "projeto",
+      "familiaNome": "Projeto",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "projeto",
+        "m²",
+        "etapa",
+        "serviço"
+      ],
+      "unidadePadrao": "projeto",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "projeto",
+          "regra": "Padrão projeto. Também aceita: projeto, m², etapa, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Assistência técnica",
+      "slug": "assistencia-tecnica",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "unidade",
+        "peça"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, unidade, peça."
+        },
+        {
+          "campo": "equipment",
+          "obrigatorio": false,
+          "regra": "Equipamento, móvel ou veículo."
+        },
+        {
+          "campo": "brand",
+          "obrigatorio": false,
+          "regra": "Marca."
+        },
+        {
+          "campo": "model",
+          "obrigatorio": false,
+          "regra": "Modelo."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Automação residencial",
+      "slug": "automacao",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "unidade",
+        "ponto"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, unidade, ponto."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Azulejista",
+      "slug": "azulejista",
+      "familia": "revestimento",
+      "familiaNome": "Revestimento",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m²."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "A quantidade do item é a área em m²."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Borracharia",
+      "slug": "borracharia",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "unidade",
+        "pneu",
+        "jogo"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, unidade, pneu, jogo."
+        },
+        {
+          "campo": "equipment",
+          "obrigatorio": false,
+          "regra": "Equipamento, móvel ou veículo."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Calceteiro",
+      "slug": "calceteiro",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m²."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "A quantidade do item é a área em m²."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Carpinteiro",
+      "slug": "carpinteiro",
+      "familia": "peca-sob-medida",
+      "familiaNome": "Peça sob medida",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "peça",
+        "m²",
+        "m",
+        "serviço"
+      ],
+      "unidadePadrao": "peça",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "peça",
+          "regra": "Padrão peça. Também aceita: peça, m², m, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "O item aceita medidas."
+      ],
+      "duplicidades": [
+        "madeira"
+      ]
+    },
+    {
+      "nome": "Chaveiro",
+      "slug": "chaveiro",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "unidade",
+        "cópia"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, unidade, cópia."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Concretagem",
+      "slug": "concretagem",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m³",
+        "m²",
+        "metro",
+        "unidade",
+        "serviço"
+      ],
+      "unidadePadrao": "m³",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m³",
+          "regra": "Padrão m³. Também aceita: m³, m², metro, unidade, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Construtora",
+      "slug": "construtora",
+      "familia": "construtora",
+      "familiaNome": "Construtora",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "m²",
+        "m³",
+        "unidade",
+        "metro"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, m², m³, unidade, metro."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Decorador",
+      "slug": "decorador",
+      "familia": "acabamento-visual",
+      "familiaNome": "Acabamento visual",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "unidade",
+        "ambiente",
+        "h"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, unidade, ambiente, h."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": [
+        "ambientacao"
+      ]
+    },
+    {
+      "nome": "Dedetizador",
+      "slug": "dedetizador",
+      "familia": "recorrente",
+      "familiaNome": "Recorrente",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "m²",
+        "ambiente",
+        "unidade"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, m², ambiente, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": true,
+          "regra": "Endereço do serviço."
+        }
+      ],
+      "regras": [
+        "O item aceita área em m².",
+        "O endereço do serviço é obrigatório."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Demolição",
+      "slug": "demolicao",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²",
+        "m³",
+        "metro",
+        "unidade",
+        "serviço"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m², m³, metro, unidade, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Desentupidor",
+      "slug": "desentupidor",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "unidade"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Designer",
+      "slug": "designer",
+      "familia": "projeto",
+      "familiaNome": "Projeto",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "arte",
+        "peça",
+        "projeto",
+        "pacote"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, arte, peça, projeto, pacote."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Designer de interiores",
+      "slug": "interiores",
+      "familia": "projeto",
+      "familiaNome": "Projeto",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "projeto",
+        "ambiente",
+        "m²",
+        "produto",
+        "h"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, projeto, ambiente, m², produto, h."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "O item aceita área em m²."
+      ],
+      "duplicidades": [
+        "ambientacao"
+      ]
+    },
+    {
+      "nome": "Diarista",
+      "slug": "diarista",
+      "familia": "recorrente",
+      "familiaNome": "Recorrente",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "diária",
+        "serviço",
+        "ambiente"
+      ],
+      "unidadePadrao": "diária",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "diária",
+          "regra": "Padrão diária. Também aceita: diária, serviço, ambiente."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Eletricista",
+      "slug": "eletricista",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "unidade",
+        "ponto",
+        "metro"
+      ],
+      "unidadePadrao": "ponto",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "ponto",
+          "regra": "Padrão ponto. Também aceita: serviço, unidade, ponto, metro."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Empreiteira",
+      "slug": "empreiteira",
+      "familia": "construtora",
+      "familiaNome": "Construtora",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "m²",
+        "m³",
+        "diária",
+        "metro",
+        "unidade"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, m², m³, diária, metro, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Encanador / hidráulico",
+      "slug": "encanador",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "unidade",
+        "ponto",
+        "metro"
+      ],
+      "unidadePadrao": "ponto",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "ponto",
+          "regra": "Padrão ponto. Também aceita: serviço, unidade, ponto, metro."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Energia solar",
+      "slug": "energia-solar",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "sistema",
+        "kWp",
+        "painel",
+        "unidade",
+        "serviço"
+      ],
+      "unidadePadrao": "sistema",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "sistema",
+          "regra": "Padrão sistema. Também aceita: sistema, kWp, painel, unidade, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "O item aceita potência em kWp."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Engenheiro civil",
+      "slug": "engenheiro-civil",
+      "familia": "projeto",
+      "familiaNome": "Projeto",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "projeto",
+        "m²",
+        "serviço",
+        "laudo",
+        "ART"
+      ],
+      "unidadePadrao": "projeto",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "projeto",
+          "regra": "Padrão projeto. Também aceita: projeto, m², serviço, laudo, ART."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Equipe de obra",
+      "slug": "equipe-obra",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "diária",
+        "serviço",
+        "m²",
+        "m³",
+        "metro",
+        "unidade"
+      ],
+      "unidadePadrao": "diária",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "diária",
+          "regra": "Padrão diária. Também aceita: diária, serviço, m², m³, metro, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": [
+        "reforma"
+      ]
+    },
+    {
+      "nome": "Esquadrias",
+      "slug": "esquadrias",
+      "familia": "peca-sob-medida",
+      "familiaNome": "Peça sob medida",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "unidade",
+        "m²",
+        "metro"
+      ],
+      "unidadePadrao": "unidade",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "unidade",
+          "regra": "Padrão unidade. Também aceita: unidade, m², metro."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "O item aceita medidas."
+      ],
+      "duplicidades": [
+        "janela"
+      ]
+    },
+    {
+      "nome": "Eventos",
+      "slug": "eventos",
+      "familia": "base",
+      "familiaNome": "Base",
+      "moldeFino": true,
+      "excecao": "Pacote de evento ainda sem família de projeto.",
+      "unidades": [
+        "evento",
+        "pessoa",
+        "diária",
+        "pacote",
+        "unidade"
+      ],
+      "unidadePadrao": "pacote",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "pacote",
+          "regra": "Padrão pacote. Também aceita: evento, pessoa, diária, pacote, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        },
+        {
+          "campo": "eventDate",
+          "obrigatorio": false,
+          "regra": "Data do evento ou da visita."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Fossa e esgoto",
+      "slug": "fossa",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "m³",
+        "unidade",
+        "metro"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, m³, unidade, metro."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "O item aceita volume em m³."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Fotógrafo",
+      "slug": "fotografo",
+      "familia": "projeto",
+      "familiaNome": "Projeto",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "ensaio",
+        "evento",
+        "hora",
+        "pacote",
+        "diária"
+      ],
+      "unidadePadrao": "pacote",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "pacote",
+          "regra": "Padrão pacote. Também aceita: ensaio, evento, hora, pacote, diária."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        },
+        {
+          "campo": "eventDate",
+          "obrigatorio": false,
+          "regra": "Data do evento ou da visita."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Funileiro",
+      "slug": "funileiro",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "peça",
+        "unidade"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, peça, unidade."
+        },
+        {
+          "campo": "equipment",
+          "obrigatorio": false,
+          "regra": "Equipamento, móvel ou veículo."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Gás",
+      "slug": "gas",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "ponto",
+        "metro",
+        "unidade"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, ponto, metro, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": [
+        "fogao"
+      ]
+    },
+    {
+      "nome": "Gesseiro",
+      "slug": "gesseiro",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²",
+        "metro",
+        "unidade",
+        "serviço"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m², metro, unidade, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "A quantidade do item é a área em m²."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Higienização de estofados",
+      "slug": "higienizacao",
+      "familia": "recorrente",
+      "familiaNome": "Recorrente",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "peça",
+        "lugar",
+        "unidade",
+        "serviço"
+      ],
+      "unidadePadrao": "peça",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "peça",
+          "regra": "Padrão peça. Também aceita: peça, lugar, unidade, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": [
+        "sofa"
+      ]
+    },
+    {
+      "nome": "Impermeabilizador",
+      "slug": "impermeabilizador",
+      "familia": "revestimento",
+      "familiaNome": "Revestimento",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²",
+        "metro",
+        "unidade",
+        "serviço"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m², metro, unidade, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "A quantidade do item é a área em m²."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Instalador",
+      "slug": "instalador",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "unidade",
+        "ponto",
+        "hora"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, unidade, ponto, hora."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Irrigação",
+      "slug": "irrigacao",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "ponto",
+        "metro",
+        "m²",
+        "unidade",
+        "serviço"
+      ],
+      "unidadePadrao": "ponto",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "ponto",
+          "regra": "Padrão ponto. Também aceita: ponto, metro, m², unidade, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Isolamento térmico e acústico",
+      "slug": "isolamento",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²",
+        "metro",
+        "unidade",
+        "serviço"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m², metro, unidade, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "A quantidade do item é a área em m²."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Jardineiro",
+      "slug": "jardineiro",
+      "familia": "recorrente",
+      "familiaNome": "Recorrente",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "diária",
+        "serviço",
+        "m²",
+        "unidade",
+        "visita"
+      ],
+      "unidadePadrao": "visita",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "visita",
+          "regra": "Padrão visita. Também aceita: diária, serviço, m², unidade, visita."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Limpeza",
+      "slug": "limpeza",
+      "familia": "recorrente",
+      "familiaNome": "Recorrente",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "diária",
+        "serviço",
+        "ambiente",
+        "m²",
+        "visita"
+      ],
+      "unidadePadrao": "diária",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "diária",
+          "regra": "Padrão diária. Também aceita: diária, serviço, ambiente, m², visita."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Limpeza pós-obra",
+      "slug": "limpeza-pos-obra",
+      "familia": "recorrente",
+      "familiaNome": "Recorrente",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²",
+        "diária",
+        "serviço",
+        "ambiente"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m², diária, serviço, ambiente."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "A quantidade do item é a área em m²."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Manutenção geral",
+      "slug": "manutencao",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "hora",
+        "diária",
+        "unidade",
+        "metro"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, hora, diária, unidade, metro."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Manutenção predial",
+      "slug": "manutencao-predial",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "hora",
+        "diária",
+        "unidade",
+        "m²",
+        "metro"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, hora, diária, unidade, m², metro."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Marceneiro",
+      "slug": "marceneiro",
+      "familia": "peca-sob-medida",
+      "familiaNome": "Peça sob medida",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "unidade",
+        "m²",
+        "metro",
+        "projeto",
+        "serviço"
+      ],
+      "unidadePadrao": "unidade",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "unidade",
+          "regra": "Padrão unidade. Também aceita: unidade, m², metro, projeto, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "O item aceita medidas."
+      ],
+      "duplicidades": [
+        "madeira"
+      ]
+    },
+    {
+      "nome": "Marido de aluguel",
+      "slug": "marido-de-aluguel",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "hora",
+        "diária",
+        "unidade"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, hora, diária, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Marmorista",
+      "slug": "marmorista",
+      "familia": "peca-sob-medida",
+      "familiaNome": "Peça sob medida",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "unidade",
+        "m²",
+        "metro",
+        "serviço"
+      ],
+      "unidadePadrao": "unidade",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "unidade",
+          "regra": "Padrão unidade. Também aceita: unidade, m², metro, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "O item aceita medidas."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Mecânico",
+      "slug": "mecanico",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "peça",
+        "hora",
+        "unidade"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, peça, hora, unidade."
+        },
+        {
+          "campo": "equipment",
+          "obrigatorio": false,
+          "regra": "Equipamento, móvel ou veículo."
+        },
+        {
+          "campo": "year",
+          "obrigatorio": false,
+          "regra": "Ano."
+        },
+        {
+          "campo": "mileage",
+          "obrigatorio": false,
+          "unidade": "km",
+          "regra": "Quilometragem."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Mestre de obras",
+      "slug": "mestre-de-obras",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "m²",
+        "m³",
+        "diária",
+        "hora",
+        "unidade"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, m², m³, diária, hora, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        },
+        {
+          "campo": "city",
+          "obrigatorio": false,
+          "regra": "Cidade, quando o endereço completo não entra."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Montador de móveis",
+      "slug": "montador-de-moveis",
+      "familia": "peca-sob-medida",
+      "familiaNome": "Peça sob medida",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "unidade",
+        "hora",
+        "ambiente"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, unidade, hora, ambiente."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        },
+        {
+          "campo": "travelFee",
+          "obrigatorio": false,
+          "unidade": "R$",
+          "regra": "Deslocamento entra no total."
+        }
+      ],
+      "regras": [
+        "Pode cobrar deslocamento."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Móveis planejados",
+      "slug": "moveis-planejados",
+      "familia": "peca-sob-medida",
+      "familiaNome": "Peça sob medida",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "unidade",
+        "m²",
+        "metro",
+        "ambiente",
+        "projeto",
+        "serviço"
+      ],
+      "unidadePadrao": "unidade",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "unidade",
+          "regra": "Padrão unidade. Também aceita: unidade, m², metro, ambiente, projeto, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "O item aceita medidas."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Mudanças",
+      "slug": "mudancas",
+      "familia": "base",
+      "familiaNome": "Base",
+      "moldeFino": true,
+      "excecao": "Frete não cabe em obra nem em oficina.",
+      "unidades": [
+        "serviço",
+        "viagem",
+        "hora",
+        "diária",
+        "unidade"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, viagem, hora, diária, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        },
+        {
+          "campo": "destAddress",
+          "obrigatorio": false,
+          "regra": "Endereço de destino."
+        },
+        {
+          "campo": "eventDate",
+          "obrigatorio": false,
+          "regra": "Data do evento ou da visita."
+        },
+        {
+          "campo": "access",
+          "obrigatorio": false,
+          "regra": "Andares ou dificuldade de acesso."
+        },
+        {
+          "campo": "elevator",
+          "obrigatorio": false,
+          "regra": "Se há elevador."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Outro",
+      "slug": "outro",
+      "familia": "base",
+      "familiaNome": "Base",
+      "moldeFino": true,
+      "excecao": "Ofício fora da lista. O prestador usa o nome que digitou.",
+      "unidades": [
+        "serviço",
+        "unidade",
+        "hora",
+        "diária"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, unidade, hora, diária."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Paisagista",
+      "slug": "paisagista",
+      "familia": "projeto",
+      "familiaNome": "Projeto",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "projeto",
+        "m²",
+        "serviço",
+        "unidade"
+      ],
+      "unidadePadrao": "projeto",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "projeto",
+          "regra": "Padrão projeto. Também aceita: projeto, m², serviço, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Papel de parede",
+      "slug": "papel-de-parede",
+      "familia": "acabamento-visual",
+      "familiaNome": "Acabamento visual",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²",
+        "metro",
+        "rolo",
+        "serviço"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m², metro, rolo, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "A quantidade do item é a área em m²."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Pavimentação",
+      "slug": "pavimentacao",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²",
+        "metro",
+        "serviço"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m², metro, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "A quantidade do item é a área em m²."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Pedreiro",
+      "slug": "pedreiro",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "m²",
+        "diária",
+        "hora",
+        "unidade"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, m², diária, hora, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": [
+        "reforma"
+      ]
+    },
+    {
+      "nome": "Personal organizer",
+      "slug": "personal-organizer",
+      "familia": "base",
+      "familiaNome": "Base",
+      "moldeFino": true,
+      "excecao": "Organização ainda sem família recorrente.",
+      "unidades": [
+        "serviço",
+        "ambiente",
+        "hora",
+        "diária"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, ambiente, hora, diária."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Pintor",
+      "slug": "pintor",
+      "familia": "acabamento-visual",
+      "familiaNome": "Acabamento visual",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²",
+        "serviço",
+        "parede"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m², serviço, parede."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "A quantidade do item é a área em m²."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Pintor automotivo",
+      "slug": "pintor-automotivo",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "peça",
+        "unidade"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, peça, unidade."
+        },
+        {
+          "campo": "equipment",
+          "obrigatorio": false,
+          "regra": "Equipamento, móvel ou veículo."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Piscineiro",
+      "slug": "piscineiro",
+      "familia": "recorrente",
+      "familiaNome": "Recorrente",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "visita",
+        "serviço",
+        "diária",
+        "unidade"
+      ],
+      "unidadePadrao": "visita",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "visita",
+          "regra": "Padrão visita. Também aceita: visita, serviço, diária, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Piso laminado / vinílico",
+      "slug": "piso-laminado",
+      "familia": "revestimento",
+      "familiaNome": "Revestimento",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²",
+        "metro",
+        "serviço"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m², metro, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "A quantidade do item é a área em m²."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Poço artesiano",
+      "slug": "poco-artesiano",
+      "familia": "construtora",
+      "familiaNome": "Construtora",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "metro",
+        "unidade"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, metro, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Polimento de pisos",
+      "slug": "polimento-pisos",
+      "familia": "revestimento",
+      "familiaNome": "Revestimento",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²",
+        "serviço"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m², serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "A quantidade do item é a área em m²."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Portão automático",
+      "slug": "portao-automatico",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "unidade",
+        "ponto"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, unidade, ponto."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Redes de proteção",
+      "slug": "redes-protecao",
+      "familia": "peca-sob-medida",
+      "familiaNome": "Peça sob medida",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²",
+        "metro",
+        "serviço"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m², metro, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "A quantidade do item é a área em m²."
+      ],
+      "duplicidades": [
+        "janela",
+        "sacada"
+      ]
+    },
+    {
+      "nome": "Redes e internet",
+      "slug": "redes",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "ponto",
+        "metro"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, ponto, metro."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Refrigeração",
+      "slug": "refrigeracao",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "unidade",
+        "peça"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, unidade, peça."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        },
+        {
+          "campo": "equipment",
+          "obrigatorio": false,
+          "regra": "Equipamento, móvel ou veículo."
+        },
+        {
+          "campo": "brand",
+          "obrigatorio": false,
+          "regra": "Marca."
+        },
+        {
+          "campo": "model",
+          "obrigatorio": false,
+          "regra": "Modelo."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Segurança eletrônica",
+      "slug": "seguranca-eletronica",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "ponto",
+        "unidade",
+        "metro"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, ponto, unidade, metro."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Serralheiro",
+      "slug": "serralheiro",
+      "familia": "peca-sob-medida",
+      "familiaNome": "Peça sob medida",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "unidade",
+        "m²",
+        "metro",
+        "serviço"
+      ],
+      "unidadePadrao": "unidade",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "unidade",
+          "regra": "Padrão unidade. Também aceita: unidade, m², metro, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "O item aceita medidas."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Social media",
+      "slug": "social-media",
+      "familia": "projeto",
+      "familiaNome": "Projeto",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "pacote",
+        "arte",
+        "serviço",
+        "h"
+      ],
+      "unidadePadrao": "pacote",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "pacote",
+          "regra": "Padrão pacote. Também aceita: pacote, arte, serviço, h."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Soldador",
+      "slug": "soldador",
+      "familia": "peca-sob-medida",
+      "familiaNome": "Peça sob medida",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "hora",
+        "unidade",
+        "metro"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, hora, unidade, metro."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Som e palco",
+      "slug": "sonorizacao",
+      "familia": "base",
+      "familiaNome": "Base",
+      "moldeFino": true,
+      "excecao": "Som e palco ainda sem família própria.",
+      "unidades": [
+        "evento",
+        "diária",
+        "serviço",
+        "hora"
+      ],
+      "unidadePadrao": "evento",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "evento",
+          "regra": "Padrão evento. Também aceita: evento, diária, serviço, hora."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        },
+        {
+          "campo": "eventDate",
+          "obrigatorio": false,
+          "regra": "Data do evento ou da visita."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Tapeceiro",
+      "slug": "tapeceiro",
+      "familia": "peca-sob-medida",
+      "familiaNome": "Peça sob medida",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "unidade",
+        "metro"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, unidade, metro."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": [
+        "sofa"
+      ]
+    },
+    {
+      "nome": "Técnico de ar-condicionado",
+      "slug": "ar-condicionado",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "unidade"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        },
+        {
+          "campo": "equipment",
+          "obrigatorio": false,
+          "regra": "Equipamento, móvel ou veículo."
+        },
+        {
+          "campo": "brand",
+          "obrigatorio": false,
+          "regra": "Marca."
+        },
+        {
+          "campo": "model",
+          "obrigatorio": false,
+          "regra": "Modelo."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Técnico de celular",
+      "slug": "celular",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "peça",
+        "unidade"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, peça, unidade."
+        },
+        {
+          "campo": "equipment",
+          "obrigatorio": false,
+          "regra": "Equipamento, móvel ou veículo."
+        },
+        {
+          "campo": "brand",
+          "obrigatorio": false,
+          "regra": "Marca."
+        },
+        {
+          "campo": "model",
+          "obrigatorio": false,
+          "regra": "Modelo."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Técnico de eletrodomésticos",
+      "slug": "eletrodomesticos",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "peça",
+        "unidade"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, peça, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        },
+        {
+          "campo": "equipment",
+          "obrigatorio": false,
+          "regra": "Equipamento, móvel ou veículo."
+        },
+        {
+          "campo": "brand",
+          "obrigatorio": false,
+          "regra": "Marca."
+        },
+        {
+          "campo": "model",
+          "obrigatorio": false,
+          "regra": "Modelo."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": [
+        "fogao"
+      ]
+    },
+    {
+      "nome": "Técnico de informática",
+      "slug": "informatica",
+      "familia": "oficina-tecnico",
+      "familiaNome": "Oficina e técnico",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "hora",
+        "unidade"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, hora, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        },
+        {
+          "campo": "equipment",
+          "obrigatorio": false,
+          "regra": "Equipamento, móvel ou veículo."
+        },
+        {
+          "campo": "brand",
+          "obrigatorio": false,
+          "regra": "Marca."
+        },
+        {
+          "campo": "model",
+          "obrigatorio": false,
+          "regra": "Modelo."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Telhadista",
+      "slug": "telhadista",
+      "familia": "equipe-obra",
+      "familiaNome": "Equipe de obra",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²",
+        "metro",
+        "serviço",
+        "unidade"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m², metro, serviço, unidade."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "A quantidade do item é a área em m²."
+      ],
+      "duplicidades": [
+        "cobertura"
+      ]
+    },
+    {
+      "nome": "Terraplanagem",
+      "slug": "terraplanagem",
+      "familia": "construtora",
+      "familiaNome": "Construtora",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m³",
+        "m²",
+        "hora",
+        "serviço"
+      ],
+      "unidadePadrao": "m³",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m³",
+          "regra": "Padrão m³. Também aceita: m³, m², hora, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "O item aceita volume em m³."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Toldos e coberturas",
+      "slug": "toldos",
+      "familia": "peca-sob-medida",
+      "familiaNome": "Peça sob medida",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²",
+        "unidade",
+        "metro",
+        "serviço"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m², unidade, metro, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "A quantidade do item é a área em m²."
+      ],
+      "duplicidades": [
+        "cobertura"
+      ]
+    },
+    {
+      "nome": "Topógrafo",
+      "slug": "topografo",
+      "familia": "projeto",
+      "familiaNome": "Projeto",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "serviço",
+        "laudo",
+        "hectare",
+        "m²"
+      ],
+      "unidadePadrao": "serviço",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "serviço",
+          "regra": "Padrão serviço. Também aceita: serviço, laudo, hectare, m²."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Videomaker",
+      "slug": "videomaker",
+      "familia": "projeto",
+      "familiaNome": "Projeto",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "evento",
+        "pacote",
+        "hora",
+        "diária"
+      ],
+      "unidadePadrao": "pacote",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "pacote",
+          "regra": "Padrão pacote. Também aceita: evento, pacote, hora, diária."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        },
+        {
+          "campo": "eventDate",
+          "obrigatorio": false,
+          "regra": "Data do evento ou da visita."
+        }
+      ],
+      "regras": [
+        "Lista de serviços com quantidade, unidade e valor."
+      ],
+      "duplicidades": []
+    },
+    {
+      "nome": "Vidraceiro",
+      "slug": "vidraceiro",
+      "familia": "peca-sob-medida",
+      "familiaNome": "Peça sob medida",
+      "moldeFino": true,
+      "excecao": null,
+      "unidades": [
+        "m²",
+        "unidade",
+        "metro",
+        "serviço"
+      ],
+      "unidadePadrao": "m²",
+      "campos": [
+        {
+          "campo": "descricao",
+          "obrigatorio": true,
+          "regra": "Nome do serviço no item."
+        },
+        {
+          "campo": "quantidade",
+          "obrigatorio": true,
+          "regra": "Quantidade do item."
+        },
+        {
+          "campo": "valor",
+          "obrigatorio": true,
+          "unidade": "R$",
+          "regra": "Valor unitário do item."
+        },
+        {
+          "campo": "unidade",
+          "obrigatorio": true,
+          "unidade": "m²",
+          "regra": "Padrão m². Também aceita: m², unidade, metro, serviço."
+        },
+        {
+          "campo": "endereco",
+          "obrigatorio": false,
+          "regra": "Endereço do serviço, se quiser informar."
+        }
+      ],
+      "regras": [
+        "O item aceita medidas."
+      ],
+      "duplicidades": [
+        "sacada"
+      ]
+    }
+  ]
+}

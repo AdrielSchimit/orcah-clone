@@ -12,7 +12,7 @@ import { prisma } from "@/lib/db";
 import { formatBRL, formatQuantity } from "@/lib/money";
 import { publicCanRespond } from "@/lib/budget-cycle";
 import { findPublicBudget, maybeExpire } from "@/lib/public-budget";
-import { companyTemplate, KIND_LABEL, extraDetailLines, itemDetailLines, parseExtras, travelFeeAmount, type ItemKind } from "@/lib/templates";
+import { companyTemplate, KIND_LABEL, itemDetailLines, linhasPreviewCliente, parseExtras, travelFeeAmount, type ItemKind } from "@/lib/templates";
 import { companyPublicUrl } from "@/lib/urls";
 
 function serviceTitle(items: { description: string; groupName?: string | null }[]) {
@@ -88,12 +88,14 @@ export default async function PublicOrcamentoPage({
     canRespond &&
     (await prisma.budgetVersion.count({ where: { budgetId: budget.id } })) > 0;
   const place = companyPlace(budget.company);
-  const contextLines = [
-    budget.serviceCity && budget.serviceState ? `Serviço em ${budget.serviceCity.name}-${budget.serviceState.uf}` : "",
-    budget.serviceAddress ?? "",
-    ...extraDetailLines(extras, template.form),
-    budget.estimatedDays ? `Prazo estimado: ${budget.estimatedDays} dia(s)` : "",
-  ].filter(Boolean);
+  const contextLines = linhasPreviewCliente({
+    serviceCity: budget.serviceCity?.name,
+    serviceUf: budget.serviceState?.uf,
+    serviceAddress: budget.serviceAddress,
+    extras,
+    form: template.form,
+    estimatedDays: budget.estimatedDays,
+  });
   const gallery = <PublicPhotoGallery photos={photos} title={template.photos.sectionTitle} />;
 
   return (

@@ -575,6 +575,22 @@ export function parseExtras(raw: unknown): BudgetExtras | null {
   return Object.keys(extras).length ? extras : null;
 }
 
+export function linhasPreviewCliente(input: {
+  serviceCity?: string | null;
+  serviceUf?: string | null;
+  serviceAddress?: string | null;
+  extras?: BudgetExtras | null;
+  form?: BudgetFormLayout | null;
+  estimatedDays?: number | null;
+}) {
+  return [
+    input.serviceCity && input.serviceUf ? `Serviço em ${input.serviceCity}-${input.serviceUf}` : "",
+    input.serviceAddress ?? "",
+    ...extraDetailLines(input.extras, input.form),
+    input.estimatedDays ? `Prazo estimado: ${input.estimatedDays} dia(s)` : "",
+  ].filter(Boolean);
+}
+
 export function extraDetailLines(
   extras: BudgetExtras | null | undefined,
   form?: BudgetFormLayout | null,
