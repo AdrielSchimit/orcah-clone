@@ -69,7 +69,7 @@ export type BudgetFormValues = {
   downPaymentType?: DiscountType | null;
   downPaymentValue?: string;
   extras?: BudgetExtras | null;
-  items?: Item[];
+  items?: Partial<Item>[];
 };
 
 function money(value: string) {
@@ -171,6 +171,7 @@ export function BudgetForm({
   const [customerId, setCustomerId] = useState<number | "">(defaults?.customerId ?? "");
   const [customerLabel, setCustomerLabel] = useState(defaults?.customerName ?? "");
   const [newCustomer, setNewCustomer] = useState(false);
+  const [loadingLabel, setLoadingLabel] = useState("Salvando…");
   const [states, setStates] = useState<State[]>([]);
   const [cities, setCities] = useState<City[]>([]);
   const [stateId, setStateId] = useState(String(defaults?.serviceStateId ?? ""));
@@ -365,6 +366,9 @@ export function BudgetForm({
       setError("Escolha ou cadastre um cliente.");
       return;
     }
+    const submitter = event.nativeEvent instanceof SubmitEvent ? event.nativeEvent.submitter : null;
+    const sendAfter = !budgetId && (!(submitter instanceof HTMLButtonElement) || submitter.value !== "draft");
+    setLoadingLabel(sendAfter ? "Abrindo WhatsApp…" : "Salvando…");
     setLoading(true);
     const payloadForm = new FormData(event.currentTarget);
 
@@ -397,6 +401,21 @@ export function BudgetForm({
       const data = (await response.json().catch(() => ({}))) as { error?: string; budget?: { id: number } };
       if (!response.ok || !data.budget) {
         setError(data.error ?? "Não foi possível salvar o orçamento.");
+        return;
+      }
+      if (sendAfter) {
+        try {
+          const sent = await fetch(`/api/orcamentos/${data.budget.id}/enviar`, { method: "POST" });
+          const sentBody = (await sent.json().catch(() => ({}))) as { href?: string };
+          if (sent.ok && sentBody.href) {
+            window.location.href = sentBody.href;
+            return;
+          }
+        } catch {
+          // o orçamento já está salvo; a tela dele oferece o envio de novo
+        }
+        router.push(`/painel/orcamentos/${data.budget.id}?envio=falhou`);
+        router.refresh();
         return;
       }
       router.push(`/painel/orcamentos/${data.budget.id}`);
@@ -1497,13 +1516,28 @@ export function BudgetForm({
               {formatBRL(total)}
             </p>
           </div>
-          <button
-            type="submit"
-            disabled={loading || Boolean(discountError || downPaymentError)}
-            className="min-h-12 shrink-0 rounded-btn bg-gold px-5 text-sm font-semibold text-ink hover:bg-gold-press disabled:opacity-60 md:px-6 md:text-base"
-          >
-            {loading ? "Salvando…" : submitLabel ?? (budgetId ? "Salvar alterações" : "Salvar orçamento")}
-          </button>
+          <div className="flex shrink-0 flex-col items-end gap-1">
+            <button
+              type="submit"
+              value="send"
+              disabled={loading || Boolean(discountError || downPaymentError)}
+              className={`min-h-12 rounded-btn px-5 text-sm font-semibold text-ink disabled:opacity-60 md:px-6 md:text-base ${
+                budgetId ? "bg-gold hover:bg-gold-press" : "bg-zap"
+              }`}
+            >
+              {loading ? loadingLabel : submitLabel ?? (budgetId ? "Salvar alterações" : "Salvar e enviar")}
+            </button>
+            {budgetId ? null : (
+              <button
+                type="submit"
+                value="draft"
+                disabled={loading || Boolean(discountError || downPaymentError)}
+                className="min-h-8 px-1 text-xs font-medium text-text-soft disabled:opacity-60"
+              >
+                Salvar rascunho
+              </button>
+            )}
+          </div>
         </div>
       </div>
     </form>

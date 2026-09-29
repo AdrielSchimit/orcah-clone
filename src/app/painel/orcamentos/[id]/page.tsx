@@ -38,13 +38,16 @@ const eventTone: Record<string, string> = {
 
 export default async function OrcamentoPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const user = await getSessionUser();
   if (!user?.company) return null;
 
   const id = Number((await params).id);
+  const envioFalhou = (await searchParams).envio === "falhou";
   const budget = await prisma.budget.findFirst({
     where: { id, companyId: user.company.id },
     include: {
@@ -124,6 +127,12 @@ export default async function OrcamentoPage({
             mesmo e já mostra a versão nova.
           </p>
         </div>
+      ) : null}
+
+      {envioFalhou ? (
+        <p className="mb-4 rounded-box border border-no/30 bg-card p-4 text-sm text-no">
+          O orçamento foi salvo. Não consegui abrir o WhatsApp agora. Toque em Enviar pelo WhatsApp para tentar de novo.
+        </p>
       ) : null}
 
       <div className="mb-6 flex flex-col gap-2">

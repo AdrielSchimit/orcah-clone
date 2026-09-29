@@ -131,7 +131,7 @@ export const perguntasRapidas: AssistentePergunta[] = [
       id: "r-enviar",
       pose: "explicando",
       texto:
-        "Crie o orçamento e salve. Na tela dele, toque em “Enviar pelo WhatsApp”: a mensagem já vai pronta com o link.",
+        "Toque em “Salvar e enviar”. O orçamento fica salvo e o WhatsApp abre com o link pronto. Se quiser só guardar, use “Salvar rascunho”.",
       acao: NOVO_ORCAMENTO,
     },
   },
