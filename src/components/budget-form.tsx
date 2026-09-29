@@ -10,6 +10,7 @@ import {
   type PaymentMethod,
 } from "@/lib/commercial";
 import { formatBRL, parseMoney } from "@/lib/money";
+import { PhoneInput } from "@/components/phone-input";
 import { formatPhoneBR } from "@/lib/phone";
 import type { BudgetExtras, BudgetFormLayout, CatalogItem, TemplateConfig } from "@/lib/templates";
 import { defaultFormLayout } from "@/lib/templates";
@@ -469,7 +470,7 @@ export function BudgetForm({
             </label>
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium">Telefone</span>
-              <input name="newPhone" required placeholder="49 99999-0000" className={fieldClass} />
+              <PhoneInput name="newPhone" required placeholder="(49) 9 9999-0000" className={fieldClass} />
             </label>
             <button type="button" onClick={() => setNewCustomer(false)} className="text-left text-sm text-text-soft">
               Usar cliente já cadastrado

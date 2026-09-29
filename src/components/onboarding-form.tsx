@@ -2,6 +2,8 @@
 
 import { KeyboardEvent, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { PhoneInput } from "@/components/phone-input";
+import { maskPhoneBR } from "@/lib/phone";
 import {
   buildCompanyDescription,
   normalizeCustomDescription,
@@ -32,7 +34,7 @@ export function OnboardingForm({ defaultWhatsapp }: { defaultWhatsapp?: string }
   const [ramoQuery, setRamoQuery] = useState("");
   const [step, setStep] = useState(0);
   const [name, setName] = useState("");
-  const [whatsapp, setWhatsapp] = useState(defaultWhatsapp ?? "");
+  const [whatsapp, setWhatsapp] = useState(() => maskPhoneBR(defaultWhatsapp ?? ""));
   const [stateId, setStateId] = useState("");
   const [stateQuery, setStateQuery] = useState("");
   const [stateOpen, setStateOpen] = useState(false);
@@ -273,13 +275,12 @@ export function OnboardingForm({ defaultWhatsapp }: { defaultWhatsapp?: string }
             <span className="block text-2xl font-semibold text-text">
               Qual WhatsApp você usa com seus clientes?
             </span>
-            <input
+            <PhoneInput
               value={whatsapp}
-              onChange={(event) => setWhatsapp(event.target.value)}
+              onValueChange={setWhatsapp}
               onKeyDown={handleEnter}
-              inputMode="tel"
               autoComplete="tel"
-              placeholder="(16) 99999-9999"
+              placeholder="(49) 9 9999-0000"
               className="mt-5 w-full rounded-btn border border-line bg-card px-4 py-4 text-base"
             />
           </label>

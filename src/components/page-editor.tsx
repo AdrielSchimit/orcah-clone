@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useRef, useState } from "react";
+import { PhoneInput } from "@/components/phone-input";
 import { Toggle } from "@/components/toggle";
 import { uploadImage } from "@/lib/client-image";
 
@@ -206,10 +207,10 @@ export function ContactForm({
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-3">
       <Field label="WhatsApp" hint="O botão verde da sua página chama esse número.">
-        <input name="whatsapp" inputMode="tel" required defaultValue={company.whatsapp} placeholder="16 99999-0000" className={inputClass} />
+        <PhoneInput name="whatsapp" required defaultValue={company.whatsapp} placeholder="(49) 9 9999-0000" className={inputClass} />
       </Field>
       <Field label="Telefone (opcional)">
-        <input name="phone" inputMode="tel" defaultValue={company.phone} placeholder="16 3333-0000" className={inputClass} />
+        <PhoneInput name="phone" defaultValue={company.phone} placeholder="(49) 3333-0000" className={inputClass} />
       </Field>
       <Field label="Instagram">
         <input name="instagram" defaultValue={company.instagram ?? ""} placeholder="@seunegocio" className={inputClass} />

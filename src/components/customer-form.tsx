@@ -2,6 +2,8 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { PhoneInput } from "@/components/phone-input";
+import { maskPhoneBR } from "@/lib/phone";
 
 type State = { id: number; name: string; uf: string };
 type City = { id: number; name: string };
@@ -28,6 +30,8 @@ export function CustomerForm({ customer }: { customer?: EditableCustomer } = {})
   const [stateId, setStateId] = useState(customer?.stateId ? String(customer.stateId) : "");
   const [cityId, setCityId] = useState(customer?.cityId ? String(customer.cityId) : "");
   const [more, setMore] = useState(Boolean(customer));
+  const [phone, setPhone] = useState(() => maskPhoneBR(customer?.phone ?? ""));
+  const [whatsapp, setWhatsapp] = useState(() => maskPhoneBR(customer?.whatsapp ?? ""));
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -80,6 +84,8 @@ export function CustomerForm({ customer }: { customer?: EditableCustomer } = {})
         return;
       }
       form.reset();
+      setPhone("");
+      setWhatsapp("");
       setStateId("");
       setCities([]);
       setCityId("");
@@ -101,7 +107,7 @@ export function CustomerForm({ customer }: { customer?: EditableCustomer } = {})
       </label>
       <label className="block">
         <span className="mb-1.5 block text-sm font-medium">Telefone</span>
-        <input name="phone" defaultValue={customer?.phone ?? ""} required placeholder="49 99999-0000" className={fieldClass} />
+        <PhoneInput name="phone" value={phone} onValueChange={setPhone} required placeholder="(49) 9 9999-0000" className={fieldClass} />
       </label>
       {/* Na edição tudo fica visível: campo escondido sairia vazio e apagaria o dado. */}
       {customer ? null : (
@@ -117,7 +123,7 @@ export function CustomerForm({ customer }: { customer?: EditableCustomer } = {})
         <>
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium">WhatsApp (se diferente)</span>
-            <input name="whatsapp" defaultValue={customer?.whatsapp ?? ""} placeholder="49 99999-0000" className={fieldClass} />
+            <PhoneInput name="whatsapp" value={whatsapp} onValueChange={setWhatsapp} placeholder="(49) 9 9999-0000" className={fieldClass} />
           </label>
           <label className="block">
             <span className="mb-1.5 block text-sm font-medium">E-mail</span>

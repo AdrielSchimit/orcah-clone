@@ -2,6 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { PasswordChecklist } from "@/components/password-checklist";
+import { PhoneInput } from "@/components/phone-input";
 import { passwordIsStrong } from "@/lib/password-rules";
 
 export const PENDING_EMAIL_KEY = "orcah-verificar-email";
@@ -72,7 +73,15 @@ export function AuthForm({ mode }: { mode: "cadastro" | "login" }) {
       {mode === "cadastro" ? (
         <>
           <Field name="name" label="Seu nome" placeholder="João da Silva" autoComplete="name" required />
-          <Field name="phone" label="Telefone" placeholder="49 99999-0000" autoComplete="tel" inputMode="tel" />
+          <label className="block">
+            <span className="mb-1.5 block text-sm font-medium text-text">Telefone</span>
+            <PhoneInput
+              name="phone"
+              autoComplete="tel"
+              placeholder="(49) 9 9999-0000"
+              className="w-full rounded-btn border border-line bg-card px-4 py-3 text-base text-text"
+            />
+          </label>
         </>
       ) : null}
       <Field

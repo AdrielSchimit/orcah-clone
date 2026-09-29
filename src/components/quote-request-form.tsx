@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useState } from "react";
+import { PhoneInput } from "@/components/phone-input";
 import { titleCaseName } from "@/lib/text";
 
 type State = { id: number; name: string; uf: string };
@@ -80,11 +81,11 @@ export function QuoteRequestForm({
         placeholder="Seu nome"
         className="rounded-btn border border-line bg-card px-4 py-3"
       />
-      <input
+      <PhoneInput
         name="customerPhone"
         required
-        aria-label="WhatsApp"
-        placeholder="WhatsApp"
+        ariaLabel="WhatsApp"
+        placeholder="(49) 9 9999-0000"
         className="rounded-btn border border-line bg-card px-4 py-3"
       />
       <input
