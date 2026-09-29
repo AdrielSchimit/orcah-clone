@@ -11,9 +11,27 @@ export const PAGE_EVENTS = {
   view: "views",
   whatsapp: "whatsappClicks",
   quote: "quoteClicks",
+  instagram: "instagramClicks",
 } as const;
 
 export type PageEvent = keyof typeof PAGE_EVENTS;
+export type PageOrigin = "instagram";
+
+const STAT_FIELDS = ["views", "whatsappClicks", "quoteClicks", "instagramClicks", "instagramVisits"] as const;
+
+/** Visita vinda do app do Instagram ou de um link da bio com ?utm_source=instagram. */
+export function isInstagramOrigin(referrer: string | null | undefined, source: string | null | undefined) {
+  const src = (source ?? "").trim().toLowerCase();
+  if (src === "instagram" || src === "ig") return true;
+  const ref = (referrer ?? "").trim();
+  if (!ref) return false;
+  try {
+    const host = new URL(ref).hostname.replace(/^www\./, "").toLowerCase();
+    return host === "instagram.com" || host === "l.instagram.com" || host.endsWith(".instagram.com");
+  } catch {
+    return ref.toLowerCase().includes("instagram.com");
+  }
+}
 
 export function isPageEvent(value: unknown): value is PageEvent {
   return typeof value === "string" && value in PAGE_EVENTS;
@@ -46,14 +64,19 @@ export function periodStart(days: number, now = new Date()) {
   return new Date(statDay(now).getTime() - (days - 1) * DAY_MS);
 }
 
-export async function recordPageEvent(db: StatsDb, companyId: number, event: PageEvent, now = new Date()) {
-  const field = PAGE_EVENTS[event];
+async function incrementStat(
+  db: StatsDb,
+  companyId: number,
+  field: (typeof STAT_FIELDS)[number],
+  now: Date,
+) {
   const date = statDay(now);
   const where = { companyId_date: { companyId, date } };
+  const zeros = { views: 0, whatsappClicks: 0, quoteClicks: 0, instagramClicks: 0, instagramVisits: 0 };
   try {
     await db.companyPageDailyStat.upsert({
       where,
-      create: { companyId, date, views: 0, whatsappClicks: 0, quoteClicks: 0, [field]: 1 },
+      create: { companyId, date, ...zeros, [field]: 1 },
       update: { [field]: { increment: 1 } },
     });
   } catch (error) {
@@ -63,7 +86,27 @@ export async function recordPageEvent(db: StatsDb, companyId: number, event: Pag
   }
 }
 
-export type StatRow = { date: Date; views: number; whatsappClicks: number; quoteClicks: number };
+export async function recordPageEvent(
+  db: StatsDb,
+  companyId: number,
+  event: PageEvent,
+  now = new Date(),
+  origin?: PageOrigin | null,
+) {
+  await incrementStat(db, companyId, PAGE_EVENTS[event], now);
+  if (event === "view" && origin === "instagram") {
+    await incrementStat(db, companyId, "instagramVisits", now);
+  }
+}
+
+export type StatRow = {
+  date: Date;
+  views: number;
+  whatsappClicks: number;
+  quoteClicks: number;
+  instagramClicks?: number;
+  instagramVisits?: number;
+};
 
 export function sumStats(rows: StatRow[]) {
   return rows.reduce(
@@ -71,8 +114,10 @@ export function sumStats(rows: StatRow[]) {
       views: total.views + row.views,
       whatsappClicks: total.whatsappClicks + row.whatsappClicks,
       quoteClicks: total.quoteClicks + row.quoteClicks,
+      instagramClicks: total.instagramClicks + (row.instagramClicks ?? 0),
+      instagramVisits: total.instagramVisits + (row.instagramVisits ?? 0),
     }),
-    { views: 0, whatsappClicks: 0, quoteClicks: 0 },
+    { views: 0, whatsappClicks: 0, quoteClicks: 0, instagramClicks: 0, instagramVisits: 0 },
   );
 }
 
@@ -89,7 +134,7 @@ export function dailySeries(rows: StatRow[], days: number, now = new Date()) {
 export async function statsForPeriod(db: StatsDb, companyId: number, days: number, now = new Date()) {
   return db.companyPageDailyStat.findMany({
     where: { companyId, date: { gte: periodStart(days, now), lte: statDay(now) } },
-    select: { date: true, views: true, whatsappClicks: true, quoteClicks: true },
+    select: { date: true, views: true, whatsappClicks: true, quoteClicks: true, instagramClicks: true, instagramVisits: true },
     orderBy: { date: "asc" },
   });
 }

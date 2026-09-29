@@ -123,6 +123,9 @@ export default async function PaginaPage() {
       <section className="gold-edge mb-4 rounded-box border bg-ink p-4 text-ink-text">
         <p className="text-xs font-medium uppercase tracking-[0.04em] text-gold">Seu link</p>
         <p className="mt-1 break-all text-sm font-semibold">{url.replace(/^https?:\/\//, "")}</p>
+        <p className="mt-2 break-all text-xs text-ink-soft">
+          Na bio do Instagram use {url.replace(/^https?:\/\//, "")}?utm_source=instagram para contar a origem.
+        </p>
         <p className="mt-1 text-xs text-ink-soft">
           {views7 === 1 ? "1 acesso" : `${views7} acessos`} nos últimos 7 dias ·{" "}
           <Link href="/painel/relatorios" className="underline underline-offset-2">

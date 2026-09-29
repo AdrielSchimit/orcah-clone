@@ -448,6 +448,8 @@ model CompanyPageDailyStat {
   views          Int      @default(0)
   whatsappClicks Int      @default(0) @map("whatsapp_clicks")
   quoteClicks    Int      @default(0) @map("quote_clicks")
+  instagramClicks Int     @default(0) @map("instagram_clicks")
+  instagramVisits Int     @default(0) @map("instagram_visits")
   createdAt      DateTime @default(now()) @map("created_at")
   updatedAt      DateTime @updatedAt @map("updated_at")
 

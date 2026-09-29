@@ -11,8 +11,11 @@ export async function POST(request: Request, context: { params: Promise<{ slug: 
 
   const raw = await request.text().catch(() => "");
   let tipo: unknown;
+  let origem: unknown;
   try {
-    tipo = (JSON.parse(raw) as { tipo?: unknown }).tipo;
+    const body = JSON.parse(raw) as { tipo?: unknown; origem?: unknown };
+    tipo = body.tipo;
+    origem = body.origem;
   } catch {
     return done();
   }
@@ -28,6 +31,7 @@ export async function POST(request: Request, context: { params: Promise<{ slug: 
   const user = await getSessionUser().catch(() => null);
   if (user?.company?.id === company.id) return done();
 
-  await recordPageEvent(prisma, company.id, tipo).catch(() => console.error("[metrica] falha ao contar"));
+  const origin = tipo === "view" && origem === "instagram" ? "instagram" : null;
+  await recordPageEvent(prisma, company.id, tipo, new Date(), origin).catch(() => console.error("[metrica] falha ao contar"));
   return done();
 }

@@ -4,6 +4,7 @@ import { loadDashboard, loadReport, parsePeriod, summarizePeriod, type MetricsDb
 import {
   dailySeries,
   isBotUserAgent,
+  isInstagramOrigin,
   isPageEvent,
   periodStart,
   recordPageEvent,
@@ -19,7 +20,7 @@ const NOW = new Date("2026-09-26T13:00:00Z");
 const DAY = 24 * 60 * 60 * 1000;
 
 function statsDb() {
-  const companyPageDailyStat = table({ views: 0, whatsappClicks: 0, quoteClicks: 0 });
+  const companyPageDailyStat = table({ views: 0, whatsappClicks: 0, quoteClicks: 0, instagramClicks: 0, instagramVisits: 0 });
   return { companyPageDailyStat, db: { companyPageDailyStat } as unknown as StatsDb };
 }
 
@@ -57,7 +58,26 @@ describe("acessos da página", () => {
       assert.equal(isBotUserAgent(ua), true, ua);
     }
     assert.equal(isPageEvent("view"), true);
+    assert.equal(isPageEvent("instagram"), true);
     assert.equal(isPageEvent("delete"), false);
+    assert.equal(isInstagramOrigin("https://l.instagram.com/", null), true);
+    assert.equal(isInstagramOrigin("https://www.instagram.com/p/abc", null), true);
+    assert.equal(isInstagramOrigin("", "instagram"), true);
+    assert.equal(isInstagramOrigin("https://google.com/", "ig"), true);
+    assert.equal(isInstagramOrigin("https://orcah.com.br/", null), false);
+    assert.equal(isInstagramOrigin("", "facebook"), false);
+  });
+
+  it("conta clique no Instagram e visita com origem, sem misturar com WhatsApp", async () => {
+    const { companyPageDailyStat, db } = statsDb();
+    await recordPageEvent(db, 7, "instagram", NOW);
+    await recordPageEvent(db, 7, "view", NOW, "instagram");
+    await recordPageEvent(db, 7, "whatsapp", NOW, "instagram");
+    const [row] = companyPageDailyStat.rows;
+    assert.equal(row.instagramClicks, 1);
+    assert.equal(row.instagramVisits, 1);
+    assert.equal(row.views, 1);
+    assert.equal(row.whatsappClicks, 1);
   });
 
   it("série diária preenche os dias sem acesso", () => {
@@ -69,13 +89,13 @@ describe("acessos da página", () => {
     assert.equal(series.length, 7);
     assert.equal(series[0].date, "2026-09-20");
     assert.deepEqual(series.slice(-3).map((point) => point.views), [2, 0, 5]);
-    assert.deepEqual(sumStats(rows), { views: 7, whatsappClicks: 1, quoteClicks: 1 });
+    assert.deepEqual(sumStats(rows), { views: 7, whatsappClicks: 1, quoteClicks: 1, instagramClicks: 0, instagramVisits: 0 });
   });
 });
 
 describe("relatórios 7/30/90 dias", () => {
   function metricsDb() {
-    const companyPageDailyStat = table({ views: 0, whatsappClicks: 0, quoteClicks: 0 });
+    const companyPageDailyStat = table({ views: 0, whatsappClicks: 0, quoteClicks: 0, instagramClicks: 0, instagramVisits: 0 });
     const quoteRequest = table();
     const budget = table({ status: "draft", total: 0, approvedAt: null, serviceCity: null, serviceState: null });
     return { companyPageDailyStat, quoteRequest, budget, db: { companyPageDailyStat, quoteRequest, budget } as unknown as MetricsDb };

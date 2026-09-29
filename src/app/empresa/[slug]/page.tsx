@@ -230,10 +230,16 @@ export default async function EmpresaPublicaPage({
                 </a>
               ) : null}
               {insta ? (
-                <a href={insta} target="_blank" rel="noreferrer" className="flex min-h-12 items-center justify-center gap-2 rounded-btn border border-line px-3 text-center text-sm font-medium">
+                <TrackedLink
+                  slug={page.slug}
+                  event="instagram"
+                  href={insta}
+                  external
+                  className="flex min-h-12 items-center justify-center gap-2 rounded-btn border border-line px-3 text-center text-sm font-medium"
+                >
                   <InstagramIcon />
                   Instagram
-                </a>
+                </TrackedLink>
               ) : null}
               {face ? (
                 <a href={face} target="_blank" rel="noreferrer" className="flex min-h-12 items-center justify-center rounded-btn border border-line px-3 text-center text-sm font-medium">
