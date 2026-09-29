@@ -38,6 +38,16 @@ function ZapIcon() {
   );
 }
 
+function InstagramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.2" cy="6.8" r="0.8" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
 export default async function EmpresaPublicaPage({
   params,
   searchParams,
@@ -215,8 +225,14 @@ export default async function EmpresaPublicaPage({
                   Chamar no WhatsApp
                 </TrackedLink>
               ) : null}
+              {page.phone ? (
+                <a href={`tel:${page.phone}`} className="flex min-h-12 items-center justify-center rounded-btn border border-line px-3 text-center text-sm font-medium">
+                  Ligar
+                </a>
+              ) : null}
               {insta ? (
-                <a href={insta} target="_blank" rel="noreferrer" className="flex min-h-12 items-center justify-center rounded-btn border border-line px-3 text-center text-sm font-medium">
+                <a href={insta} target="_blank" rel="noreferrer" className="flex min-h-12 items-center justify-center gap-2 rounded-btn border border-line px-3 text-center text-sm font-medium">
+                  <InstagramIcon />
                   Instagram
                 </a>
               ) : null}
@@ -228,11 +244,6 @@ export default async function EmpresaPublicaPage({
               {site ? (
                 <a href={site} target="_blank" rel="noreferrer" className="flex min-h-12 items-center justify-center rounded-btn border border-line px-3 text-center text-sm font-medium">
                   Site
-                </a>
-              ) : null}
-              {page.phone ? (
-                <a href={`tel:${page.phone}`} className="flex min-h-12 items-center justify-center rounded-btn border border-line px-3 text-center text-sm font-medium">
-                  Ligar
                 </a>
               ) : null}
             </div>
