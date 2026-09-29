@@ -240,6 +240,7 @@ export default async function PaginaPage() {
               whatsapp: company.whatsapp,
               phone: company.phone,
               instagram: company.instagram,
+              instagramConfirmed: company.instagramConfirmed,
               facebook: company.facebook,
               website: company.website,
             }}

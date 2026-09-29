@@ -23,6 +23,7 @@ const pinturaNorte = {
   instagram: "pinturanorte",
   facebook: null,
   website: null,
+  instagramConfirmed: true,
   openingHours: "Seg a sáb, 8h às 18h",
   primaryColor: "#14532D",
   secondaryColor: "fc0",
@@ -107,14 +108,55 @@ describe("editor da página", () => {
     const result = normalizeCompanyPagePatch({
       description: "  Pintura caprichada  ",
       instagram: "https://instagram.com/pinturanorte/",
+      instagramConfirmed: true,
       companyId: 999,
       slug: "outra-empresa",
       userId: 1,
       logoPath: "/uploads/companies/999/logo/x.webp",
     });
     assert.ok("data" in result);
-    assert.deepEqual(result.data, { description: "Pintura caprichada", instagram: "pinturanorte" });
+    assert.deepEqual(result.data, {
+      description: "Pintura caprichada",
+      instagram: "pinturanorte",
+      instagramConfirmed: true,
+    });
     assert.equal(result.region, null);
+  });
+
+  it("não publica o Instagram sem a confirmação do prestador", () => {
+    const pending = normalizeCompanyPagePatch({ name: "Pintada", instagram: "Pintada" });
+    assert.deepEqual(pending, { error: "Confirme o Instagram. O @ é o da conta, não o nome da página." });
+
+    const namedOnly = normalizeCompanyPagePatch({ name: "Pintada" });
+    assert.ok("data" in namedOnly);
+    assert.equal("instagram" in namedOnly.data, false);
+
+    const confirmed = normalizeCompanyPagePatch({ instagram: "@outra.conta", instagramConfirmed: true });
+    assert.ok("data" in confirmed);
+    assert.equal(confirmed.data.instagram, "outra.conta");
+    assert.equal(confirmed.data.instagramConfirmed, true);
+
+    const cleared = normalizeCompanyPagePatch({ instagram: "" });
+    assert.ok("data" in cleared);
+    assert.equal(cleared.data.instagram, null);
+    assert.equal(cleared.data.instagramConfirmed, false);
+  });
+
+  it("página pública esconde @ que ainda não foi confirmado", async () => {
+    const hidden = await getPublicCompanyPage(
+      {
+        company: {
+          async findUnique() {
+            return { ...pinturaNorte, instagram: "conta.real", instagramConfirmed: false };
+          },
+        },
+      } as unknown as PublicPageDb,
+      "pintura-norte",
+    );
+    assert.equal(hidden?.instagram, null);
+
+    const shown = await getPublicCompanyPage(db, "pintura-norte");
+    assert.equal(shown?.instagram, "pinturanorte");
   });
 
   it("valida nome, WhatsApp e cores", () => {

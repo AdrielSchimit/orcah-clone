@@ -22,13 +22,7 @@ export function ramoLabel(company: {
   return company.customRamoName || company.businessCategory?.name || "Ramo";
 }
 
-export function instagramUrl(value?: string | null) {
-  if (!value) return "";
-  const handle = value.trim().replace(/^@/, "");
-  if (!handle) return "";
-  if (handle.startsWith("http")) return handle;
-  return `https://instagram.com/${handle}`;
-}
+export { instagramUrl } from "@/lib/instagram";
 
 export function websiteUrl(value?: string | null) {
   if (!value) return "";

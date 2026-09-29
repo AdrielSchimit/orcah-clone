@@ -5,6 +5,7 @@ import { FormEvent, useRef, useState } from "react";
 import { PhoneInput } from "@/components/phone-input";
 import { Toggle } from "@/components/toggle";
 import { uploadImage } from "@/lib/client-image";
+import { instagramHandle } from "@/lib/instagram";
 
 const inputClass = "w-full rounded-btn border border-line bg-card px-4 py-3 text-base text-text";
 const saveClass =
@@ -188,9 +189,25 @@ export function ProfileForm({
 export function ContactForm({
   company,
 }: {
-  company: { whatsapp: string; phone: string; instagram: string | null; facebook: string | null; website: string | null };
+  company: {
+    whatsapp: string;
+    phone: string;
+    instagram: string | null;
+    instagramConfirmed: boolean;
+    facebook: string | null;
+    website: string | null;
+  };
 }) {
   const { saving, saved, error, save } = useSave();
+  const savedHandle = instagramHandle(company.instagram);
+  const [instagram, setInstagram] = useState(company.instagram ?? "");
+  const [confirmed, setConfirmed] = useState(company.instagramConfirmed && Boolean(savedHandle));
+  const handle = instagramHandle(instagram);
+
+  function onInstagramChange(value: string) {
+    setInstagram(value);
+    if (instagramHandle(value) !== savedHandle) setConfirmed(false);
+  }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -199,6 +216,7 @@ export function ContactForm({
       whatsapp: form.get("whatsapp"),
       phone: form.get("phone"),
       instagram: form.get("instagram"),
+      instagramConfirmed: form.get("instagramConfirmed") === "true",
       facebook: form.get("facebook"),
       website: form.get("website"),
     });
@@ -212,9 +230,33 @@ export function ContactForm({
       <Field label="Telefone (opcional)">
         <PhoneInput name="phone" defaultValue={company.phone} placeholder="(49) 3333-0000" className={inputClass} />
       </Field>
-      <Field label="Instagram">
-        <input name="instagram" defaultValue={company.instagram ?? ""} placeholder="@seunegocio" className={inputClass} />
+      <Field label="Instagram" hint="O @ da conta. Não precisa ser igual ao nome da página.">
+        <input
+          name="instagram"
+          value={instagram}
+          onChange={(event) => onInstagramChange(event.target.value)}
+          placeholder="@seunegocio"
+          className={inputClass}
+          autoCapitalize="off"
+          autoCorrect="off"
+          spellCheck={false}
+        />
       </Field>
+      {handle ? (
+        <label className="flex items-start gap-3 rounded-btn border border-line bg-paper px-3 py-3 text-sm leading-snug">
+          <input
+            type="checkbox"
+            name="instagramConfirmed"
+            value="true"
+            checked={confirmed}
+            onChange={(event) => setConfirmed(event.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0"
+          />
+          <span>
+            Confirmo que <strong>@{handle}</strong> é o Instagram da minha empresa.
+          </span>
+        </label>
+      ) : null}
       <Field label="Facebook">
         <input name="facebook" defaultValue={company.facebook ?? ""} placeholder="facebook.com/seunegocio" className={inputClass} />
       </Field>

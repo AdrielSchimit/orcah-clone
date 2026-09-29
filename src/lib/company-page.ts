@@ -1,3 +1,4 @@
+import { instagramHandle } from "@/lib/instagram";
 import { normalizeHexColor } from "@/lib/public-page";
 
 /**
@@ -12,6 +13,7 @@ export type CompanyPagePatch = {
   whatsapp?: string;
   phone?: string;
   instagram?: string | null;
+  instagramConfirmed?: boolean;
   facebook?: string | null;
   website?: string | null;
   primaryColor?: string | null;
@@ -52,11 +54,13 @@ export function normalizeCompanyPagePatch(body: Record<string, unknown>):
     if (phone) data.phone = phone;
   }
   if ("instagram" in body) {
-    data.instagram =
-      text(body.instagram, 120)
-        .replace(/^https?:\/\/(www\.)?instagram\.com\//i, "")
-        .replace(/^@/, "")
-        .replace(/\/+$/, "") || null;
+    const handle = instagramHandle(body.instagram);
+    const confirmed = body.instagramConfirmed === true || body.instagramConfirmed === "true" || body.instagramConfirmed === "on";
+    if (handle && !confirmed) {
+      return { error: "Confirme o Instagram. O @ é o da conta, não o nome da página." };
+    }
+    data.instagram = handle || null;
+    data.instagramConfirmed = Boolean(handle);
   }
   if ("facebook" in body) data.facebook = text(body.facebook, 180) || null;
   if ("website" in body) data.website = text(body.website, 180) || null;

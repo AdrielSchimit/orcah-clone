@@ -165,6 +165,7 @@ model Company {
   zipCode            String?  @map("zip_code") @db.VarChar(10)
   website            String?  @db.VarChar(180)
   instagram          String?  @db.VarChar(120)
+  instagramConfirmed Boolean @default(false) @map("instagram_confirmed")
   facebook           String?  @db.VarChar(180)
   openingHours       String?  @map("opening_hours") @db.VarChar(160)
   primaryColor       String?  @map("primary_color") @db.VarChar(7)
