@@ -46,7 +46,7 @@ export function dicaDaTela(pathname: string, ctx: AssistenteContexto): Assistent
       id: "orcamento",
       pose: "trabalhando",
       texto:
-        "Toque em “Enviar pelo WhatsApp”. O cliente abre o link no celular e aprova, recusa ou pede alteração.",
+        "Toque em “Mandar no WhatsApp”. Se a janela não abrir, copie a mensagem ou o link ali embaixo.",
     };
   }
   if (pathname.startsWith("/painel/pedidos")) {
@@ -131,7 +131,7 @@ export const perguntasRapidas: AssistentePergunta[] = [
       id: "r-enviar",
       pose: "explicando",
       texto:
-        "Toque em “Salvar e enviar”. O orçamento fica salvo e o WhatsApp abre com o link pronto. Se quiser só guardar, use “Salvar rascunho”.",
+        "Toque em “Salvar e enviar”. O orçamento fica salvo e o WhatsApp abre com o texto pronto. Se a janela não abrir, copie a mensagem ou o link. Pra só guardar, use “Salvar rascunho”.",
       acao: NOVO_ORCAMENTO,
     },
   },

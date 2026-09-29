@@ -47,7 +47,8 @@ export default async function OrcamentoPage({
   if (!user?.company) return null;
 
   const id = Number((await params).id);
-  const envioFalhou = (await searchParams).envio === "falhou";
+  const envio = (await searchParams).envio;
+  const notice = envio === "aberto" || envio === "falhou" ? envio : undefined;
   const budget = await prisma.budget.findFirst({
     where: { id, companyId: user.company.id },
     include: {
@@ -123,20 +124,19 @@ export default async function OrcamentoPage({
         <div className="mb-5 rounded-box border border-ok/30 bg-ok-wash p-4">
           <p className="text-sm font-semibold text-ok">Nova versão pronta para aprovação</p>
           <p className="mt-1 text-sm text-text-soft">
-            Avise o cliente: toque em <strong className="font-semibold text-text">Enviar pelo WhatsApp</strong>. O link é o
+            Avise o cliente: toque em <strong className="font-semibold text-text">Mandar a alteração</strong>. O link é o
             mesmo e já mostra a versão nova.
           </p>
         </div>
       ) : null}
 
-      {envioFalhou ? (
-        <p className="mb-4 rounded-box border border-no/30 bg-card p-4 text-sm text-no">
-          O orçamento foi salvo. Não consegui abrir o WhatsApp agora. Toque em Enviar pelo WhatsApp para tentar de novo.
-        </p>
-      ) : null}
-
       <div className="mb-6 flex flex-col gap-2">
-        <SendWhatsAppButton budgetId={budget.id} />
+        <SendWhatsAppButton
+          budgetId={budget.id}
+          status={budget.status}
+          republished={republishedNow}
+          notice={notice}
+        />
         <div className="grid grid-cols-2 gap-2">
           <a
             href={`/api/orcamentos/${budget.id}/pdf`}

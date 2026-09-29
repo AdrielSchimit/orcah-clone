@@ -410,9 +410,22 @@ export function BudgetForm({
       if (sendAfter) {
         try {
           const sent = await fetch(`/api/orcamentos/${data.budget.id}/enviar`, { method: "POST" });
-          const sentBody = (await sent.json().catch(() => ({}))) as { href?: string };
+          const sentBody = (await sent.json().catch(() => ({}))) as {
+            href?: string;
+            message?: string;
+            url?: string;
+            error?: string;
+          };
+          if (sentBody.message && sentBody.url) {
+            sessionStorage.setItem(
+              `orcah-wa-${data.budget.id}`,
+              JSON.stringify({ message: sentBody.message, url: sentBody.url, error: sentBody.error ?? "" }),
+            );
+          }
           if (sent.ok && sentBody.href) {
-            window.location.href = sentBody.href;
+            window.open(sentBody.href, "_blank", "noopener,noreferrer");
+            router.push(`/painel/orcamentos/${data.budget.id}?envio=aberto`);
+            router.refresh();
             return;
           }
         } catch {

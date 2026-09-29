@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
+import { isRepublishMetadata } from "@/lib/budget-cycle";
 import { requireActivePlan } from "@/lib/plan";
 import { prisma } from "@/lib/db";
 import { formatBRL } from "@/lib/money";
 import { recordBudgetEvent } from "@/lib/public-budget";
-import { budgetPublicUrl, whatsappHref, whatsappBudgetMessage } from "@/lib/whatsapp";
-import { companyTemplate, parseExtras } from "@/lib/templates";
+import { budgetPublicUrl, whatsappHref, whatsappBudgetMessage, whatsappPhoneError } from "@/lib/whatsapp";
 
 export async function POST(
   request: Request,
@@ -16,33 +16,36 @@ export async function POST(
   const id = Number((await context.params).id);
   const budget = await prisma.budget.findFirst({
     where: { id, companyId: auth.company.id },
-    include: {
-      customer: true,
-      serviceCity: { select: { name: true } },
-      company: { include: { businessCategory: true } },
-    },
+    include: { customer: true },
   });
   if (!budget) {
     return NextResponse.json({ error: "Orçamento não encontrado." }, { status: 404 });
   }
 
-  const template = companyTemplate(budget.company);
   const phone = budget.customer.whatsapp || budget.customer.phone;
   const url = budgetPublicUrl(budget.publicToken);
+  const lastEvent = await prisma.budgetEvent.findFirst({
+    where: { budgetId: budget.id },
+    orderBy: { createdAt: "desc" },
+    select: { event: true, metadata: true },
+  });
+  const republished =
+    budget.status === "sent" && lastEvent?.event === "sent" && isRepublishMetadata(lastEvent.metadata);
   const message = whatsappBudgetMessage({
     customerName: budget.customer.name,
     number: budget.number,
     totalLabel: formatBRL(Number(budget.total)),
     url,
-    templateKey: template.key,
-    address: budget.serviceAddress,
-    city: budget.serviceCity?.name,
-    days: budget.estimatedDays,
-    extras: parseExtras(budget.extras),
+    status: budget.status,
+    republished,
   });
+  const phoneError = whatsappPhoneError(phone);
+  if (phoneError) {
+    return NextResponse.json({ error: phoneError, url, message }, { status: 400 });
+  }
   const href = whatsappHref(phone, message);
   if (!href) {
-    return NextResponse.json({ error: "Cliente sem telefone para WhatsApp." }, { status: 400 });
+    return NextResponse.json({ error: phoneError || "Não consegui abrir o WhatsApp.", url, message }, { status: 400 });
   }
 
   if (budget.status === "draft") {
@@ -60,5 +63,5 @@ export async function POST(
   }
 
   const status = budget.status === "draft" || budget.status === "waiting" ? "sent" : budget.status;
-  return NextResponse.json({ ok: true, href, url, status });
+  return NextResponse.json({ ok: true, href, url, message, status });
 }
