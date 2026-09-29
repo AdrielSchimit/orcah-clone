@@ -56,8 +56,8 @@ export function dicaDaTela(pathname: string, ctx: AssistenteContexto): Assistent
         pose: "atencao",
         texto:
           ctx.pedidosNovos === 1
-            ? "Chegou 1 pedido novo! Responda rápido: quem manda o orçamento primeiro costuma fechar."
-            : `Chegaram ${ctx.pedidosNovos} pedidos novos! Responda rápido: quem manda o orçamento primeiro costuma fechar.`,
+            ? "Chegou 1 pedido novo! Toque em Criar orçamento: o cliente e o serviço já entram preenchidos."
+            : `Chegaram ${ctx.pedidosNovos} pedidos novos! Toque em Criar orçamento: o cliente e o serviço já entram preenchidos.`,
       };
     }
     return {
@@ -152,7 +152,7 @@ export const perguntasRapidas: AssistentePergunta[] = [
       id: "r-pedidos",
       pose: "pensando",
       texto:
-        "São clientes que pediram orçamento pela sua página pública. Você responde montando o orçamento para eles.",
+        "São clientes que pediram orçamento pela sua página. Toque em Criar orçamento: nome, WhatsApp e serviço já vêm preenchidos, e o pedido fica convertido.",
       acao: { label: "Ver pedidos", href: "/painel/pedidos" },
     },
   },

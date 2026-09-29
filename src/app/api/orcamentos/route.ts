@@ -49,6 +49,7 @@ export async function POST(request: Request) {
     downPaymentValue?: string | number;
     extras?: unknown;
     items?: ItemInput[];
+    quoteRequestId?: number | string;
   };
 
   const customerId = Number(body.customerId);
@@ -113,7 +114,11 @@ export async function POST(request: Request) {
   const validityDate = body.validityDate ? new Date(`${body.validityDate}T12:00:00`) : null;
   const estimatedDays = body.estimatedDays ? Number(body.estimatedDays) : null;
 
-  const budget = await prisma.budget.create({
+  const parsedRequestId = Number(body.quoteRequestId);
+  const quoteRequestId = Number.isInteger(parsedRequestId) && parsedRequestId > 0 ? parsedRequestId : null;
+
+  const budget = await prisma.$transaction(async (tx) => {
+    const created = await tx.budget.create({
     data: {
       companyId: auth.company.id,
       customerId: customer.id,
@@ -141,10 +146,20 @@ export async function POST(request: Request) {
       items: { create: mapItemCreates(items) },
       events: { create: { event: "created" } },
     },
-    include: {
-      customer: { select: { id: true, name: true, phone: true } },
-      items: { orderBy: { sortOrder: "asc" } },
-    },
+      include: {
+        customer: { select: { id: true, name: true, phone: true } },
+        items: { orderBy: { sortOrder: "asc" } },
+      },
+    });
+
+    if (quoteRequestId) {
+      await tx.quoteRequest.updateMany({
+        where: { id: quoteRequestId, companyId: auth.company.id },
+        data: { status: "converted" },
+      });
+    }
+
+    return created;
   });
 
   return NextResponse.json({ ok: true, budget: serializeBudget(budget) });

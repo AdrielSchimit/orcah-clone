@@ -91,6 +91,14 @@ export function PedidosList({ pedidos }: { pedidos: Pedido[] }) {
               <p className="text-xs text-text-soft">Horário: {pedido.preferredTime}</p>
             ) : null}
             <div className="mt-3 flex flex-col gap-2">
+              {pedido.status === "archived" ? null : (
+                <a
+                  href={`/painel/orcamentos/novo?pedido=${pedido.id}`}
+                  className="flex min-h-12 items-center justify-center rounded-btn bg-gold px-3 text-sm font-semibold text-ink"
+                >
+                  {pedido.status === "converted" ? "Criar outro orçamento" : "Criar orçamento"}
+                </a>
+              )}
               {zap ? (
                 <a
                   href={zap}

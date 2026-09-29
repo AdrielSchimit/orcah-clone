@@ -70,6 +70,9 @@ export type BudgetFormValues = {
   downPaymentValue?: string;
   extras?: BudgetExtras | null;
   items?: Partial<Item>[];
+  newCustomerName?: string;
+  newCustomerPhone?: string;
+  quoteRequestId?: number;
 };
 
 function money(value: string) {
@@ -170,7 +173,7 @@ export function BudgetForm({
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [customerId, setCustomerId] = useState<number | "">(defaults?.customerId ?? "");
   const [customerLabel, setCustomerLabel] = useState(defaults?.customerName ?? "");
-  const [newCustomer, setNewCustomer] = useState(false);
+  const [newCustomer, setNewCustomer] = useState(Boolean(defaults?.newCustomerName) && !defaults?.customerId);
   const [loadingLabel, setLoadingLabel] = useState("Salvando…");
   const [states, setStates] = useState<State[]>([]);
   const [cities, setCities] = useState<City[]>([]);
@@ -192,7 +195,7 @@ export function BudgetForm({
   const [downPaymentValue, setDownPaymentValue] = useState(defaults?.downPaymentValue ?? "30");
   const [validityDate, setValidityDate] = useState(defaults?.validityDate ?? defaultValidity());
   const [estimatedDays, setEstimatedDays] = useState(defaults?.estimatedDays ?? "");
-  const [showMoreOptions, setShowMoreOptions] = useState(Boolean(defaults?.serviceAddress));
+  const [showMoreOptions, setShowMoreOptions] = useState(Boolean(defaults?.serviceAddress || defaults?.notes));
   const [catalog, setCatalog] = useState<SavedService[]>([]);
   const [savingCatalogAt, setSavingCatalogAt] = useState<number | null>(null);
   const [extras, setExtras] = useState<BudgetExtras>(() => {
@@ -376,6 +379,7 @@ export function BudgetForm({
       const resolvedCustomerId = await ensureCustomer(payloadForm);
       const payload = {
         customerId: resolvedCustomerId,
+        quoteRequestId: budgetId ? undefined : defaults?.quoteRequestId,
         serviceStateId: stateId,
         serviceCityId: cityId,
         validityDate,
@@ -485,11 +489,11 @@ export function BudgetForm({
           <div className="flex flex-col gap-3">
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium">Nome</span>
-              <input name="newName" required placeholder="Maria Souza" className={fieldClass} />
+              <input name="newName" required defaultValue={defaults?.newCustomerName} placeholder="Maria Souza" className={fieldClass} />
             </label>
             <label className="block">
               <span className="mb-1.5 block text-sm font-medium">Telefone</span>
-              <PhoneInput name="newPhone" required placeholder="(49) 9 9999-0000" className={fieldClass} />
+              <PhoneInput name="newPhone" required defaultValue={defaults?.newCustomerPhone} placeholder="(49) 9 9999-0000" className={fieldClass} />
             </label>
             <button type="button" onClick={() => setNewCustomer(false)} className="text-left text-sm text-text-soft">
               Usar cliente já cadastrado
