@@ -20,13 +20,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const title = `${page.name} | Orçah`;
   const description =
     page.description?.slice(0, 160) || `${page.ramo} em ${page.areaLabel}. Peça seu orçamento pelo celular.`;
-  const image = page.logoPath && /^https?:\/\//.test(page.logoPath) ? [{ url: page.logoPath }] : undefined;
   return {
     // absoluto: o layout raiz acrescentaria "· Orçah" de novo
     title: { absolute: title },
     description,
-    openGraph: { title, description, type: "website", locale: "pt_BR", images: image },
-    twitter: { card: "summary", title, description },
+    openGraph: { title, description, type: "website", locale: "pt_BR" },
+    twitter: { card: "summary_large_image", title, description },
   };
 }
 

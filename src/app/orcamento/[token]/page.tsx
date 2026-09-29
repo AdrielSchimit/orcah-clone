@@ -48,9 +48,12 @@ export async function generateMetadata({
     include: { company: { select: { name: true } } },
   });
   if (!budget) return { title: "Orçamento" };
+  const title = `${budget.company.name} · ${budget.number}`;
   return {
-    title: `${budget.company.name} · ${budget.number}`,
+    title,
     robots: { index: false, follow: false },
+    openGraph: { title, type: "website", locale: "pt_BR" },
+    twitter: { card: "summary_large_image", title },
   };
 }
 

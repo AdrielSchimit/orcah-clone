@@ -10,7 +10,9 @@ import {
   ShareBar,
 } from "@/components/page-editor";
 import { ASSISTED_SETUP_PRICE_LABEL, ASSISTED_SETUP_STATUS_LABEL, findActiveAssistedSetup } from "@/lib/assisted-setup";
+import { SharePreviewCard } from "@/components/share-preview-card";
 import { ramoLabel } from "@/lib/company-display";
+import { companySharePreview } from "@/lib/share-preview";
 import { pageCompleteness } from "@/lib/company-page";
 import { prisma } from "@/lib/db";
 import { statsForPeriod, sumStats } from "@/lib/page-stats";
@@ -81,6 +83,14 @@ export default async function PaginaPage() {
   ]);
 
   const url = companyPublicUrl(company.slug);
+  const place = company.city ? `${company.city.name} - ${company.state.uf}` : company.state.name;
+  const sharePreview = companySharePreview({
+    name: company.name,
+    ramo: ramoLabel(company),
+    place: company.servesRegion ? `${place} e região` : place,
+    description: company.description,
+    host: url,
+  });
   const views7 = sumStats(stats).views;
   const progress = pageCompleteness({
     logoPath: company.logoPath,
@@ -128,7 +138,9 @@ export default async function PaginaPage() {
           Visualizar minha página
         </a>
       </section>
-      <div className="mb-5">
+      <div className="mb-5 flex flex-col gap-3">
+        <SharePreviewCard preview={sharePreview} />
+        <p className="text-xs text-text-soft">Assim o link aparece quando alguém compartilha, inclusive no Instagram.</p>
         <ShareBar url={url} name={company.name} />
       </div>
 
