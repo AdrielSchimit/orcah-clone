@@ -14,6 +14,7 @@ const RESERVED_COMPANY_SLUGS = new Set([
   "orcamento",
   "empresa",
   "orcah",
+  "prestadores",
   "staging",
   "dev",
 ]);

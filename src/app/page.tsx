@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { HomeEntryModal } from "@/components/home/home-entry-modal";
 import { FlowSection } from "@/components/home/flow-stepper";
 import { HeroQuoteDemo } from "@/components/home/hero-quote-demo";
 import { PagePhoneDemo } from "@/components/home/page-phone-demo";
@@ -85,6 +86,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-1 flex-col bg-paper">
+      <HomeEntryModal />
       <header className="sticky top-0 z-20 border-b border-line bg-card/80 px-4 py-3 backdrop-blur-md">
         <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3">
           <Link href="/" aria-label="Orçah" className="flex min-h-12 shrink-0 items-center">
