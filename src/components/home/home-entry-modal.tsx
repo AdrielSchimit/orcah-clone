@@ -6,6 +6,9 @@ import { appUrl } from "@/lib/urls";
 
 const STORAGE_KEY = "orcah-home-entry-dismissed";
 
+const journeyCardClass =
+  "group relative flex min-h-[7.5rem] flex-col rounded-2xl border border-line bg-card p-4 shadow-card transition-all duration-200 ease-soft hover:-translate-y-0.5 hover:shadow-float focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus sm:min-h-0 sm:p-5";
+
 export function HomeEntryModal() {
   const [open, setOpen] = useState(false);
 
@@ -34,57 +37,86 @@ export function HomeEntryModal() {
       role="dialog"
       aria-modal="true"
       aria-labelledby="home-entry-title"
+      aria-describedby="home-entry-desc"
     >
       <button
         type="button"
         aria-label="Fechar e ir ao site"
-        className="absolute inset-0 bg-ink/40 backdrop-blur-md"
+        className="absolute inset-0 bg-ink/32 backdrop-blur-[3px] transition-opacity"
         onClick={dismiss}
       />
-      <div className="relative w-full max-w-2xl animate-rise rounded-[1.75rem] bg-card p-6 shadow-float ring-1 ring-line md:p-8">
-        <p className="text-center text-xs font-medium uppercase tracking-[0.04em] text-gold-deep">Bem-vindo ao Orçah</p>
-        <h2 id="home-entry-title" className="mt-2 text-center text-xl font-semibold text-text md:text-2xl">
-          O que você procura?
-        </h2>
-        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <div className="relative w-full max-w-[720px] animate-modal-enter rounded-3xl border border-line bg-card px-6 py-8 shadow-float sm:px-10 sm:py-9">
+        <header className="text-center">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gold-deep">Bem-vindo ao Orçah</p>
+          <h2 id="home-entry-title" className="mt-2 text-2xl font-semibold tracking-tight text-text sm:text-[1.625rem]">
+            O que você quer fazer?
+          </h2>
+          <p id="home-entry-desc" className="mt-1.5 text-sm text-text-soft">
+            Escolha como deseja acessar o Orçah.
+          </p>
+        </header>
+
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 sm:gap-4">
           <Link
             href="/prestadores"
             onClick={dismiss}
-            className="group flex min-h-38 flex-col rounded-box border border-line bg-paper p-5 shadow-card transition-shadow hover:shadow-float focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            className={`${journeyCardClass} hover:border-gold hover:bg-gold-wash/40`}
           >
-            <span className="flex h-11 w-11 items-center justify-center rounded-btn bg-gold-wash text-gold-deep">
+            <span className="flex h-11 w-11 items-center justify-center rounded-btn bg-gold-wash text-gold-deep transition-colors duration-200 group-hover:bg-gold-wash group-hover:text-gold-press">
               <SearchIcon />
             </span>
-            <span className="mt-4 text-base font-semibold leading-snug text-text group-hover:text-gold-deep">
-              Pesquisar Prestadores em sua Região
+            <span className="mt-3 flex items-start justify-between gap-2">
+              <span className="font-semibold leading-snug text-text">Encontrar Profissionais</span>
+              <ArrowIcon className="mt-0.5 shrink-0 text-text-soft opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-gold-deep group-hover:opacity-100" />
             </span>
-            <span className="mt-1 text-sm text-text-soft">Encontre profissionais perto de você</span>
+            <span className="mt-1 text-sm leading-snug text-text-soft">
+              Encontre prestadores de confiança na sua região.
+            </span>
           </Link>
+
           <Link
             href={appUrl("/login")}
             onClick={dismiss}
-            className="group flex min-h-38 flex-col rounded-box border border-line bg-paper p-5 shadow-card transition-shadow hover:shadow-float focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+            className={`${journeyCardClass} hover:border-ink-line hover:bg-brand-wash/50`}
           >
-            <span className="flex h-11 w-11 items-center justify-center rounded-btn bg-brand-wash text-ink">
+            <span className="flex h-11 w-11 items-center justify-center rounded-btn bg-brand-wash text-ink transition-colors duration-200 group-hover:bg-brand-wash group-hover:text-ink-deep">
               <PanelIcon />
             </span>
-            <span className="mt-4 text-base font-semibold leading-snug text-text group-hover:text-gold-deep">
-              Painel do Prestador
+            <span className="mt-3 flex items-start justify-between gap-2">
+              <span className="font-semibold leading-snug text-text">Área do Prestador</span>
+              <ArrowIcon className="mt-0.5 shrink-0 text-text-soft opacity-0 transition-all duration-200 group-hover:translate-x-0.5 group-hover:text-ink group-hover:opacity-100" />
             </span>
-            <span className="mt-1 text-sm text-text-soft">Orçamentos, página e clientes</span>
+            <span className="mt-1 text-sm leading-snug text-text-soft">
+              Gerencie orçamentos, clientes, serviços e sua página.
+            </span>
           </Link>
         </div>
-        <div className="mt-8 flex justify-center">
+
+        <footer className="mt-5 border-t border-line/80 pt-4">
           <button
             type="button"
             onClick={dismiss}
-            className="inline-flex min-h-12 items-center rounded-btn px-6 text-sm font-semibold text-text-soft underline-offset-4 hover:text-text hover:underline"
+            className="group/more mx-auto flex min-h-11 items-center gap-1 text-sm font-medium text-text-soft transition-colors duration-200 hover:text-gold-deep"
           >
-            Ir ao Site
+            Continuar para o site
+            <span
+              className="inline-block transition-transform duration-200 group-hover/more:translate-x-0.5"
+              aria-hidden
+            >
+              →
+            </span>
           </button>
-        </div>
+        </footer>
       </div>
     </div>
+  );
+}
+
+function ArrowIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={`h-4 w-4 ${className ?? ""}`} fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
 }
 

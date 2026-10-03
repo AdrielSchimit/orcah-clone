@@ -67,6 +67,7 @@
   --shadow-float: 0 2px 4px rgb(21 31 56 / 0.06), 0 16px 40px rgb(21 31 56 / 0.12);
   --ease-soft: var(--ease-out-soft);
   --animate-rise: rise 400ms var(--ease-out-soft) both;
+  --animate-modal-enter: modal-enter 320ms var(--ease-out-soft) both;
   --animate-pop: pop 300ms var(--ease-out-soft) both;
   --animate-notify: notify 2400ms var(--ease-out-soft) both;
   --animate-progress: progress var(--progress-duration, 4s) linear both;
@@ -112,6 +113,17 @@
   from {
     opacity: 0;
     transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
   }
   to {
     opacity: 1;
