@@ -45,7 +45,7 @@ export default function HeroTestePage() {
               href={appUrl("/cadastro")}
               className="inline-flex min-h-10 items-center rounded-btn bg-gold px-4 text-sm font-semibold text-ink shadow-card transition hover:-translate-y-0.5 hover:bg-gold-press"
             >
-              Criar página grátis
+              Começar grátis
             </Link>
           </div>
         </div>
@@ -79,12 +79,24 @@ export default function HeroTestePage() {
                 <SocialChip icon={<LinkIcon />} label="e onde quiser" />
               </div>
 
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
+              <div className="mt-5 flex flex-wrap items-center gap-2">
+                <span className="mr-1 text-xs font-medium text-text-soft">Para prestadores</span>
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-wash px-2.5 py-1 text-xs font-semibold text-gold-deep">
+                  <CalendarIcon />
+                  {TRIAL_DAYS} dias grátis
+                </span>
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-card px-2.5 py-1 text-xs font-semibold text-ink shadow-card">
+                  <CardIcon />
+                  Sem cartão de crédito
+                </span>
+              </div>
+
+              <div className="mt-5 flex flex-col gap-3 sm:flex-row">
                 <Link
-                  href={appUrl("/cadastro")}
+                  href={appUrl("/painel")}
                   className="inline-flex min-h-12 flex-1 items-center justify-center rounded-[14px] bg-gold px-5 text-base font-semibold text-ink shadow-[0_12px_30px_-16px_rgba(229,153,26,.85)] transition hover:-translate-y-0.5 hover:bg-gold-press sm:flex-none"
                 >
-                  Criar minha página grátis
+                  Acessar meu painel
                   <ArrowIcon />
                 </Link>
                 <a
@@ -94,12 +106,6 @@ export default function HeroTestePage() {
                   <EyeIcon />
                   Ver exemplo pronto
                 </a>
-              </div>
-
-              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-text-soft">
-                <span className="inline-flex items-center gap-1.5"><CheckIcon /> {TRIAL_DAYS} dias grátis</span>
-                <span className="inline-flex items-center gap-1.5"><CheckIcon /> Sem cartão</span>
-                <span className="inline-flex items-center gap-1.5"><CheckIcon /> Funciona no celular</span>
               </div>
 
               <div className="mt-7 grid grid-cols-3 gap-2 sm:gap-3">
@@ -249,13 +255,21 @@ function ResultItem({ title, text }: { title: string; text: string }) {
   );
 }
 
-function CheckIcon() {
+function CalendarIcon() {
   return (
-    <span className="flex h-4 w-4 items-center justify-center rounded-full bg-ok-wash text-ok" aria-hidden>
-      <svg viewBox="0 0 16 16" className="h-2.5 w-2.5" fill="none" stroke="currentColor" strokeWidth="2.4">
-        <path d="M3.5 8.5l3 3 6-7" strokeLinecap="round" strokeLinejoin="round" />
-      </svg>
-    </span>
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+      <rect x="2.5" y="3.5" width="11" height="10" rx="2" />
+      <path d="M2.5 6.5h11M5.5 2.5v2M10.5 2.5v2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function CardIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+      <rect x="2" y="4" width="12" height="8" rx="1.5" />
+      <path d="M2 7h12M4.5 10h3" strokeLinecap="round" />
+    </svg>
   );
 }
 
@@ -288,8 +302,9 @@ function InstagramIcon() {
 
 function WhatsAppIcon() {
   return (
-    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden>
-      <path d="M19.1 4.9A9.8 9.8 0 0 0 12.1 2C6.6 2 2.2 6.4 2.2 11.9c0 1.7.4 3.4 1.3 4.9L2 22l5.3-1.4A9.9 9.9 0 0 0 12 21.8c5.5 0 9.9-4.4 9.9-9.9 0-2.6-1-5.1-2.8-7Zm-7 15.2a8.2 8.2 0 0 1-4.2-1.1l-.3-.2-3.1.8.8-3-.2-.3a8.2 8.2 0 1 1 7 3.8Zm4.5-6.2c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1-.1.3-.6.8-.8 1-.1.2-.3.2-.5.1-2.2-1.1-3.6-2-5-4.5-.1-.2 0-.4.1-.5l.4-.4.2-.4c.1-.2 0-.3 0-.4L8 6.3c-.2-.5-.4-.4-.6-.4H7c-.2 0-.4.1-.7.3-.2.3-.9.9-.9 2.1 0 1.2.9 2.4 1 2.6.1.2 1.8 2.7 4.2 3.7.6.3 1.1.4 1.4.5.6.2 1.1.2 1.6.1.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2 0-.1-.2-.2-.5-.3Z" />
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden>
+      <path d="M20 12a8 8 0 0 1-11.7 7.1L4 20l1-4.1A8 8 0 1 1 20 12Z" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M9.4 8.9c.2-.4.4-.4.6-.4h.5c.2 0 .4.1.5.4l.5 1.4c.1.2.1.4 0 .6l-.4.6c-.1.1-.1.3 0 .4.4.7 1 1.3 1.7 1.7.1.1.3.1.4 0l.6-.4c.2-.1.4-.1.6 0l1.4.5c.3.1.4.3.4.5v.5c0 .2 0 .4-.4.6-.4.2-1 .4-1.7.2-1-.2-2.2-.8-3.4-2-1.2-1.2-1.8-2.4-2-3.4-.1-.7 0-1.3.2-1.7Z" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
