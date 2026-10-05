@@ -9,11 +9,13 @@ export function HomeMobileNav({
   providerAreaLabel,
   loggedIn,
   links,
+  loginPopoverId,
 }: {
   providerAreaHref: string;
   providerAreaLabel: string;
   loggedIn: boolean;
   links: readonly (readonly [string, string])[];
+  loginPopoverId?: string;
 }) {
   const detailsRef = useRef<HTMLDetailsElement>(null);
 
@@ -44,13 +46,13 @@ export function HomeMobileNav({
           </a>
         ))}
         <div className="my-2 h-px bg-line" />
-        <Link
+        {!loggedIn && loginPopoverId ? <button type="button" popoverTarget={loginPopoverId} aria-haspopup="dialog" onClick={close} className="flex min-h-11 w-full items-center rounded-btn bg-paper px-3 text-sm font-semibold text-ink">{providerAreaLabel}</button> : <Link
           href={providerAreaHref}
           onClick={close}
           className="flex min-h-11 items-center rounded-btn bg-paper px-3 text-sm font-semibold text-ink"
         >
           {providerAreaLabel}
-        </Link>
+        </Link>}
         {!loggedIn ? (
           <Link
             href={appUrl("/cadastro")}

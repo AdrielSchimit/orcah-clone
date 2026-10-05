@@ -7,7 +7,7 @@
 .desktopNav a:hover { color: #b66a00; }
 .headerActions { display: flex; align-items: center; gap: 12px; padding-left: 18px; border-left: 1px solid #dde4f0; }
 .areaButton,.startButton { display: inline-flex; align-items: center; justify-content: center; gap: 9px; min-height: 47px; padding: 0 18px; border-radius: 40px; white-space: nowrap; font-size: 13px; font-weight: 650; letter-spacing: -.3px; transition: box-shadow .2s,background .2s; }
-.areaButton { border: 1px solid #e6eaf1; background: linear-gradient(#fff,#f5f7fb); }
+.areaButton { border: 1px solid #e6eaf1; background: linear-gradient(#fff,#f5f7fb); cursor: pointer; }
 .areaButton:hover { background: #edf2f9; }
 .startButton { min-height: 51px; padding-inline: 24px; border: 1px solid #ffc34c; background: linear-gradient(180deg,#ffd36b 0%,#ffbd2e 48%,#ffae0d 100%); box-shadow: inset 0 1px 0 #fff5ccbd,inset 0 -1px 0 #d98a0026,0 3px 6px #b9770012,0 8px 20px #ffae002b; }
 .startButton:hover { background: linear-gradient(180deg,#ffdd87 0%,#ffca4b 48%,#ffb820 100%); box-shadow: inset 0 1px 0 #fff8d9d9,inset 0 -1px 0 #d98a0026,0 4px 8px #b9770018,0 10px 24px #ffae003b; }
@@ -165,7 +165,7 @@
   .logoImage { width: 133px; }
   .desktopNav,.headerActions { display: none; }
   .mobileActions { grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: 5px; padding-right: 17px; font-size: 13px; font-weight: 500; }
-  .mobileActions>a { padding: 12px 8px; }
+  .mobileActions>a,.mobileActions>button { padding: 12px 8px; cursor: pointer; }
   .tabs { grid-column: 1 / -1; grid-row: 2; width: min(640px,calc(100% - 30px)); margin: 0 auto 12px; }
   .tab { justify-content: flex-start; padding-inline: 18px; }
   .tab small { display: block; }

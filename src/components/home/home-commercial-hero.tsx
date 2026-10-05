@@ -8,6 +8,7 @@ import { TRIAL_DAYS } from "@/lib/plan-constants";
 import { appUrl, companyPublicUrl } from "@/lib/urls";
 import { OrcahLogo } from "@/components/orcah-logo";
 import { HomeMobileNav } from "./home-mobile-nav";
+import { HOME_LOGIN_ID, HomeProviderLogin } from "./home-provider-login";
 import styles from "./home-commercial-hero.module.css";
 
 type IconName = "person" | "search" | "arrow" | "pin" | "check" | "calendar" | "card" | "page" | "star" | "bolt" | "paint" | "bricks" | "water" | "snow" | "house" | "tool" | "more";
@@ -72,18 +73,19 @@ export function HomeCommercialHero({
           ))}
         </div>
           <div className={styles.headerActions}>
-            <Link href={providerAreaHref} className={styles.areaButton}>
+            {loggedIn ? <Link href={providerAreaHref} className={styles.areaButton}>{providerAreaLabel}</Link> : <button type="button" popoverTarget={HOME_LOGIN_ID} aria-haspopup="dialog" className={styles.areaButton}>
               <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>
               {providerAreaLabel}
-            </Link>
+            </button>}
             {!loggedIn && <Link href={appUrl("/cadastro")} className={styles.startButton}>Começar grátis <Icon name="arrow" /></Link>}
           </div>
           <div className={styles.mobileActions}>
-            <HomeMobileNav providerAreaHref={providerAreaHref} providerAreaLabel={providerAreaLabel} loggedIn={loggedIn} links={links} />
-            <Link href={providerAreaHref}>{loggedIn ? "Painel" : "Entrar"}</Link>
+            <HomeMobileNav providerAreaHref={providerAreaHref} providerAreaLabel={providerAreaLabel} loggedIn={loggedIn} links={links} loginPopoverId={HOME_LOGIN_ID} />
+            {loggedIn ? <Link href={providerAreaHref}>Painel</Link> : <button type="button" popoverTarget={HOME_LOGIN_ID} aria-haspopup="dialog">Entrar</button>}
           </div>
         </div>
       </header>
+      {!loggedIn && <HomeProviderLogin />}
     <section id="hero-comercial" className={styles.hero} data-audience={audiences[active][0]} aria-label="Orçah para profissionais e clientes">
       <div className={styles.stage}>
 
