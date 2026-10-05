@@ -1,11 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { FlowSection } from "@/components/home/flow-stepper";
+import { HomeCommercialHero } from "@/components/home/home-commercial-hero";
 import { HomeMobileNav } from "@/components/home/home-mobile-nav";
 import { HomeMobileStickyCta } from "@/components/home/home-mobile-sticky-cta";
 import { HomeProviderSearch } from "@/components/home/home-provider-search";
-import { HeroQuoteDemo } from "@/components/home/hero-quote-demo";
 import { PagePhoneDemo } from "@/components/home/page-phone-demo";
 import { StatusSection } from "@/components/home/status-flow-demo";
 import { OrcahLogo } from "@/components/orcah-logo";
@@ -148,88 +147,7 @@ export default async function Home() {
         <HomeProviderSearch />
       </div>
 
-      <section id="hero-comercial" className="scroll-mt-20 overflow-hidden bg-paper px-4 pb-4 pt-6 text-text lg:pb-2 lg:pt-8">
-        <div className="mx-auto grid w-full max-w-5xl items-center gap-8 lg:grid-cols-[1fr_1fr] lg:gap-12">
-          <div className="lg:max-w-[34rem] lg:-translate-y-8">
-            <h1 className="text-[1.75rem] font-semibold leading-[1.15] text-ink sm:text-[2rem] lg:text-4xl xl:text-[2.5rem]">
-              <span className="block lg:whitespace-nowrap">Encontre um profissional.</span>
-              <span className="mt-1 block lg:whitespace-nowrap">Mostre seu trabalho.</span>
-            </h1>
-            <p className="mt-3 text-base leading-snug text-text-soft">
-              Para contratar ou prestar serviços, comece pelo Orçah.
-            </p>
-            <div className="mt-4 rounded-2xl border border-ok/15 bg-ok-wash p-5 text-ink">
-              <div className="flex flex-col gap-4">
-                <div className="flex gap-2.5">
-                  <Check small />
-                  <p className="text-sm leading-snug">
-                    <span className="font-semibold">Procura um profissional?</span>
-                    <span className="mt-0.5 block font-normal text-text">
-                      Conheça seus trabalhos e peça um orçamento.
-                    </span>
-                  </p>
-                </div>
-                <div className="flex gap-2.5">
-                  <Check small />
-                  <p className="text-sm leading-snug">
-                    <span className="font-semibold">Presta serviços?</span>
-                    <span className="mt-0.5 block font-normal text-text">
-                      Divulgue seu portfólio e envie orçamentos pelo WhatsApp.
-                    </span>
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <span className="mr-1 text-xs font-medium text-text-soft">Para prestadores</span>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-wash px-2.5 py-1 text-xs font-semibold text-gold-deep">
-                <TrialIcon />
-                {TRIAL_DAYS} dias grátis
-              </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-card px-2.5 py-1 text-xs font-semibold text-ink">
-                <NoCardIcon />
-                Sem cartão de crédito
-              </span>
-            </div>
-            <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
-              <Link
-                href="/prestadores"
-                className="flex h-12 items-center justify-center rounded-[12px] bg-gold px-4 text-sm font-semibold text-ink hover:bg-gold-press focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-focus"
-              >
-                Encontrar profissionais
-              </Link>
-              <Link
-                href={loggedIn ? appUrl("/painel") : "#como-funciona"}
-                className="flex h-12 items-center justify-center rounded-[12px] border border-line bg-card px-4 text-sm font-semibold text-ink hover:border-ink/20 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-focus"
-              >
-                {loggedIn ? "Acessar meu painel" : "Sou prestador"}
-              </Link>
-            </div>
-          </div>
-          <div className="relative mx-auto hidden w-full max-w-[420px] pb-10 pr-10 lg:block lg:max-w-[420px] lg:justify-self-end lg:pr-12">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] shadow-float">
-              <Image
-                src="/demo/prestador-celular.webp"
-                alt="Pintor conferindo um orçamento no celular durante a obra"
-                fill
-                priority
-                sizes="(min-width: 1024px) 480px, 90vw"
-                className="object-cover object-[30%_center]"
-              />
-            </div>
-            <div className="absolute -bottom-2 right-0 origin-bottom-right scale-[0.72] lg:-right-4 lg:scale-[0.78]">
-              <HeroQuoteDemo />
-            </div>
-            <div className="absolute left-4 top-5 flex items-center gap-2 rounded-2xl bg-card/95 px-3 py-2 text-xs font-medium shadow-card backdrop-blur">
-              <span className="flex h-6 w-6 items-center justify-center rounded-full bg-ok-wash text-ok">✓</span>
-              <span>
-                <span className="block font-semibold text-text">Maria aprovou</span>
-                <span className="block text-text-soft">R$ 2.450,00 · agora</span>
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
+      <HomeCommercialHero />
 
       <section id="oficios" className="scroll-mt-20 bg-paper px-4 pb-16 pt-2 md:pb-24 md:pt-3">
         <div className="mx-auto w-full max-w-5xl">
@@ -417,24 +335,12 @@ export default async function Home() {
           <nav aria-label="Produto">
             <p className="text-xs font-medium uppercase tracking-[0.04em] text-ink-soft">Produto</p>
             <ul className="mt-3 space-y-2 text-sm">
-              <li>
-                <a href="#como-funciona">Como funciona</a>
-              </li>
-              <li>
-                <a href="#pagina">Sua página</a>
-              </li>
-              <li>
-                <a href="#orcamentos">Orçamentos</a>
-              </li>
-              <li>
-                <a href="#ramo">Profissões</a>
-              </li>
-              <li>
-                <a href="#plano">Plano</a>
-              </li>
-              <li>
-                <a href="#perguntas">Perguntas</a>
-              </li>
+              <li><a href="#como-funciona">Como funciona</a></li>
+              <li><a href="#pagina">Sua página</a></li>
+              <li><a href="#orcamentos">Orçamentos</a></li>
+              <li><a href="#ramo">Profissões</a></li>
+              <li><a href="#plano">Plano</a></li>
+              <li><a href="#perguntas">Perguntas</a></li>
             </ul>
           </nav>
           <div>
@@ -442,9 +348,7 @@ export default async function Home() {
             <p className="mt-3 text-sm leading-7 text-ink-soft">
               Pedreiro · Eletricista · Pintor · Marceneiro · Serralheiro · Mecânico · Encanador · +80 profissões
             </p>
-            <a href="#oficios" className="mt-3 inline-block text-sm">
-              Ver profissões
-            </a>
+            <a href="#oficios" className="mt-3 inline-block text-sm">Ver profissões</a>
           </div>
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.04em] text-ink-soft">Legal</p>
@@ -467,24 +371,6 @@ function PanelIcon({ small = false }: { small?: boolean }) {
       <rect x="13" y="3" width="8" height="5" rx="1.5" />
       <rect x="13" y="10" width="8" height="11" rx="1.5" />
       <rect x="3" y="13" width="8" height="8" rx="1.5" />
-    </svg>
-  );
-}
-
-function TrialIcon() {
-  return (
-    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
-      <rect x="2.5" y="3.5" width="11" height="10" rx="2" />
-      <path d="M2.5 6.5h11M5.5 2.5v2M10.5 2.5v2" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function NoCardIcon() {
-  return (
-    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
-      <rect x="2" y="4" width="12" height="8" rx="1.5" />
-      <path d="M2 7h12M4.5 10h3" strokeLinecap="round" />
     </svg>
   );
 }
