@@ -31,7 +31,7 @@ export function StatusSection() {
   const current = steps[step];
 
   return (
-    <section id="orcamentos" className="scroll-mt-24 bg-paper px-4 py-16 md:py-24">
+    <section id="orcamentos" className="scroll-mt-20 bg-paper px-4 py-16 md:py-24">
       <div className="mx-auto grid w-full max-w-5xl items-center gap-12 lg:grid-cols-[1fr_auto]">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.04em] text-gold-deep">Depois que você manda</p>

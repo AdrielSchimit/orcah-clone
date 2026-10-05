@@ -1,8 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { HomeEntryModal } from "@/components/home/home-entry-modal";
 import { FlowSection } from "@/components/home/flow-stepper";
+import { HomeAboutMenu } from "@/components/home/home-about-menu";
+import { HomeMobileNav } from "@/components/home/home-mobile-nav";
+import { HomeMobileStickyCta } from "@/components/home/home-mobile-sticky-cta";
+import { HomeProviderSearch } from "@/components/home/home-provider-search";
 import { HeroQuoteDemo } from "@/components/home/hero-quote-demo";
 import { PagePhoneDemo } from "@/components/home/page-phone-demo";
 import { StatusSection } from "@/components/home/status-flow-demo";
@@ -27,11 +30,10 @@ const trades = [
   "Técnico",
 ];
 
-const nav = [
+const aboutNav = [
   ["Como funciona", "#como-funciona"],
   ["Sua página", "#pagina"],
   ["Orçamentos", "#orcamentos"],
-  ["Plano", "#plano"],
   ["Perguntas", "#perguntas"],
 ] as const;
 
@@ -83,68 +85,78 @@ async function viewerIsLoggedIn() {
 
 export default async function Home() {
   const loggedIn = await viewerIsLoggedIn();
+  const providerAreaHref = loggedIn ? appUrl("/painel") : appUrl("/login");
+  const providerAreaLabel = loggedIn ? "Acessar painel" : "Área do prestador";
 
   return (
     <div className="flex flex-1 flex-col bg-paper">
-      <HomeEntryModal />
-      <header className="sticky top-0 z-20 border-b border-line bg-card/80 px-4 py-3 backdrop-blur-md">
-        <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-3">
-          <Link href="/" aria-label="Orçah" className="flex min-h-12 shrink-0 items-center">
+      <header className="sticky top-0 z-20 border-b border-line/80 bg-card/95 backdrop-blur-md">
+        <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-2 px-4 lg:gap-3 lg:px-6">
+          <Link href="/" aria-label="Orçah" className="flex h-10 shrink-0 items-center">
             <OrcahLogo priority />
           </Link>
-          <nav aria-label="Seções" className="hidden items-center lg:flex">
-            {nav.map(([label, href]) => (
-              <a
-                key={href}
-                href={href}
-                className="inline-flex min-h-12 items-center px-2.5 text-sm font-medium text-text hover:opacity-70 xl:px-3"
-              >
-                {label}
-              </a>
-            ))}
-          </nav>
-          <div className="flex items-center gap-1 sm:gap-2">
-            <details className="relative lg:hidden">
-              <summary className="flex min-h-12 cursor-pointer list-none items-center px-3 text-sm font-medium text-text [&::-webkit-details-marker]:hidden">
-                Menu
-              </summary>
-              <nav aria-label="Seções" className="absolute right-0 z-30 mt-1 w-56 rounded-box border border-line bg-card p-2 shadow-card">
-                {nav.map(([label, href]) => (
-                  <a
-                    key={href}
-                    href={href}
-                    className="flex min-h-12 items-center rounded-btn px-3 text-sm font-medium text-text"
-                  >
-                    {label}
-                  </a>
-                ))}
-              </nav>
-            </details>
-            {loggedIn ? (
+          <nav aria-label="Principal" className="hidden min-w-0 flex-1 items-center gap-1 lg:flex">
+            <Link
+              href="/prestadores"
+              className="inline-flex h-10 items-center gap-1.5 whitespace-nowrap rounded-btn bg-gold-wash px-3 text-sm font-semibold text-gold-deep focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-focus"
+            >
+              <SearchIcon small />
+              Encontrar profissionais
+            </Link>
+            <HomeAboutMenu links={aboutNav} />
+            <a
+              href="#plano"
+              className="inline-flex h-10 items-center whitespace-nowrap rounded-btn px-2.5 text-sm font-medium text-text hover:bg-paper"
+            >
+              Plano
+            </a>
+            <div className="ml-auto flex items-center gap-2">
               <Link
-                href={appUrl("/painel")}
-                className="inline-flex min-h-12 items-center rounded-btn bg-gold px-4 text-sm font-semibold text-ink"
+                href={providerAreaHref}
+                className="inline-flex h-10 items-center gap-1.5 whitespace-nowrap rounded-btn border border-line bg-paper px-3 text-sm font-semibold text-ink focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-focus"
               >
-                Acessar painel
+                <PanelIcon small />
+                {providerAreaLabel}
               </Link>
-            ) : (
-              <>
-                <Link href={appUrl("/login")} className="inline-flex min-h-12 items-center px-3 text-sm font-medium text-text">
-                  Entrar
-                </Link>
+              {!loggedIn ? (
                 <Link
                   href={appUrl("/cadastro")}
-                  className="hidden min-h-12 items-center rounded-btn bg-gold px-4 text-sm font-semibold text-ink sm:inline-flex"
+                  className="inline-flex h-10 items-center whitespace-nowrap rounded-btn bg-gold px-4 text-sm font-semibold text-ink hover:bg-gold-press"
                 >
                   Começar grátis
                 </Link>
-              </>
-            )}
+              ) : null}
+            </div>
+          </nav>
+          <div className="ml-auto flex items-center gap-1 lg:hidden">
+            <HomeMobileNav
+              providerAreaHref={providerAreaHref}
+              providerAreaLabel={providerAreaLabel}
+              loggedIn={loggedIn}
+              aboutLinks={aboutNav}
+            />
+            <Link
+              href={loggedIn ? appUrl("/painel") : appUrl("/login")}
+              className={
+                loggedIn
+                  ? "inline-flex h-10 items-center rounded-btn bg-paper px-3 text-sm font-semibold text-ink"
+                  : "inline-flex h-11 items-center px-3 text-sm font-medium text-text"
+              }
+            >
+              {loggedIn ? "Painel" : "Entrar"}
+            </Link>
           </div>
         </div>
       </header>
 
-      <section className="overflow-hidden bg-paper px-4 pb-16 pt-10 text-text md:pb-24 md:pt-20">
+      <div className="border-b border-line/70 bg-paper px-4 py-3 lg:px-6">
+        <HomeProviderSearch />
+      </div>
+
+      <section
+        id="hero-comercial"
+        className="scroll-mt-20 overflow-hidden bg-paper px-4 pb-6 pt-10 text-text md:pb-8 md:pt-16"
+      >
         <div className="mx-auto grid w-full max-w-5xl items-center gap-12 lg:grid-cols-[1fr_1fr]">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.04em] text-gold-deep">Para quem vive de serviço</p>
@@ -206,9 +218,63 @@ export default async function Home() {
             </div>
           </div>
         </div>
+
+        <div className="mx-auto mt-7 grid w-full max-w-5xl gap-3 md:mt-10 md:grid-cols-2 md:gap-5">
+          <article className="flex h-full flex-col rounded-[20px] border border-gold/40 bg-card p-5 shadow-[0_4px_16px_rgba(15,23,42,.05)] transition duration-150 motion-safe:hover:-translate-y-0.5 hover:border-gold-deep hover:shadow-[0_8px_24px_rgba(15,23,42,.08)] motion-reduce:transition-none md:p-6">
+            <div className="flex items-center gap-3">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-gold-wash text-gold-deep">
+                <SearchIcon />
+              </span>
+              <p className="text-[11px] font-semibold tracking-[0.08em] text-gold-deep">PARA CONTRATAR</p>
+            </div>
+            <h2 className="mt-4 text-xl font-semibold leading-tight text-text md:text-[22px]">Encontrar profissionais</h2>
+            <p className="mt-2 text-sm leading-normal text-text-soft md:min-h-[2.625rem]">
+              Encontre quem atende sua cidade e conheça seus trabalhos.
+            </p>
+            <div className="mt-auto pt-5">
+              <Link
+                href="/prestadores"
+                className="inline-flex h-11 w-full items-center justify-center rounded-btn bg-gold text-sm font-semibold text-ink hover:bg-gold-press focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-focus"
+              >
+                Pesquisar prestadores →
+              </Link>
+            </div>
+          </article>
+
+          <article className="flex h-full flex-col rounded-[20px] border border-line bg-card p-5 shadow-[0_4px_16px_rgba(15,23,42,.05)] transition duration-150 motion-safe:hover:-translate-y-0.5 hover:border-ink/30 hover:shadow-[0_8px_24px_rgba(15,23,42,.08)] motion-reduce:transition-none md:p-6">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-brand-wash text-ink">
+                  <PanelIcon />
+                </span>
+                <p className="text-[11px] font-semibold tracking-[0.08em] text-text-soft">PARA PRESTADORES</p>
+              </div>
+              {!loggedIn ? (
+                <Link
+                  href={appUrl("/cadastro")}
+                  className="inline-flex min-h-11 shrink-0 items-center text-sm font-medium text-text-soft hover:text-text focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-focus"
+                >
+                  Começar grátis
+                </Link>
+              ) : null}
+            </div>
+            <h2 className="mt-4 text-xl font-semibold leading-tight text-text md:text-[22px]">Área do prestador</h2>
+            <p className="mt-2 text-sm leading-normal text-text-soft md:min-h-[2.625rem]">
+              Organize sua página, clientes e orçamentos em um só lugar.
+            </p>
+            <div className="mt-auto pt-5">
+              <Link
+                href={providerAreaHref}
+                className="inline-flex h-11 w-full items-center justify-center rounded-btn bg-ink text-sm font-semibold text-ink-text hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-focus"
+              >
+                {loggedIn ? "Acessar painel →" : "Entrar na área do prestador →"}
+              </Link>
+            </div>
+          </article>
+        </div>
       </section>
 
-      <section id="oficios" className="scroll-mt-32 bg-paper px-4 py-16 md:py-24">
+      <section id="oficios" className="scroll-mt-20 bg-paper px-4 pb-16 pt-6 md:pb-24 md:pt-8">
         <div className="mx-auto w-full max-w-5xl">
           <h2 className="text-2xl font-semibold md:text-3xl">Feito para quem vive de serviço</h2>
           <div className="mt-6 flex flex-wrap gap-2">
@@ -224,7 +290,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section id="pagina" className="scroll-mt-24 bg-card px-4 py-16 md:py-24">
+      <section id="pagina" className="scroll-mt-20 bg-card px-4 py-16 md:py-24">
         <div className="mx-auto grid w-full max-w-5xl items-center gap-10 lg:grid-cols-2">
           <div className="lg:order-2">
             <p className="text-xs font-medium uppercase tracking-[0.04em] text-gold-deep">Sua página</p>
@@ -266,7 +332,7 @@ export default async function Home() {
       <StatusSection />
       <FlowSection />
 
-      <section id="ramo" className="scroll-mt-32 bg-paper px-4 py-16 md:py-24">
+      <section id="ramo" className="scroll-mt-20 bg-paper px-4 py-16 md:py-24">
         <div className="mx-auto w-full max-w-5xl">
           <h2 className="text-2xl font-semibold md:text-3xl">Seu serviço não é igual ao de todo mundo.</h2>
           <p className="mt-3 max-w-xl text-text-soft">
@@ -293,7 +359,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section id="plano" className="scroll-mt-24 bg-paper-alt px-4 py-16 md:py-24">
+      <section id="plano" className="scroll-mt-20 bg-paper-alt px-4 py-16 md:py-24">
         <div className="mx-auto grid w-full max-w-5xl items-center gap-10 lg:grid-cols-[1fr_1.1fr]">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.04em] text-gold-deep">Um plano só</p>
@@ -351,7 +417,7 @@ export default async function Home() {
         </div>
       </section>
 
-      <section id="perguntas" className="scroll-mt-32 bg-paper px-4 py-16 md:py-24">
+      <section id="perguntas" className="scroll-mt-20 bg-paper px-4 py-16 md:py-24">
         <div className="mx-auto w-full max-w-3xl">
           <h2 className="text-2xl font-semibold md:text-3xl">Perguntas frequentes</h2>
           <div className="mt-4 divide-y divide-line rounded-box border border-line bg-card shadow-card">
@@ -381,7 +447,7 @@ export default async function Home() {
         </p>
       </section>
 
-      <footer className="bg-ink-deep px-4 pb-[max(6.5rem,calc(env(safe-area-inset-bottom)+5.25rem))] pt-4 text-ink-text md:pb-16 md:pt-0">
+      <footer className="bg-ink-deep px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] pt-4 text-ink-text md:pb-16 md:pt-0">
         <div className="mx-auto grid w-full max-w-5xl gap-10 border-t border-ink-line pt-10 md:grid-cols-4 md:pt-14">
           <div>
             <OrcahLogo variant="dark" className="h-8 w-auto" />
@@ -432,15 +498,28 @@ export default async function Home() {
         <p className="mx-auto mt-10 w-full max-w-5xl text-xs text-ink-soft">© 2026 Orçah</p>
       </footer>
 
-      <div className="fixed inset-x-0 bottom-0 z-20 border-t border-ink-line bg-ink p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] md:hidden">
-        <Link
-          href={appUrl("/cadastro")}
-          className="flex min-h-12 items-center justify-center rounded-btn bg-gold font-semibold text-ink"
-        >
-          Começar grátis
-        </Link>
-      </div>
+      <HomeMobileStickyCta />
     </div>
+  );
+}
+
+function SearchIcon({ small = false }: { small?: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" className={small ? "h-4 w-4" : "h-6 w-6"} fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-3.5-3.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function PanelIcon({ small = false }: { small?: boolean }) {
+  return (
+    <svg viewBox="0 0 24 24" className={small ? "h-4 w-4" : "h-6 w-6"} fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <rect x="3" y="3" width="8" height="8" rx="1.5" />
+      <rect x="13" y="3" width="8" height="5" rx="1.5" />
+      <rect x="13" y="10" width="8" height="11" rx="1.5" />
+      <rect x="3" y="13" width="8" height="8" rx="1.5" />
+    </svg>
   );
 }
 

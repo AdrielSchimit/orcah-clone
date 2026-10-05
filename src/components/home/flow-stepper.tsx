@@ -29,7 +29,7 @@ export function FlowSection() {
   }, [auto, active]);
 
   return (
-    <section id="como-funciona" className="scroll-mt-24 bg-paper-alt px-4 py-16 md:py-24">
+    <section id="como-funciona" className="scroll-mt-20 bg-paper-alt px-4 py-16 md:py-24">
       <div ref={ref} className="mx-auto w-full max-w-5xl">
         <div className="max-w-xl">
           <p className="text-xs font-medium uppercase tracking-[0.04em] text-gold-deep">Como funciona</p>
