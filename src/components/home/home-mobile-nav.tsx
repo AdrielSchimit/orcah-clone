@@ -8,12 +8,12 @@ export function HomeMobileNav({
   providerAreaHref,
   providerAreaLabel,
   loggedIn,
-  aboutLinks,
+  links,
 }: {
   providerAreaHref: string;
   providerAreaLabel: string;
   loggedIn: boolean;
-  aboutLinks: readonly (readonly [string, string])[];
+  links: readonly (readonly [string, string])[];
 }) {
   const detailsRef = useRef<HTMLDetailsElement>(null);
 
@@ -30,22 +30,7 @@ export function HomeMobileNav({
         aria-label="Menu"
         className="absolute right-0 z-30 mt-1 w-[min(16rem,calc(100vw-2rem))] rounded-box border border-line bg-card p-2 shadow-card"
       >
-        <Link
-          href="/prestadores"
-          onClick={close}
-          className="flex min-h-11 items-center rounded-btn bg-gold-wash px-3 text-sm font-semibold text-gold-deep"
-        >
-          Encontrar profissionais
-        </Link>
-        <Link
-          href={providerAreaHref}
-          onClick={close}
-          className="mt-1 flex min-h-11 items-center rounded-btn bg-paper px-3 text-sm font-semibold text-ink"
-        >
-          {providerAreaLabel}
-        </Link>
-        <p className="px-3 pb-1 pt-3 text-[11px] font-semibold tracking-[0.06em] text-text-soft">SOBRE O ORÇAH</p>
-        {aboutLinks.map(([label, href]) => (
+        {links.map(([label, href]) => (
           <a
             key={href}
             href={href}
@@ -55,9 +40,14 @@ export function HomeMobileNav({
             {label}
           </a>
         ))}
-        <a href="#plano" onClick={close} className="flex min-h-11 items-center rounded-btn px-3 text-sm font-medium text-text">
-          Plano
-        </a>
+        <div className="my-2 h-px bg-line" />
+        <Link
+          href={providerAreaHref}
+          onClick={close}
+          className="flex min-h-11 items-center rounded-btn bg-paper px-3 text-sm font-semibold text-ink"
+        >
+          {providerAreaLabel}
+        </Link>
         {!loggedIn ? (
           <Link
             href={appUrl("/cadastro")}

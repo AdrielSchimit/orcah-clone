@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { FlowSection } from "@/components/home/flow-stepper";
-import { HomeAboutMenu } from "@/components/home/home-about-menu";
 import { HomeMobileNav } from "@/components/home/home-mobile-nav";
 import { HomeMobileStickyCta } from "@/components/home/home-mobile-sticky-cta";
 import { HomeProviderSearch } from "@/components/home/home-provider-search";
@@ -30,10 +29,11 @@ const trades = [
   "Técnico",
 ];
 
-const aboutNav = [
+const sectionNav = [
   ["Como funciona", "#como-funciona"],
   ["Sua página", "#pagina"],
   ["Orçamentos", "#orcamentos"],
+  ["Plano", "#plano"],
   ["Perguntas", "#perguntas"],
 ] as const;
 
@@ -95,21 +95,16 @@ export default async function Home() {
           <Link href="/" aria-label="Orçah" className="flex h-10 shrink-0 items-center">
             <OrcahLogo priority />
           </Link>
-          <nav aria-label="Principal" className="hidden min-w-0 flex-1 items-center gap-1 lg:flex">
-            <Link
-              href="/prestadores"
-              className="inline-flex h-10 items-center gap-1.5 whitespace-nowrap rounded-btn bg-gold-wash px-3 text-sm font-semibold text-gold-deep focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-focus"
-            >
-              <SearchIcon small />
-              Encontrar profissionais
-            </Link>
-            <HomeAboutMenu links={aboutNav} />
-            <a
-              href="#plano"
-              className="inline-flex h-10 items-center whitespace-nowrap rounded-btn px-2.5 text-sm font-medium text-text hover:bg-paper"
-            >
-              Plano
-            </a>
+          <nav aria-label="Principal" className="hidden min-w-0 flex-1 items-center gap-0.5 lg:flex">
+            {sectionNav.map(([label, href]) => (
+              <a
+                key={href}
+                href={href}
+                className="inline-flex h-10 items-center whitespace-nowrap rounded-btn px-2 text-sm font-medium text-text hover:bg-paper xl:px-2.5"
+              >
+                {label}
+              </a>
+            ))}
             <div className="ml-auto flex items-center gap-2">
               <Link
                 href={providerAreaHref}
@@ -133,7 +128,7 @@ export default async function Home() {
               providerAreaHref={providerAreaHref}
               providerAreaLabel={providerAreaLabel}
               loggedIn={loggedIn}
-              aboutLinks={aboutNav}
+              links={sectionNav}
             />
             <Link
               href={loggedIn ? appUrl("/painel") : appUrl("/login")}
@@ -153,49 +148,65 @@ export default async function Home() {
         <HomeProviderSearch />
       </div>
 
-      <section
-        id="hero-comercial"
-        className="scroll-mt-20 overflow-hidden bg-paper px-4 pb-6 pt-10 text-text md:pb-8 md:pt-16"
-      >
-        <div className="mx-auto grid w-full max-w-5xl items-center gap-12 lg:grid-cols-[1fr_1fr]">
-          <div>
-            <p className="text-xs font-medium uppercase tracking-[0.04em] text-gold-deep">Para quem vive de serviço</p>
-            <h1 className="mt-2 text-3xl font-semibold leading-tight md:text-5xl">
-              Orçamento bonito no WhatsApp.
-              <span className="mt-1 block">Cliente aprova com um toque.</span>
+      <section id="hero-comercial" className="scroll-mt-20 overflow-hidden bg-paper px-4 pb-4 pt-6 text-text lg:pb-2 lg:pt-8">
+        <div className="mx-auto grid w-full max-w-5xl items-center gap-8 lg:grid-cols-[1fr_1fr] lg:gap-12">
+          <div className="lg:max-w-[34rem] lg:-translate-y-8">
+            <h1 className="text-[1.75rem] font-semibold leading-[1.15] text-ink sm:text-[2rem] lg:text-4xl xl:text-[2.5rem]">
+              <span className="block lg:whitespace-nowrap">Encontre um profissional.</span>
+              <span className="mt-1 block lg:whitespace-nowrap">Mostre seu trabalho.</span>
             </h1>
-            <p className="mt-4 max-w-md text-text-soft">
-              Monte o orçamento pelo celular em poucos minutos, mande o link no WhatsApp e veja quando o cliente
-              abriu. Sem papel, sem PDF borrado, sem “vou ver e te falo”.
+            <p className="mt-3 text-base leading-snug text-text-soft">
+              Para contratar ou prestar serviços, comece pelo Orçah.
             </p>
-            <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
-              <Link
-                href={appUrl("/cadastro")}
-                className="inline-flex min-h-12 items-center justify-center rounded-btn bg-gold px-5 text-base font-semibold text-ink"
-              >
-                Criar meu primeiro orçamento
-              </Link>
-              <a href="#como-funciona" className="inline-flex min-h-12 items-center text-sm font-semibold text-text">
-                Ver como funciona →
-              </a>
+            <div className="mt-4 rounded-2xl border border-ok/15 bg-ok-wash p-5 text-ink">
+              <div className="flex flex-col gap-4">
+                <div className="flex gap-2.5">
+                  <Check small />
+                  <p className="text-sm leading-snug">
+                    <span className="font-semibold">Procura um profissional?</span>
+                    <span className="mt-0.5 block font-normal text-text">
+                      Conheça seus trabalhos e peça um orçamento.
+                    </span>
+                  </p>
+                </div>
+                <div className="flex gap-2.5">
+                  <Check small />
+                  <p className="text-sm leading-snug">
+                    <span className="font-semibold">Presta serviços?</span>
+                    <span className="mt-0.5 block font-normal text-text">
+                      Divulgue seu portfólio e envie orçamentos pelo WhatsApp.
+                    </span>
+                  </p>
+                </div>
+              </div>
             </div>
-            <p className="mt-3 text-sm text-text-soft">
-              {TRIAL_DAYS} dias grátis · Sem cartão · {PLAN_PRICE_LABEL} depois
-            </p>
-            <a
-              href={companyPublicUrl(DEMO_SLUG)}
-              className="mt-8 inline-flex min-h-12 items-center gap-3 rounded-2xl bg-card py-2 pl-2 pr-4 text-sm shadow-card"
-            >
-              <span className="relative h-10 w-10 overflow-hidden rounded-xl">
-                <Image src="/demo/trabalho-sala.webp" alt="" fill sizes="40px" className="object-cover" />
+            <div className="mt-4 flex flex-wrap items-center gap-2">
+              <span className="mr-1 text-xs font-medium text-text-soft">Para prestadores</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-wash px-2.5 py-1 text-xs font-semibold text-gold-deep">
+                <TrialIcon />
+                {TRIAL_DAYS} dias grátis
               </span>
-              <span>
-                <span className="block font-semibold text-text">Veja uma página pronta</span>
-                <span className="block text-xs text-text-soft">Pintura Norte · loja de exemplo →</span>
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-card px-2.5 py-1 text-xs font-semibold text-ink">
+                <NoCardIcon />
+                Sem cartão de crédito
               </span>
-            </a>
+            </div>
+            <div className="mt-3 grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+              <Link
+                href="/prestadores"
+                className="flex h-12 items-center justify-center rounded-[12px] bg-gold px-4 text-sm font-semibold text-ink hover:bg-gold-press focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-focus"
+              >
+                Encontrar profissionais
+              </Link>
+              <Link
+                href={loggedIn ? appUrl("/painel") : "#como-funciona"}
+                className="flex h-12 items-center justify-center rounded-[12px] border border-line bg-card px-4 text-sm font-semibold text-ink hover:border-ink/20 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-focus"
+              >
+                {loggedIn ? "Acessar meu painel" : "Sou prestador"}
+              </Link>
+            </div>
           </div>
-          <div className="relative mx-auto w-full max-w-[480px] pb-10 pr-12 sm:pr-24 lg:max-w-none">
+          <div className="relative mx-auto hidden w-full max-w-[420px] pb-10 pr-10 lg:block lg:max-w-[420px] lg:justify-self-end lg:pr-12">
             <div className="relative aspect-[4/5] overflow-hidden rounded-[2rem] shadow-float">
               <Image
                 src="/demo/prestador-celular.webp"
@@ -206,10 +217,10 @@ export default async function Home() {
                 className="object-cover object-[30%_center]"
               />
             </div>
-            <div className="absolute -bottom-2 right-0 origin-bottom-right scale-[0.6] sm:scale-[0.72] lg:-right-8 lg:scale-[0.78]">
+            <div className="absolute -bottom-2 right-0 origin-bottom-right scale-[0.72] lg:-right-4 lg:scale-[0.78]">
               <HeroQuoteDemo />
             </div>
-            <div className="absolute left-3 top-4 flex animate-float items-center gap-2 rounded-2xl bg-card/95 px-3 py-2 text-xs font-medium shadow-card backdrop-blur sm:left-5 sm:top-6">
+            <div className="absolute left-4 top-5 flex items-center gap-2 rounded-2xl bg-card/95 px-3 py-2 text-xs font-medium shadow-card backdrop-blur">
               <span className="flex h-6 w-6 items-center justify-center rounded-full bg-ok-wash text-ok">✓</span>
               <span>
                 <span className="block font-semibold text-text">Maria aprovou</span>
@@ -218,63 +229,9 @@ export default async function Home() {
             </div>
           </div>
         </div>
-
-        <div className="mx-auto mt-7 grid w-full max-w-5xl gap-3 md:mt-10 md:grid-cols-2 md:gap-5">
-          <article className="flex h-full flex-col rounded-[20px] border border-gold/40 bg-card p-5 shadow-[0_4px_16px_rgba(15,23,42,.05)] transition duration-150 motion-safe:hover:-translate-y-0.5 hover:border-gold-deep hover:shadow-[0_8px_24px_rgba(15,23,42,.08)] motion-reduce:transition-none md:p-6">
-            <div className="flex items-center gap-3">
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-gold-wash text-gold-deep">
-                <SearchIcon />
-              </span>
-              <p className="text-[11px] font-semibold tracking-[0.08em] text-gold-deep">PARA CONTRATAR</p>
-            </div>
-            <h2 className="mt-4 text-xl font-semibold leading-tight text-text md:text-[22px]">Encontrar profissionais</h2>
-            <p className="mt-2 text-sm leading-normal text-text-soft md:min-h-[2.625rem]">
-              Encontre quem atende sua cidade e conheça seus trabalhos.
-            </p>
-            <div className="mt-auto pt-5">
-              <Link
-                href="/prestadores"
-                className="inline-flex h-11 w-full items-center justify-center rounded-btn bg-gold text-sm font-semibold text-ink hover:bg-gold-press focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-focus"
-              >
-                Pesquisar prestadores →
-              </Link>
-            </div>
-          </article>
-
-          <article className="flex h-full flex-col rounded-[20px] border border-line bg-card p-5 shadow-[0_4px_16px_rgba(15,23,42,.05)] transition duration-150 motion-safe:hover:-translate-y-0.5 hover:border-ink/30 hover:shadow-[0_8px_24px_rgba(15,23,42,.08)] motion-reduce:transition-none md:p-6">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex min-w-0 items-center gap-3">
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-[14px] bg-brand-wash text-ink">
-                  <PanelIcon />
-                </span>
-                <p className="text-[11px] font-semibold tracking-[0.08em] text-text-soft">PARA PRESTADORES</p>
-              </div>
-              {!loggedIn ? (
-                <Link
-                  href={appUrl("/cadastro")}
-                  className="inline-flex min-h-11 shrink-0 items-center text-sm font-medium text-text-soft hover:text-text focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-focus"
-                >
-                  Começar grátis
-                </Link>
-              ) : null}
-            </div>
-            <h2 className="mt-4 text-xl font-semibold leading-tight text-text md:text-[22px]">Área do prestador</h2>
-            <p className="mt-2 text-sm leading-normal text-text-soft md:min-h-[2.625rem]">
-              Organize sua página, clientes e orçamentos em um só lugar.
-            </p>
-            <div className="mt-auto pt-5">
-              <Link
-                href={providerAreaHref}
-                className="inline-flex h-11 w-full items-center justify-center rounded-btn bg-ink text-sm font-semibold text-ink-text hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-focus"
-              >
-                {loggedIn ? "Acessar painel →" : "Entrar na área do prestador →"}
-              </Link>
-            </div>
-          </article>
-        </div>
       </section>
 
-      <section id="oficios" className="scroll-mt-20 bg-paper px-4 pb-16 pt-6 md:pb-24 md:pt-8">
+      <section id="oficios" className="scroll-mt-20 bg-paper px-4 pb-16 pt-2 md:pb-24 md:pt-3">
         <div className="mx-auto w-full max-w-5xl">
           <h2 className="text-2xl font-semibold md:text-3xl">Feito para quem vive de serviço</h2>
           <div className="mt-6 flex flex-wrap gap-2">
@@ -503,15 +460,6 @@ export default async function Home() {
   );
 }
 
-function SearchIcon({ small = false }: { small?: boolean }) {
-  return (
-    <svg viewBox="0 0 24 24" className={small ? "h-4 w-4" : "h-6 w-6"} fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <circle cx="11" cy="11" r="7" />
-      <path d="M20 20l-3.5-3.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 function PanelIcon({ small = false }: { small?: boolean }) {
   return (
     <svg viewBox="0 0 24 24" className={small ? "h-4 w-4" : "h-6 w-6"} fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -519,6 +467,24 @@ function PanelIcon({ small = false }: { small?: boolean }) {
       <rect x="13" y="3" width="8" height="5" rx="1.5" />
       <rect x="13" y="10" width="8" height="11" rx="1.5" />
       <rect x="3" y="13" width="8" height="8" rx="1.5" />
+    </svg>
+  );
+}
+
+function TrialIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+      <rect x="2.5" y="3.5" width="11" height="10" rx="2" />
+      <path d="M2.5 6.5h11M5.5 2.5v2M10.5 2.5v2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function NoCardIcon() {
+  return (
+    <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden>
+      <rect x="2" y="4" width="12" height="8" rx="1.5" />
+      <path d="M2 7h12M4.5 10h3" strokeLinecap="round" />
     </svg>
   );
 }
