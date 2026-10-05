@@ -4,36 +4,17 @@ import { HomeProviderSearch } from "@/components/home/home-provider-search";
 import { OrcahLogo } from "@/components/orcah-logo";
 import { appUrl } from "@/lib/urls";
 
-const trades = [
-  "Pedreiro",
-  "Eletricista",
-  "Pintor",
-  "Marceneiro",
-  "Serralheiro",
-  "Mecânico",
-  "Encanador",
-  "Fotógrafo",
-  "Gesseiro",
-  "Montador de móveis",
-  "Técnico",
-];
-
 export default function HeroTestePage() {
   return (
     <div className="min-h-screen bg-paper text-text">
-      <header className="sticky top-0 z-40 border-b border-line/70 bg-card/88 backdrop-blur-xl">
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center px-4 lg:px-6">
+      <header className="sticky top-0 z-40 border-b border-line/65 bg-card/90 backdrop-blur-xl">
+        <div className="mx-auto flex h-16 w-full max-w-7xl items-center px-4 lg:px-6">
           <Link href="/" aria-label="Orçah" className="flex h-10 shrink-0 items-center">
             <OrcahLogo priority />
           </Link>
 
-          <nav
-            aria-label="Navegação principal"
-            className="ml-7 hidden items-center gap-0.5 rounded-full border border-line/75 bg-paper/70 p-1 shadow-[0_10px_34px_-26px_rgba(15,23,42,.55)] backdrop-blur-xl lg:flex"
-          >
+          <nav aria-label="Navegação principal" className="ml-8 hidden items-center gap-1 lg:flex">
             <HeaderNavItem href="#como-funciona">Como funciona</HeaderNavItem>
-            <HeaderNavItem href="#sua-pagina">Sua página</HeaderNavItem>
-            <HeaderNavItem href="#orcamentos">Orçamentos</HeaderNavItem>
             <HeaderNavItem href="/#plano">Plano</HeaderNavItem>
             <HeaderNavItem href="/#perguntas">Perguntas</HeaderNavItem>
           </nav>
@@ -60,33 +41,11 @@ export default function HeroTestePage() {
           <HomeProviderSearch />
         </div>
 
-        <section id="sua-pagina" className="scroll-mt-24 border-y border-line bg-card px-4 py-7 lg:px-6">
-          <div className="mx-auto grid w-full max-w-6xl gap-3 sm:grid-cols-3">
-            <ResultItem title="1 link para divulgar" text="Bio, status, grupos e redes sociais." />
-            <ResultItem title="Sua marca com cara profissional" text="Logo, fotos, serviços e identidade." />
-            <ResultItem title="Orçamento sem enrolação" text="Monte, envie e acompanhe a resposta." />
-          </div>
-        </section>
-
-        <section id="orcamentos" className="scroll-mt-24 bg-paper px-4 py-10 lg:px-6 lg:py-14">
-          <div className="mx-auto w-full max-w-6xl">
-            <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.08em] text-gold-deep">Feito para prestadores</p>
-                <h2 className="mt-2 text-2xl font-semibold text-ink sm:text-3xl">Do primeiro contato ao serviço fechado.</h2>
-              </div>
-              <p className="max-w-md text-sm leading-6 text-text-soft">
-                O cliente abre sua página, conhece seu trabalho e recebe um orçamento profissional sem você perder tempo.
-              </p>
-            </div>
-            <div className="mt-6 flex flex-wrap gap-2">
-              {trades.map((trade) => (
-                <span key={trade} className="rounded-full border border-line bg-card px-4 py-2 text-sm font-medium text-text shadow-card">
-                  {trade}
-                </span>
-              ))}
-              <span className="rounded-full border border-line px-4 py-2 text-sm text-text-soft">+80 profissões</span>
-            </div>
+        <section className="border-y border-line/75 bg-card px-4 py-6 lg:px-6">
+          <div className="mx-auto grid w-full max-w-7xl gap-3 sm:grid-cols-3">
+            <ResultItem title="Para profissionais" text="Página, marca e orçamento em um só lugar." />
+            <ResultItem title="Para quem precisa contratar" text="Pesquisa simples, trabalhos visíveis e contato direto." />
+            <ResultItem title="Um ecossistema só" text="Mais procura para quem presta. Mais facilidade para quem busca." />
           </div>
         </section>
       </main>
@@ -98,7 +57,7 @@ function HeaderNavItem({ href, children }: { href: string; children: ReactNode }
   return (
     <a
       href={href}
-      className="relative rounded-full px-3 py-2 text-[13px] font-medium text-text-soft transition duration-200 hover:bg-card hover:text-ink hover:shadow-[0_4px_14px_-10px_rgba(15,23,42,.7)]"
+      className="rounded-full px-3 py-2 text-[13px] font-medium text-text-soft transition duration-200 hover:bg-paper-alt hover:text-ink"
     >
       {children}
     </a>
@@ -107,8 +66,8 @@ function HeaderNavItem({ href, children }: { href: string; children: ReactNode }
 
 function ResultItem({ title, text }: { title: string; text: string }) {
   return (
-    <div className="flex gap-3 rounded-2xl border border-line/80 bg-paper/50 p-4">
-      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-ok-wash text-ok">✓</span>
+    <div className="flex gap-3 rounded-2xl border border-line/75 bg-paper/55 p-4">
+      <span className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-gold-wash text-xs font-bold text-gold-deep">✓</span>
       <div>
         <p className="text-sm font-semibold text-ink">{title}</p>
         <p className="mt-1 text-xs leading-5 text-text-soft">{text}</p>
