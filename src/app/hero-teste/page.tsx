@@ -32,18 +32,33 @@ const quickBenefits = [
 export default function HeroTestePage() {
   return (
     <div className="min-h-screen bg-paper text-text">
-      <header className="sticky top-0 z-40 border-b border-line/80 bg-card/90 backdrop-blur-xl">
+      <header className="sticky top-0 z-40 border-b border-line/70 bg-card/88 backdrop-blur-xl">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center px-4 lg:px-6">
-          <Link href="/" aria-label="Orçah" className="flex h-10 items-center">
+          <Link href="/" aria-label="Orçah" className="flex h-10 shrink-0 items-center">
             <OrcahLogo priority />
           </Link>
+
+          <nav
+            aria-label="Navegação principal"
+            className="ml-7 hidden items-center gap-0.5 rounded-full border border-line/75 bg-paper/70 p-1 shadow-[0_10px_34px_-26px_rgba(15,23,42,.55)] backdrop-blur-xl lg:flex"
+          >
+            <HeaderNavItem href="#como-funciona">Como funciona</HeaderNavItem>
+            <HeaderNavItem href="#sua-pagina">Sua página</HeaderNavItem>
+            <HeaderNavItem href="#orcamentos">Orçamentos</HeaderNavItem>
+            <HeaderNavItem href="/#plano">Plano</HeaderNavItem>
+            <HeaderNavItem href="/#perguntas">Perguntas</HeaderNavItem>
+          </nav>
+
           <div className="ml-auto flex items-center gap-2">
-            <Link href={appUrl("/login")} className="hidden min-h-10 items-center px-3 text-sm font-semibold text-text sm:inline-flex">
+            <Link
+              href={appUrl("/login")}
+              className="hidden min-h-10 items-center rounded-full px-3.5 text-sm font-semibold text-text transition hover:bg-paper-alt hover:text-ink sm:inline-flex"
+            >
               Já tenho conta
             </Link>
             <Link
               href={appUrl("/cadastro")}
-              className="inline-flex min-h-10 items-center rounded-btn bg-gold px-4 text-sm font-semibold text-ink shadow-card transition hover:-translate-y-0.5 hover:bg-gold-press"
+              className="inline-flex min-h-10 items-center rounded-full bg-gold px-4.5 text-sm font-semibold text-ink shadow-[0_10px_24px_-16px_rgba(229,153,26,.85)] transition hover:-translate-y-0.5 hover:bg-gold-press"
             >
               Começar grátis
             </Link>
@@ -52,7 +67,7 @@ export default function HeroTestePage() {
       </header>
 
       <main>
-        <section className="relative isolate overflow-hidden px-4 pb-10 pt-7 sm:pt-12 lg:px-6 lg:pb-20 lg:pt-16">
+        <section id="como-funciona" className="relative isolate scroll-mt-24 overflow-hidden px-4 pb-10 pt-7 sm:pt-12 lg:px-6 lg:pb-20 lg:pt-16">
           <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[34rem] bg-[radial-gradient(circle_at_82%_18%,rgba(255,176,32,0.16),transparent_30%),radial-gradient(circle_at_10%_0%,rgba(21,31,56,0.07),transparent_28%)]" />
 
           <div className="mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[1.02fr_.98fr] lg:gap-14">
@@ -125,7 +140,7 @@ export default function HeroTestePage() {
           </div>
         </section>
 
-        <section className="border-y border-line bg-card px-4 py-7 lg:px-6">
+        <section id="sua-pagina" className="scroll-mt-24 border-y border-line bg-card px-4 py-7 lg:px-6">
           <div className="mx-auto grid w-full max-w-6xl gap-3 sm:grid-cols-3">
             <ResultItem title="1 link para divulgar" text="Bio, status, grupos e redes sociais." />
             <ResultItem title="Sua marca com cara profissional" text="Logo, fotos, serviços e identidade." />
@@ -133,7 +148,7 @@ export default function HeroTestePage() {
           </div>
         </section>
 
-        <section className="bg-paper px-4 py-10 lg:px-6 lg:py-14">
+        <section id="orcamentos" className="scroll-mt-24 bg-paper px-4 py-10 lg:px-6 lg:py-14">
           <div className="mx-auto w-full max-w-6xl">
             <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-end">
               <div>
@@ -169,6 +184,17 @@ export default function HeroTestePage() {
         </section>
       </main>
     </div>
+  );
+}
+
+function HeaderNavItem({ href, children }: { href: string; children: ReactNode }) {
+  return (
+    <a
+      href={href}
+      className="relative rounded-full px-3 py-2 text-[13px] font-medium text-text-soft transition duration-200 hover:bg-card hover:text-ink hover:shadow-[0_4px_14px_-10px_rgba(15,23,42,.7)]"
+    >
+      {children}
+    </a>
   );
 }
 
