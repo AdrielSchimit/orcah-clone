@@ -1,165 +1,141 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
-import type { ReactNode } from "react";
-import { HeroQuoteDemo } from "@/components/home/hero-quote-demo";
+import { useRef, useState } from "react";
+import type { KeyboardEvent, ReactNode } from "react";
 import { TRIAL_DAYS } from "@/lib/plan-constants";
 import { appUrl, companyPublicUrl } from "@/lib/urls";
+import styles from "./home-commercial-hero.module.css";
 
-const DEMO_SLUG = "pintura-norte";
-
-const quickBenefits = [
-  ["Página profissional", "Logo, fotos e serviços", <PageIcon key="page" />],
-  ["Seu link onde quiser", "Instagram, WhatsApp e mais", <LinkIcon key="link" />],
-  ["Orçamento em minutos", "Bonito e pronto para enviar", <QuoteIcon key="quote" />],
+type IconName = "person" | "search" | "arrow" | "pin" | "check" | "calendar" | "card" | "page" | "star" | "bolt" | "paint" | "bricks" | "water" | "snow" | "house" | "tool" | "more";
+const benefits = ["Página com sua logo, fotos e serviços", "Receba clientes da sua região", "Orçamentos prontos para enviar", "Compartilhe no WhatsApp, Instagram e mais"];
+const categories: { label: string; query: string; icon: IconName }[] = [
+  { label: "Eletricista", query: "eletricista", icon: "bolt" },
+  { label: "Pintor", query: "pintor", icon: "paint" },
+  { label: "Pedreiro", query: "pedreiro", icon: "bricks" },
+  { label: "Encanador", query: "encanador", icon: "water" },
+  { label: "Ar-condicionado", query: "ar-condicionado", icon: "snow" },
+  { label: "Limpeza", query: "limpeza", icon: "house" },
+  { label: "Marido de aluguel", query: "marido de aluguel", icon: "tool" },
+  { label: "Ver mais", query: "", icon: "more" },
+];
+const audiences = [
+  ["professional", "Sou profissional", "Divulgar e receber clientes", "person"],
+  ["customer", "Preciso de um profissional", "Encontrar e pedir orçamentos", "search"],
 ] as const;
 
 export function HomeCommercialHero() {
+  const [active, setActive] = useState(0);
+  const [location, setLocation] = useState("");
+  const tabs = useRef<(HTMLButtonElement | null)[]>([]);
+  function onTabKey(event: KeyboardEvent<HTMLButtonElement>) {
+    if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+    event.preventDefault();
+    const next = event.key === "Home" ? 0 : event.key === "End" ? 1 : 1 - active;
+    setActive(next);
+    tabs.current[next]?.focus();
+  }
+  function categoryHref(query: string) {
+    const params = new URLSearchParams();
+    if (query) params.set("servico", query);
+    if (location.trim()) params.set("local", location.trim());
+    return "/prestadores" + (params.size ? "?" + params.toString() : "");
+  }
+
   return (
-    <section id="hero-comercial" className="relative isolate scroll-mt-20 overflow-hidden bg-paper px-4 pb-10 pt-7 text-text sm:pt-12 lg:px-6 lg:pb-20 lg:pt-16">
-      <div className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-[34rem] bg-[radial-gradient(circle_at_82%_18%,rgba(255,176,32,0.16),transparent_30%),radial-gradient(circle_at_10%_0%,rgba(21,31,56,0.07),transparent_28%)]" />
+    <section id="hero-comercial" className={styles.hero} data-audience={audiences[active][0]} aria-label="Orçah para profissionais e clientes">
+      <div className={styles.stage}>
+        <div className={styles.tabs} role="tablist" aria-label="Como você quer usar o Orçah?">
+          {audiences.map(([value, title, subtitle, icon], index) => (
+            <button key={value} ref={(element) => { tabs.current[index] = element; }} id={"hero-tab-" + value} type="button" role="tab" aria-selected={active === index} aria-controls={"hero-panel-" + value} tabIndex={active === index ? 0 : -1} onClick={() => setActive(index)} onKeyDown={onTabKey} className={styles.tab}>
+              <span className={styles.tabIcon}><Icon name={icon} /></span>
+              <span><strong>{title}</strong><small>{subtitle}</small></span>
+            </button>
+          ))}
+        </div>
 
-      <div className="mx-auto grid w-full max-w-6xl items-center gap-8 lg:grid-cols-[1.02fr_.98fr] lg:gap-14">
-        <div className="max-w-[39rem]">
-          <div className="inline-flex items-center gap-2 rounded-full border border-gold/25 bg-gold-wash px-3 py-1.5 text-xs font-semibold text-gold-deep shadow-[0_8px_30px_-18px_rgba(255,176,32,.8)]">
-            <span className="h-2 w-2 rounded-full bg-gold shadow-[0_0_0_4px_rgba(255,176,32,.14)]" />
-            Feito para quem vive de serviço
+        <div id="hero-panel-professional" role="tabpanel" aria-labelledby="hero-tab-professional" tabIndex={0} hidden={active !== 0} className={styles.panel}>
+          <div className={styles.portrait}>
+            <Image src="/home/prestador.webp" alt="Pintor sorrindo em uma reforma, de braços cruzados" fill preload sizes="(min-width: 1200px) 650px, (min-width: 768px) 60vw, 90vw" className={styles.photo} />
           </div>
-
-          <h1 className="mt-5 text-[2.35rem] font-semibold leading-[1.02] tracking-[-0.045em] text-ink sm:text-5xl lg:text-[3.55rem]">
-            Sua página profissional.
-            <span className="mt-1 block text-gold-deep">Orçamentos em minutos.</span>
-          </h1>
-
-          <p className="mt-4 max-w-[36rem] text-[1.02rem] leading-7 text-text-soft sm:text-lg">
-            Um link com sua logo, fotos e serviços para divulgar onde quiser — e orçamento profissional pronto para enviar.
-          </p>
-
-          <div className="mt-4 flex flex-wrap items-center gap-2" aria-label="Onde divulgar sua página Orçah">
-            <span className="mr-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-text-soft">Divulgue no</span>
-            <SocialChip icon={<InstagramIcon />} label="Instagram" />
-            <SocialChip icon={<WhatsAppIcon />} label="WhatsApp" />
-            <SocialChip icon={<FacebookIcon />} label="Facebook" />
-            <SocialChip icon={<LinkIcon />} label="e onde quiser" />
+          <div className={styles.copy}>
+            <h1>Sua página<br />profissional.<span>Orçamentos em minutos.</span></h1>
+            <p>Crie sua página, mostre seus serviços, receba clientes da sua região e envie orçamentos profissionais.</p>
+            <ul className={styles.benefits}>{benefits.map((benefit) => <li key={benefit}><span><Icon name="check" /></span>{benefit}</li>)}</ul>
+            <Link href={appUrl("/cadastro")} className={styles.primaryCta}>Criar minha página grátis <Icon name="arrow" /></Link>
+            <div className={styles.trial}>
+              <span><Icon name="calendar" />{TRIAL_DAYS} dias grátis</span>
+              <span><Icon name="card" />Sem cartão<span className={styles.credit}> de crédito</span></span>
+              <span><Icon name="check" />Cancele quando quiser</span>
+            </div>
           </div>
-
-          <div className="mt-5 flex flex-wrap items-center gap-2">
-            <span className="mr-1 text-xs font-medium text-text-soft">Para prestadores</span>
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-gold-wash px-2.5 py-1 text-xs font-semibold text-gold-deep">
-              <CalendarIcon />
-              {TRIAL_DAYS} dias grátis
-            </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-card px-2.5 py-1 text-xs font-semibold text-ink shadow-card">
-              <CardIcon />
-              Sem cartão de crédito
-            </span>
-          </div>
-
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-            <Link
-              href={appUrl("/painel")}
-              className="inline-flex min-h-12 flex-1 items-center justify-center rounded-[14px] bg-gold px-5 text-base font-semibold text-ink shadow-[0_12px_30px_-16px_rgba(229,153,26,.85)] transition hover:-translate-y-0.5 hover:bg-gold-press sm:flex-none"
-            >
-              Acessar meu painel
-              <ArrowIcon />
-            </Link>
-            <a
-              href={companyPublicUrl(DEMO_SLUG)}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-[14px] border border-line bg-card/90 px-5 text-base font-semibold text-ink shadow-card transition hover:-translate-y-0.5 hover:border-ink/20"
-            >
-              <EyeIcon />
-              Ver exemplo pronto
+          <div className={styles.previewWrap}>
+            <a className={styles.preview} href={companyPublicUrl("pintura-norte")} aria-label="Ver exemplo da página profissional Pintura Norte">
+              <div className={styles.previewHeader}><span><Icon name="page" /></span><div><small>Sua página profissional</small><b>pintura-norte.orcah.com.br</b></div></div>
+              <div className={styles.previewCover}><Image src="/demo/trabalho-fachada.webp" alt="Exemplo de trabalho de pintura" fill sizes="280px" /></div>
+              <div className={styles.previewAvatar}><Image src="/home/prestador.webp" alt="" fill sizes="56px" /></div>
+              <div className={styles.previewDetails}><strong>Pintura Norte</strong><span className={styles.previewStars}>★★★★★ <small>Página de exemplo</small></span><p>Maravilha - SC</p></div>
+              <div className={styles.previewNav}><span><Icon name="page" />Serviços</span><span><Icon name="house" />Fotos</span><span><Icon name="star" />Avaliações</span></div>
+              <div className={styles.previewServices}>{["Pintura interna", "Massa corrida", "Pintura externa"].map((service, index) => <div key={service}><Image src={index === 1 ? "/demo/trabalho-sala.webp" : "/demo/trabalho-muro.webp"} alt="" width={40} height={40} /><span><b>{service}</b><small>Peça um orçamento</small></span></div>)}</div>
+              <div className={styles.previewBottom} />
             </a>
-          </div>
-
-          <div className="mt-7 grid grid-cols-3 gap-2 sm:gap-3">
-            {quickBenefits.map(([title, text, icon]) => (
-              <div key={title} className="group rounded-2xl border border-line/90 bg-card/75 p-3 shadow-card backdrop-blur sm:p-4">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-ink text-ink-text shadow-card transition group-hover:-translate-y-0.5">
-                  {icon}
-                </span>
-                <p className="mt-2.5 text-[12px] font-semibold leading-4 text-ink sm:text-sm">{title}</p>
-                <p className="mt-1 hidden text-xs leading-5 text-text-soft sm:block">{text}</p>
-              </div>
-            ))}
+            <div className={styles.growth}><span><Icon name="bolt" /></span><b>Mais visibilidade<br />na sua região</b></div>
+            <div className={styles.message}><span><Icon name="page" /></span><b>Pedidos de orçamento<br />direto pelo seu link</b><small>Exemplo</small></div>
           </div>
         </div>
 
-        <HeroVisual />
+        <div id="hero-panel-customer" role="tabpanel" aria-labelledby="hero-tab-customer" tabIndex={0} hidden={active !== 1} className={styles.panel}>
+          <div className={styles.portrait}><Image src="/home/cliente.webp" alt="Cliente no sofá procurando um profissional pelo celular" fill sizes="(min-width: 1200px) 650px, (min-width: 768px) 60vw, 90vw" className={styles.photo} /></div>
+          <div className={styles.copy}>
+            <h2>Encontre<br />profissionais<span>de confiança.</span></h2>
+            <p>Compare, veja fotos de serviços e peça orçamentos de profissionais da sua região em poucos cliques.</p>
+          </div>
+          <div className={styles.customerActions}>
+            <form action="/prestadores" method="get" className={styles.search}>
+              <div className={styles.fields}>
+                <label className={styles.field}><Icon name="search" /><span><span>Qual serviço você precisa?</span><input name="servico" aria-label="Qual serviço você precisa?" placeholder="Ex: eletricista, pintor, pedreiro..." required /></span></label>
+                <label className={styles.field}><Icon name="pin" /><input name="local" aria-label="Sua cidade e estado" placeholder="Sua cidade - UF" value={location} onChange={(event) => setLocation(event.target.value)} required /></label>
+              </div>
+              <button type="submit" className={styles.searchCta}>Buscar profissionais <Icon name="arrow" /></button>
+            </form>
+            <div className={styles.categoriesHeader}><h3>Serviços mais buscados</h3><Link href={categoryHref("")}>Ver todos <Icon name="arrow" /></Link></div>
+            <div className={styles.categories}>{categories.map(({ label, query, icon }) => <Link key={label} href={categoryHref(query)} className={styles.category}><Icon name={icon} /><span>{label}</span></Link>)}</div>
+            <p className={styles.customerFree}>Para clientes, é grátis. Encontre e fale com profissionais.</p>
+          </div>
+        </div>
+      </div>
+      <div className={styles.trust}>
+        {([
+          ["person", "Profissionais da sua região", "Encontre perto de você"],
+          ["page", "Orçamentos rápidos", "Contato direto com o profissional"],
+          ["pin", "Serviços em um só lugar", "Compare e escolha com calma"],
+          ["star", "Conheça os trabalhos", "Veja fotos e informações"],
+        ] as const).map(([icon, title, subtitle]) => <div key={title}><span className={styles.trustIcon}><Icon name={icon} /></span><span><strong>{title}</strong><small>{subtitle}</small></span></div>)}
       </div>
     </section>
   );
 }
 
-function HeroVisual() {
-  return (
-    <div className="relative mx-auto mt-1 w-full max-w-[500px] pb-12 pt-3 lg:mt-0 lg:justify-self-end lg:pb-16">
-      <div className="absolute -inset-x-3 bottom-5 top-10 -z-10 rounded-[2.5rem] bg-gradient-to-br from-gold-wash via-card to-paper-alt opacity-90 blur-[1px]" />
-
-      <div className="absolute left-0 top-0 z-20 animate-float rounded-2xl border border-line bg-card/95 px-3 py-2.5 shadow-float backdrop-blur sm:-left-5 sm:top-7" style={{ animationDuration: "5.6s" }}>
-        <div className="flex items-center gap-2">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-gold-wash text-gold-deep"><LinkIcon /></span>
-          <div>
-            <p className="text-[9px] font-semibold uppercase tracking-[0.09em] text-text-soft">Seu site está no ar</p>
-            <p className="mt-0.5 font-mono text-[11px] font-semibold text-ink sm:text-xs">pintura-norte.orcah.com.br</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="relative mx-auto aspect-[1.08/1] w-[94%] overflow-hidden rounded-[2rem] border border-white/70 bg-card shadow-float sm:aspect-[4/5] sm:w-[86%]">
-        <Image
-          src="/demo/prestador-celular.webp"
-          alt="Prestador usando o Orçah no celular"
-          fill
-          priority
-          sizes="(min-width: 1024px) 430px, 94vw"
-          className="object-cover object-[30%_center]"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-ink/20 via-transparent to-white/5" />
-
-        <div className="absolute bottom-3 left-3 right-3 rounded-2xl border border-white/60 bg-card/90 p-3 shadow-card backdrop-blur-md sm:hidden">
-          <div className="flex items-center gap-2.5">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-ink text-ink-text"><PageIcon /></span>
-            <div className="min-w-0">
-              <p className="text-[11px] font-semibold text-ink">Pintura Norte</p>
-              <p className="truncate text-[10px] text-text-soft">Logo · trabalhos · serviços · contato</p>
-            </div>
-            <span className="ml-auto rounded-full bg-ok-wash px-2 py-1 text-[9px] font-semibold text-ok">Online</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="absolute -bottom-1 right-0 z-10 origin-bottom-right scale-[0.43] sm:right-1 sm:scale-[0.62] lg:-right-4 lg:scale-[0.68]">
-        <HeroQuoteDemo />
-      </div>
-
-      <div className="absolute right-0 top-16 z-20 animate-float rounded-2xl border border-ok/10 bg-card/95 px-3 py-2.5 shadow-float backdrop-blur sm:-right-2 sm:top-20" style={{ animationDelay: "-2.1s", animationDuration: "6.5s" }}>
-        <div className="flex items-center gap-2">
-          <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ok-wash text-ok">✓</span>
-          <span>
-            <span className="block text-[11px] font-semibold text-ink sm:text-xs">Cliente aprovou</span>
-            <span className="block text-[10px] text-text-soft">R$ 2.450,00 · agora</span>
-          </span>
-        </div>
-      </div>
-
-      <div className="absolute bottom-5 left-0 z-20 hidden animate-float rounded-2xl border border-line bg-ink px-3 py-2.5 text-ink-text shadow-float sm:block" style={{ animationDelay: "-3s", animationDuration: "7s" }}>
-        <p className="text-[9px] uppercase tracking-[0.09em] text-ink-soft">Orçamento</p>
-        <p className="mt-0.5 text-xs font-semibold">Pronto para WhatsApp ✓</p>
-      </div>
-    </div>
-  );
+function Icon({ name }: { name: IconName }) {
+  const paths: Record<IconName, ReactNode> = {
+    person: <><circle cx="12" cy="7" r="3.5" /><path d="M5 21v-3a7 7 0 0 1 14 0v3Z" /></>,
+    search: <><circle cx="10.5" cy="10.5" r="6.5" /><path d="m16 16 5 5" /></>,
+    arrow: <path d="M4 12h16m-6-6 6 6-6 6" />,
+    pin: <><path d="M19 10c0 5-7 11-7 11S5 15 5 10a7 7 0 1 1 14 0Z" /><circle cx="12" cy="10" r="2.5" /></>,
+    check: <path d="m5 12 4 4L19 6" />,
+    calendar: <><rect x="3" y="5" width="18" height="16" rx="2" /><path d="M7 3v4m10-4v4M3 10h18" /></>,
+    card: <><rect x="2" y="5" width="20" height="14" rx="3" /><path d="M2 10h20M6 15h4" /></>,
+    page: <><path d="M14 2H5v20h14V7Z" /><path d="M14 2v6h5M8 12h8M8 16h8" /></>,
+    star: <path d="m12 2 3 6.5 7 1-5 5 1 7-6-3.5L6 21l1-6.5-5-5 7-1Z" />,
+    bolt: <path d="m14 2-9 12h7l-2 8 9-13h-7Z" fill="currentColor" strokeWidth="1" />,
+    paint: <><rect x="3" y="3" width="15" height="7" rx="2" fill="currentColor" /><path d="M18 6h3v7h-9v3" /><rect x="10" y="16" width="4" height="6" rx="1" fill="currentColor" /></>,
+    bricks: <path d="M4 3h7v5H4zm10 0h7v5h-7zM2 11h7v4H2zm10 0h9v4h-9zM2 18h9v4H2zm12 0h7v4h-7z" fill="currentColor" strokeWidth="1" />,
+    water: <><path d="M3 11h15a3 3 0 0 1 3 3v3h-5v-2H3Zm7-6h6M13 3v8M6 8v9" /><path d="M19 19s-2 2-2 3h4c0-1-2-3-2-3Z" fill="currentColor" /></>,
+    snow: <path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 3 3-3M9 20l3-3 3 3M3 10l4-1-1-4m12 14-1-4 4-1M3 14l4 1-1 4M18 5l-1 4 4 1" />,
+    house: <><path d="m2 11 10-9 10 9M5 9v13h14V9" /><path d="M10 22v-8h4v8" /></>,
+    tool: <path d="M21 3a6 6 0 0 1-8 8L5 21a2 2 0 0 1-3-3l10-8a6 6 0 0 1 8-8l-4 4 2 2Z" fill="currentColor" strokeWidth="1" />,
+    more: <><circle cx="4" cy="12" r="1.5" fill="currentColor" /><circle cx="12" cy="12" r="1.5" fill="currentColor" /><circle cx="20" cy="12" r="1.5" fill="currentColor" /></>,
+  };
+  return <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
-
-function SocialChip({ icon, label }: { icon: ReactNode; label: string }) {
-  return <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-card/85 px-3 py-1.5 text-[11px] font-semibold text-ink shadow-card backdrop-blur sm:text-xs">{icon}{label}</span>;
-}
-function CalendarIcon(){return <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden><rect x="2.5" y="3.5" width="11" height="10" rx="2"/><path d="M2.5 6.5h11M5.5 2.5v2M10.5 2.5v2" strokeLinecap="round"/></svg>}
-function CardIcon(){return <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden><rect x="2" y="4" width="12" height="8" rx="1.5"/><path d="M2 7h12M4.5 10h3" strokeLinecap="round"/></svg>}
-function ArrowIcon(){return <svg viewBox="0 0 20 20" className="ml-2 h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.9" aria-hidden><path d="M4 10h11M11 6l4 4-4 4" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-function EyeIcon(){return <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden><path d="M2.8 12s3.3-5.2 9.2-5.2S21.2 12 21.2 12 17.9 17.2 12 17.2 2.8 12 2.8 12Z"/><circle cx="12" cy="12" r="2.4"/></svg>}
-function InstagramIcon(){return <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>}
-function WhatsAppIcon(){return <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden><path d="M20 12a8 8 0 0 1-11.7 7.1L4 20l1-4.1A8 8 0 1 1 20 12Z" strokeLinecap="round" strokeLinejoin="round"/><path d="M9.4 8.9c.2-.4.4-.4.6-.4h.5c.2 0 .4.1.5.4l.5 1.4c.1.2.1.4 0 .6l-.4.6c-.1.1-.1.3 0 .4.4.7 1 1.3 1.7 1.7.1.1.3.1.4 0l.6-.4c.2-.1.4-.1.6 0l1.4.5c.3.1.4.3.4.5v.5c0 .2 0 .4-.4.6-.4.2-1 .4-1.7.2-1-.2-2.2-.8-3.4-2-1.2-1.2-1.8-2.4-2-3.4-.1-.7 0-1.3.2-1.7Z" strokeLinecap="round" strokeLinejoin="round"/></svg>}
-function FacebookIcon(){return <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden><path d="M13.5 21v-8h2.7l.4-3h-3.1V8.1c0-.9.3-1.5 1.6-1.5H17V4a24 24 0 0 0-2.5-.1c-2.5 0-4.2 1.5-4.2 4.3V10H7.5v3h2.8v8h3.2Z"/></svg>}
-function LinkIcon(){return <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden><path d="M10.3 13.7a4 4 0 0 0 5.7 0l2.7-2.7A4 4 0 0 0 13 5.3l-1.5 1.5" strokeLinecap="round"/><path d="M13.7 10.3a4 4 0 0 0-5.7 0L5.3 13A4 4 0 1 0 11 18.7l1.5-1.5" strokeLinecap="round"/></svg>}
-function PageIcon(){return <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M4 8h16M8 12h5M8 16h8" strokeLinecap="round"/></svg>}
-function QuoteIcon(){return <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden><path d="M6 6h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H9l-4 2v-3.2A2 2 0 0 1 4 15V8a2 2 0 0 1 2-2Z"/><path d="M8 10h8M8 14h5" strokeLinecap="round"/></svg>}

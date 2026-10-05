@@ -4,7 +4,6 @@ import { FlowSection } from "@/components/home/flow-stepper";
 import { HomeCommercialHero } from "@/components/home/home-commercial-hero";
 import { HomeMobileNav } from "@/components/home/home-mobile-nav";
 import { HomeMobileStickyCta } from "@/components/home/home-mobile-sticky-cta";
-import { HomeProviderSearch } from "@/components/home/home-provider-search";
 import { PagePhoneDemo } from "@/components/home/page-phone-demo";
 import { StatusSection } from "@/components/home/status-flow-demo";
 import { OrcahLogo } from "@/components/orcah-logo";
@@ -142,10 +141,6 @@ export default async function Home() {
           </div>
         </div>
       </header>
-
-      <div className="border-b border-line/70 bg-paper px-4 py-3 lg:px-6">
-        <HomeProviderSearch />
-      </div>
 
       <HomeCommercialHero />
 
