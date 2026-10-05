@@ -1,4 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
@@ -100,21 +101,19 @@ export async function POST(request: Request) {
       case "companies": {
         const q = text(params.q);
         const status = text(params.status);
-        const where: Parameters<typeof prisma.company.findMany>[0] extends { where?: infer W } ? W : never = {};
+        const where: Prisma.CompanyWhereInput = {};
 
         if (q) {
-          Object.assign(where as object, {
-            OR: [
-              { name: { contains: q, mode: "insensitive" } },
-              { email: { contains: q, mode: "insensitive" } },
-              { whatsapp: { contains: q } },
-              { user: { email: { contains: q, mode: "insensitive" } } },
-            ],
-          });
+          where.OR = [
+            { name: { contains: q, mode: "insensitive" } },
+            { email: { contains: q, mode: "insensitive" } },
+            { whatsapp: { contains: q } },
+            { user: { email: { contains: q, mode: "insensitive" } } },
+          ];
         }
-        if (status === "trial") Object.assign(where as object, { subscription: { status: "trialing" } });
-        if (status === "active") Object.assign(where as object, { subscription: { status: "active" } });
-        if (status === "none") Object.assign(where as object, { subscription: null });
+        if (status === "trial") where.subscription = { status: "trialing" };
+        if (status === "active") where.subscription = { status: "active" };
+        if (status === "none") where.subscription = null;
 
         const rows = await prisma.company.findMany({
           where,
@@ -189,8 +188,8 @@ export async function POST(request: Request) {
       case "budgets": {
         const q = text(params.q);
         const status = text(params.status);
-        const where: Record<string, unknown> = {};
-        if (status) where.status = status;
+        const where: Prisma.BudgetWhereInput = {};
+        if (status) where.status = status as Prisma.EnumBudgetStatusFilter["equals"];
         if (q) {
           where.OR = [
             { number: { contains: q, mode: "insensitive" } },
