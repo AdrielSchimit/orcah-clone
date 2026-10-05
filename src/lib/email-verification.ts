@@ -104,8 +104,8 @@ export async function requestVerificationResend({
   await recordAuthAttempt({ purpose: VERIFY_PURPOSE, email, ipHash, now, db });
 
   const user = await db.user.findUnique({ where: { email }, select: { id: true, email: true, emailVerifiedAt: true } });
-  if (user && !user.emailVerifiedAt) {
-    await sendVerificationForUser({ user, sendEmail, emailConfigured, now, db });
+  if (user?.email && !user.emailVerifiedAt) {
+    await sendVerificationForUser({ user: { id: user.id, email: user.email }, sendEmail, emailConfigured, now, db });
   }
   return { ok: true, message: VERIFY_GENERIC_MESSAGE };
 }

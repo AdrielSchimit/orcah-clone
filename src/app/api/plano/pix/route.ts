@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   try {
     const customer = await findOrCreateAsaasCustomer({
       name: auth.company.name,
-      email: auth.company.email || auth.user.email,
+      email: auth.company.email || auth.user.email || undefined,
       cpfCnpj: document,
       mobilePhone: digitsOnly(auth.company.whatsapp || auth.company.phone),
       companyId: auth.company.id,

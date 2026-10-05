@@ -118,7 +118,7 @@ export async function searchPublicProviders(db: SearchDb, input: SearchProviders
   }
 
   const where: Prisma.CompanyWhereInput = {
-    user: { emailVerifiedAt: { not: null } },
+    user: { OR: [{ emailVerifiedAt: { not: null } }, { email: null }] },
   };
 
   if (category) {
@@ -213,7 +213,7 @@ export async function searchPublicProviders(db: SearchDb, input: SearchProviders
 
 export async function getPublicProviderBrief(db: SearchDb, slug: string, searchCity: ResolvedSearchCity | null) {
   const company = await db.company.findFirst({
-    where: { slug, user: { emailVerifiedAt: { not: null } } },
+    where: { slug, user: { OR: [{ emailVerifiedAt: { not: null } }, { email: null }] } },
     select: {
       slug: true,
       name: true,

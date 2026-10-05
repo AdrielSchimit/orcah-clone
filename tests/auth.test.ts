@@ -151,7 +151,7 @@ describe("login", () => {
     await addUser("ze@teste.com", "Senha-forte-1");
     const result = await authenticateLogin({ email: "ze@teste.com", password: "errada123", headers: headers(), db: asDb(db), now: T0 });
     assert.deepEqual(result, { ok: false, status: 401, error: LOGIN_INVALID_MESSAGE });
-    assert.equal(LOGIN_INVALID_MESSAGE, "E-mail ou senha incorretos.");
+    assert.equal(LOGIN_INVALID_MESSAGE, "E-mail, telefone ou senha incorretos.");
   });
 
   it("usuário inexistente recebe exatamente a mesma resposta", async () => {

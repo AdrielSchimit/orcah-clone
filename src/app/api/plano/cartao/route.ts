@@ -48,6 +48,10 @@ export async function POST(request: Request) {
   const expiryMonth = expiry.slice(0, 2);
   const expiryYear = expiry.length === 4 ? `20${expiry.slice(2)}` : expiry.slice(2);
   const phone = digitsOnly(auth.company.whatsapp || auth.company.phone);
+  const billingEmail = auth.company.email || auth.user.email;
+  if (!billingEmail) {
+    return NextResponse.json({ error: "Informe um e-mail nos dados da sua página para pagar com cartão." }, { status: 400 });
+  }
 
   await ensureSubscription(auth.company.id);
   await prisma.company.update({
@@ -58,7 +62,7 @@ export async function POST(request: Request) {
   try {
     const customer = await findOrCreateAsaasCustomer({
       name: auth.company.name,
-      email: auth.company.email || auth.user.email,
+      email: billingEmail,
       cpfCnpj: document,
       mobilePhone: phone,
       companyId: auth.company.id,
@@ -76,7 +80,7 @@ export async function POST(request: Request) {
       },
       holder: {
         name: holderName,
-        email: auth.company.email || auth.user.email,
+        email: billingEmail,
         cpfCnpj: document,
         postalCode,
         addressNumber,

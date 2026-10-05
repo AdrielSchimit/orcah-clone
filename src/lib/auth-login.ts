@@ -3,7 +3,7 @@ import { normalizeEmail } from "@/lib/auth-security";
 import { verifyPassword } from "@/lib/password";
 import { loginRateIsLimited, recordFailedLogin, type AuthDb } from "@/lib/password-reset";
 
-export const LOGIN_INVALID_MESSAGE = "E-mail ou senha incorretos.";
+export const LOGIN_INVALID_MESSAGE = "E-mail, telefone ou senha incorretos.";
 export const EMAIL_NOT_VERIFIED_MESSAGE = "Confirme seu e-mail para continuar.";
 export const LOGIN_LIMITED_MESSAGE = "Muitas tentativas. Aguarde alguns minutos e tente novamente.";
 
@@ -29,15 +29,22 @@ export async function authenticateLogin({
   now?: Date;
   db?: AuthDb;
 }): Promise<LoginResult> {
-  const email = normalizeEmail(rawEmail);
+  const identifier = normalizeEmail(rawEmail);
+  const digits = /^[+\d\s().-]+$/.test(identifier) ? identifier.replace(/\D/g, "") : "";
+  const phone = digits.startsWith("55") && [12, 13].includes(digits.length) ? digits.slice(2) : digits;
+  const email = identifier.includes("@") ? identifier : phone ? "phone:" + phone : identifier;
 
   if (await loginRateIsLimited(email, headers, db, now)) {
     return { ok: false, status: 429, error: LOGIN_LIMITED_MESSAGE };
   }
 
-  const user = email
-    ? await db.user.findUnique({ where: { email }, select: { id: true, passwordHash: true, emailVerifiedAt: true, company: { select: { id: true } } } })
-    : null;
+  const select = { id: true, email: true, passwordHash: true, emailVerifiedAt: true, company: { select: { id: true } } };
+  let user = identifier.includes("@") ? await db.user.findUnique({ where: { email: identifier }, select }) : null;
+  if (!identifier.includes("@") && /^[0-9]{10,11}$/.test(phone)) {
+    const matches = await db.user.findMany({ where: { phone }, select, take: 2 });
+    // Telefones compartilhados não identificam uma conta com segurança: nesse caso, use o e-mail.
+    if (matches.length === 1) user = matches[0];
+  }
   const passwordOk = await verifyPassword(password, user?.passwordHash ?? DUMMY_PASSWORD_HASH);
 
   if (!user || !passwordOk) {
@@ -46,7 +53,7 @@ export async function authenticateLogin({
   }
 
   // só depois da senha certa: não revela nada para quem não sabe a senha
-  if (!user.emailVerifiedAt) {
+  if (user.email && !user.emailVerifiedAt) {
     return { ok: false, status: 403, code: "email_not_verified", error: EMAIL_NOT_VERIFIED_MESSAGE };
   }
 

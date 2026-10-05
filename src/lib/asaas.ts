@@ -76,7 +76,7 @@ export async function asaas<T>(path: string, init?: RequestInit): Promise<T> {
 
 export async function findOrCreateAsaasCustomer(input: {
   name: string;
-  email: string;
+  email?: string;
   cpfCnpj: string;
   mobilePhone: string;
   companyId: number;

@@ -98,12 +98,12 @@ model BusinessCategory {
 model User {
   id           Int      @id @default(autoincrement())
   name         String   @db.VarChar(120)
-  email        String   @unique @db.VarChar(180)
+  email        String?  @unique @db.VarChar(180)
   passwordHash String   @map("password_hash") @db.VarChar(255)
   phone        String?  @db.VarChar(20)
   // sessões emitidas antes desta data deixam de valer (troca de senha)
   passwordChangedAt DateTime? @map("password_changed_at")
-  // null = e-mail ainda não confirmado (não entra no painel)
+  // Contas com e-mail precisam confirmá-lo; contas sem e-mail entram pelo telefone.
   emailVerifiedAt   DateTime? @map("email_verified_at")
   // só muda por processo interno (migration/banco); o cadastro público sempre cria USER
   role              UserRole  @default(USER)

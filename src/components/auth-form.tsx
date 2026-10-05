@@ -1,16 +1,14 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { PasswordChecklist } from "@/components/password-checklist";
 import { PhoneInput } from "@/components/phone-input";
-import { passwordIsStrong } from "@/lib/password-rules";
 
 export const PENDING_EMAIL_KEY = "orcah-verificar-email";
 
 export function AuthForm({ mode }: { mode: "cadastro" | "login" }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [password, setPassword] = useState("");
+  const [registrationEmail, setRegistrationEmail] = useState("");
   const [unverifiedEmail, setUnverifiedEmail] = useState("");
   const [resendMessage, setResendMessage] = useState("");
 
@@ -21,11 +19,6 @@ export function AuthForm({ mode }: { mode: "cadastro" | "login" }) {
     setResendMessage("");
     const form = new FormData(event.currentTarget);
     const payload = Object.fromEntries(form.entries()) as Record<string, string>;
-
-    if (mode === "cadastro" && !passwordIsStrong(password)) {
-      setError("A senha ainda não cumpre todos os itens abaixo.");
-      return;
-    }
 
     setLoading(true);
     const url = mode === "cadastro" ? "/api/auth/register" : "/api/auth/login";
@@ -42,7 +35,7 @@ export function AuthForm({ mode }: { mode: "cadastro" | "login" }) {
         setLoading(false);
         return;
       }
-      if (mode === "cadastro") {
+      if (mode === "cadastro" && data.next === "/verificar-email") {
         try {
           sessionStorage.setItem(PENDING_EMAIL_KEY, String(payload.email ?? "").trim().toLowerCase());
         } catch {
@@ -50,7 +43,7 @@ export function AuthForm({ mode }: { mode: "cadastro" | "login" }) {
         }
       }
       const next = data.next ?? "/painel";
-      window.location.assign(mode === "cadastro" && data.emailSent === false ? `${next}?envio=falhou` : next);
+      window.location.assign(next === "/verificar-email" && data.emailSent === false ? `${next}?envio=falhou` : next);
     } catch {
       setError("Falha de conexão. Tente de novo.");
       setLoading(false);
@@ -78,37 +71,35 @@ export function AuthForm({ mode }: { mode: "cadastro" | "login" }) {
             <PhoneInput
               name="phone"
               autoComplete="tel"
+              required={!registrationEmail.trim()}
               placeholder="(49) 9 9999-0000"
               className="w-full rounded-btn border border-line bg-card px-4 py-3 text-base text-text"
             />
+            <span className="mt-1.5 block text-xs text-text-soft">Use seu telefone para entrar se não informar e-mail.</span>
           </label>
         </>
       ) : null}
       <Field
         name="email"
-        label="E-mail"
-        type="email"
-        placeholder="voce@email.com"
-        autoComplete="email"
-        inputMode="email"
-        required
+        label={mode === "cadastro" ? "E-mail" : "E-mail ou telefone"}
+        type={mode === "cadastro" ? "email" : "text"}
+        placeholder={mode === "cadastro" ? "voce@email.com" : "Digite seu telefone ou e-mail"}
+        autoComplete={mode === "cadastro" ? "email" : "username"}
+        inputMode={mode === "cadastro" ? "email" : "text"}
+        required={mode === "login"}
+        value={mode === "cadastro" ? registrationEmail : undefined}
+        onChange={mode === "cadastro" ? setRegistrationEmail : undefined}
+        hint={mode === "cadastro" ? "Opcional — ajuda a recuperar sua conta caso perca." : undefined}
       />
       <div>
         <Field
           name="password"
           label="Senha"
           type="password"
-          placeholder={mode === "cadastro" ? "Crie uma senha forte" : "Sua senha"}
+          placeholder="Digite sua senha"
           autoComplete={mode === "cadastro" ? "new-password" : "current-password"}
-          value={mode === "cadastro" ? password : undefined}
-          onChange={mode === "cadastro" ? setPassword : undefined}
           required
         />
-        {mode === "cadastro" ? (
-          <div className="mt-2">
-            <PasswordChecklist password={password} />
-          </div>
-        ) : null}
       </div>
       {error ? <p className="text-sm text-no">{error}</p> : null}
       {unverifiedEmail ? (
@@ -140,6 +131,7 @@ function Field({
   inputMode,
   value,
   onChange,
+  hint,
 }: {
   name: string;
   label: string;
@@ -150,6 +142,7 @@ function Field({
   inputMode?: "email" | "tel" | "text";
   value?: string;
   onChange?: (value: string) => void;
+  hint?: string;
 }) {
   return (
     <label className="block">
@@ -164,6 +157,7 @@ function Field({
         {...(onChange ? { value: value ?? "", onChange: (event) => onChange(event.target.value) } : {})}
         className="w-full rounded-btn border border-line bg-card px-4 py-3 text-base text-text"
       />
+      {hint ? <span className="mt-1.5 block text-xs text-text-soft">{hint}</span> : null}
     </label>
   );
 }

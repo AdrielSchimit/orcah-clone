@@ -35,7 +35,7 @@ export default async function ContaPage() {
       <div className="flex flex-col gap-3">
         <Card title="Perfil">
           <Line label="Nome" value={user.name} />
-          <Line label="E-mail de acesso" value={user.email} />
+          <Line label="E-mail de acesso" value={user.email ?? "Não informado"} />
         </Card>
 
         <Card title="Empresa">

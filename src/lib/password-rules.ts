@@ -32,3 +32,8 @@ export function passwordIsStrong(password: string) {
     PASSWORD_RULES.every((rule) => rule.test(password))
   );
 }
+
+/** Cadastro aceita qualquer senha não vazia dentro do limite real do bcrypt. */
+export function registrationPasswordIsValid(password: string) {
+  return typeof password === "string" && password.trim().length > 0 && byteLength(password) <= MAX_PASSWORD_BYTES;
+}

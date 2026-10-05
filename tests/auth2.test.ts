@@ -99,13 +99,53 @@ describe("cadastro", () => {
     assert.equal((stored.expiresAt as Date).getTime() - T0.getTime(), EMAIL_VERIFICATION_TTL_MINUTES * 60 * 1000);
   });
 
-  it("recusa e-mail inválido e cada tipo de senha fraca", async () => {
+  it("recusa e-mail inválido e senha vazia, mas permite senhas simples no cadastro", async () => {
     assert.deepEqual(await register({ name: "João", email: "joao@", password: STRONG }), { ok: false, status: 400, error: "E-mail inválido." });
-    for (const weak of ["Pint1!", "pintura123!", "PINTURA123!", "Pinturaaa!", "Pintura123"]) {
-      const result = await register({ name: "João", email: "joao@gmail.com", password: weak });
-      assert.deepEqual(result, { ok: false, status: 400, error: PASSWORD_POLICY_MESSAGE }, weak);
+    assert.deepEqual(await register({ name: "João", email: "joao@gmail.com", password: "" }), { ok: false, status: 400, error: "Digite sua senha." });
+    assert.deepEqual(await register({ name: "João", email: "joao@gmail.com", password: " ".repeat(8) }), { ok: false, status: 400, error: "Digite sua senha." });
+    assert.deepEqual(await register({ name: "João", email: "joao@gmail.com", password: "a".repeat(73) }), { ok: false, status: 400, error: "Use uma senha mais curta." });
+    for (const [index, password] of ["1", "1234", "pintura", "PINTURA", "Pintura123"].entries()) {
+      const result = await register({ name: "João", email: "joao" + index + "@gmail.com", password });
+      assert.equal(result.ok, true, password);
+      assert.equal(await verifyPassword(password, db.user.rows[index].passwordHash as string), true);
     }
-    assert.equal(db.user.rows.length, 0);
+  });
+
+  it("cria conta sem e-mail, sem enviar confirmação, e permite entrar pelo telefone", async () => {
+    const result = await register({ name: "João", phone: "(49) 99999-0000", password: "1234" });
+    assert.deepEqual(result, { ok: true, next: "/onboarding", userId: db.user.rows[0].id });
+    assert.equal(db.user.rows[0].email, null);
+    assert.equal(db.user.rows[0].phone, "49999990000");
+    assert.equal(db.user.rows[0].emailVerifiedAt, null);
+    assert.equal(sent.length, 0);
+    const login = await authenticateLogin({ email: "+55 (49) 99999-0000", password: "1234", headers: headers(), now: T0, db: asAuthDb() });
+    assert.deepEqual(login, { ok: true, user: { id: db.user.rows[0].id, hasCompany: false } });
+  });
+
+  it("sem e-mail exige telefone com DDD e não permite duplicar a conta", async () => {
+    for (const phone of ["", "1234", "999990000"]) {
+      const result = await register({ name: "João", phone, password: "1234" });
+      assert.equal(result.ok === false && result.status, 400);
+    }
+    await register({ name: "João", phone: "49999990000", password: "1234" });
+    const again = await register({ name: "Outro", phone: "(49) 99999-0000", password: "5678" });
+    assert.equal(again.ok === false && again.status, 409);
+    assert.equal(db.user.rows.length, 1);
+    assert.equal(await verifyPassword("1234", db.user.rows[0].passwordHash as string), true);
+  });
+
+  it("telefone também entra em conta existente com e-mail confirmado", async () => {
+    const user = await db.user.create({ data: { email: "joao@teste.com", phone: "49999990000", passwordHash: await hashPassword("1234"), emailVerifiedAt: T0 } });
+    const login = await authenticateLogin({ email: "(49) 99999-0000", password: "1234", headers: headers(), now: T0, db: asAuthDb() });
+    assert.deepEqual(login, { ok: true, user: { id: user.id, hasCompany: false } });
+  });
+
+  it("telefone compartilhado não entra em uma conta arbitrária", async () => {
+    for (const email of ["joao@teste.com", "ana@teste.com"]) {
+      await db.user.create({ data: { email, phone: "49999990000", passwordHash: await hashPassword("1234"), emailVerifiedAt: T0 } });
+    }
+    const login = await authenticateLogin({ email: "49999990000", password: "1234", headers: headers(), now: T0, db: asAuthDb() });
+    assert.equal(login.ok === false && login.status, 401);
   });
 
   it("cadastro comum nunca vira ADMIN, nem mandando role no corpo, nem com e-mail de admin", async () => {

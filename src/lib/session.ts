@@ -52,8 +52,8 @@ export async function getSessionUser() {
       },
     });
     if (!user || !sessionIsCurrent(session.issuedAt, user.passwordChangedAt)) return null;
-    // conta com e-mail não confirmado não entra no painel, mesmo com cookie
-    if (!user.emailVerifiedAt) return null;
+    // Quando informado, o e-mail precisa ser confirmado. Contas sem e-mail usam telefone.
+    if (user.email && !user.emailVerifiedAt) return null;
     return user;
   } catch {
     return null;

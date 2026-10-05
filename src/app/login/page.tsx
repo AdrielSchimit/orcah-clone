@@ -8,7 +8,7 @@ export default function LoginPage() {
       <BrandBar />
       <main className="mx-auto flex w-full max-w-md flex-col px-4 pb-10 pt-8">
         <h1 className="mb-1 text-2xl font-semibold">Entrar</h1>
-        <p className="mb-6 text-sm text-text-soft">Abra o painel da sua empresa.</p>
+        <p className="mb-6 text-sm text-text-soft">Digite seu telefone ou e-mail para entrar.</p>
         <div className="rounded-box border border-line bg-card p-4">
           <AuthForm mode="login" />
         </div>

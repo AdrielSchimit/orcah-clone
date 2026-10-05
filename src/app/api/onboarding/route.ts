@@ -81,7 +81,7 @@ export async function POST(request: Request) {
         tradeName: name,
         phone: whatsapp,
         whatsapp,
-        email: user.email,
+        email: user.email ?? "",
         businessCategoryId: category.id,
         customRamoName: isOutro && customRamoName.length >= 2 ? customRamoName : null,
         stateId: state.id,
