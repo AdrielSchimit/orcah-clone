@@ -52,7 +52,21 @@
   .story h1 { font-size: 28px; letter-spacing: -1px; margin-top: 14px; } .storyCopy>p { font-size: 13px; margin-top: 11px; }
   .photo { height: 210px; margin: 0 10px; border-radius: 18px; } .photoCaption { margin: 10px; padding: 10px; gap: 8px; } .photoCaption strong { font-size: 10px; } .photoCaption small { font-size: 9px; } .captionIcon { width: 28px; height: 28px; }
   .benefits { display: none; } .formCard { padding: 25px 23px; border-radius: 25px; }
-  .formCard h2 { font-size: 25px; } .formIntro { margin-bottom: 20px; } .note { margin-top: 13px; }
+  .formCard h2 { font-size: 26px; }
+  .formIntro { font-size: 15px; line-height: 1.6; margin-bottom: 24px; }
+  .loginLink { font-size: 14px; min-height: 44px; }
+  .trialBadge { font-size: 13px; line-height: 1.4; padding: 8px 11px; }
+  .trialBadge svg { width: 17px; height: 17px; flex-shrink: 0; }
+  .form form { gap: 19px; }
+  .form label>span:first-child { font-size: 15px; line-height: 1.4; }
+  .form label>span:not(:first-child) { font-size: 14px; line-height: 1.5; color: var(--muted); }
+  .form input { min-height: 52px; }
+  .form input::placeholder { font-size: 16px; color: #68768d; }
+  .form button[type="submit"] { min-height: 54px; font-size: 16px; }
+  .price { font-size: 13px; line-height: 1.6; color: var(--muted); margin-top: 16px; }
+  .loginFooter { font-size: 14px; line-height: 1.5; row-gap: 8px; }
+  .loginFooter a { min-height: 44px; }
+  .note { font-size: 13px; line-height: 1.5; color: var(--muted); margin-top: 16px; }
 }
 @media(max-width:359px) { .layout { padding-inline: 14px; } .header { padding-inline: 16px; } .storyCopy { padding-inline: 19px; } .story h1 { font-size: 25px; } .formCard { padding-inline: 19px; } .photoCaption small { font-size: 8px; } .photoCaption strong { font-size: 9px; } }
 @media(prefers-reduced-motion:reduce) { .form input,.form button[type="submit"] { transition: none; } }

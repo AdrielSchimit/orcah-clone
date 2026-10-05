@@ -187,7 +187,10 @@
   .tabs { margin: 0; width: 100%; padding: 10px 14px 13px; border: 0; border-radius: 0 0 30px 30px; background: linear-gradient(100deg,#fffaf0,#fff 48%,#f1f8ff); box-shadow: none; }
   .tab { padding: 10px 7px; gap: 7px; border-radius: 40px; min-height: 58px; }
   .tabIcon { width: 29px; height: 29px; } .tabIcon svg { width: 18px; height: 18px; }
-  .tab strong { font-size: 11px; letter-spacing: -.45px; white-space: nowrap; } .tab small { font-size: 9px; letter-spacing: -.35px; }
+  .tabs { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .tab>span:last-child { min-width: 0; }
+  .tab strong,.tab:first-child strong { font-size: 13px; letter-spacing: -.2px; white-space: normal; line-height: 1.3; }
+  .tab small { font-size: 11px; letter-spacing: 0; white-space: normal; line-height: 1.4; color: #4d5e7b; }
   .tab[aria-selected="true"] { background: linear-gradient(120deg,#ffedb3,#fff6df); }
   .panel { min-height: 0; padding: 27px 22px 0; }
   .panel::before { width: 94%; height: 350px; bottom: -70px; right: -10%; border-radius: 100px; }
@@ -196,18 +199,20 @@
   .portrait::after { background: linear-gradient(90deg,#fff7ea 8%,#fff7eaaa 36%,transparent 67%); }
   .copy { width: 100%; }
   .copy h1,.copy h2 { font-size: clamp(30px,8.5vw,52px); max-width: 67%; line-height: 1.06; letter-spacing: -1.7px; }
-  .copy>p { width: 61%; font-size: 13px; line-height: 1.5; margin-top: 13px; }
-  .benefits { margin-top: 20px; gap: 10px; }
-  .benefits li { font-size: 10px; gap: 8px; color: #263957; text-shadow: 0 1px 3px #fff8ee,0 0 9px #fff8ee; } .benefits li:last-child { letter-spacing: -.25px; }
-  .benefits li>span { width: 19px; height: 19px; }
-  .primaryCta { width: 100%; padding-inline: 10px; margin-top: 23px; min-height: 53px; font-size: 15px; border-radius: 15px; }
-  .trial { justify-content: space-between; gap: 5px; margin-top: 15px; font-size: 9px; }
-  .trial>span { gap: 5px; } .trial>span+span { padding-left: 7px; } .trial svg { width: 14px; height: 14px; } .credit { display: none; }
+  .copy>p { width: 68%; font-size: 15px; line-height: 1.55; margin-top: 15px; color: #425677; }
+  .benefits { margin-top: 20px; gap: 12px; padding: 12px; border: 1px solid #ffffffad; border-radius: 14px; background: linear-gradient(90deg,#fff8eef2,#fff8eebd); }
+  .benefits li { font-size: 14px; line-height: 1.45; gap: 9px; color: #263957; }
+  .benefits li>span { width: 22px; height: 22px; }
+  .primaryCta { width: 100%; padding-inline: 10px; margin-top: 22px; min-height: 56px; font-size: 16px; border-radius: 15px; }
+  .trial { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px 8px; margin-top: 18px; font-size: 13px; line-height: 1.4; color: #425677; }
+  .trial>span { gap: 7px; white-space: normal; } .trial>span+span { padding-left: 8px; }
+  .trial>span:last-child { grid-column: 1 / -1; padding-left: 0; border-left: 0; }
+  .trial svg { flex-shrink: 0; width: 18px; height: 18px; } .credit { display: none; }
   .previewWrap { position: relative; top: auto; right: auto; width: 235px; margin: 29px auto 0; padding-bottom: 28px; }
   .preview { border-width: 7px; border-radius: 30px; padding: 10px; transform: rotate(-4deg); box-shadow: 0 16px 35px #cc8a2530,0 0 0 1px #ffdca0; }
-  .previewHeader small { font-size: 9px; } .previewHeader b { font-size: 9px; } .previewCover { height: 97px; }
-  .previewDetails>strong { font-size: 18px; } .previewStars { font-size: 13px; } .previewAvatar { width: 49px; height: 49px; } .previewNav span { font-size: 8px; }
-  .previewServices b,.previewServices small { font-size: 9px; }
+  .previewHeader small { font-size: 11px; } .previewHeader b { font-size: 10px; } .previewCover { height: 97px; }
+  .previewDetails>strong { font-size: 18px; } .previewStars { font-size: 13px; } .previewAvatar { width: 49px; height: 49px; } .previewNav span { font-size: 11px; }
+  .previewServices b,.previewServices small { font-size: 11px; }
   .growth,.message { display: none; }
   .hero[data-audience="customer"] .panel { padding-bottom: 23px; }
   .hero[data-audience="customer"] .portrait { right: -55px; top: 0; width: 80%; height: 320px; }
@@ -217,17 +222,18 @@
   .customerActions { margin-top: 21px; }
   .search { margin: 0 -7px; padding: 10px; border-radius: 19px; }
   .fields { grid-template-columns: 1fr; gap: 7px; }
-  .field { min-height: 49px; padding: 8px 12px; } .field>span>span { font-size: 12px; } .field input { font-size: 10px; } .field:last-child input { font-size: 12px; }
-  .searchCta { margin-top: 7px; min-height: 48px; font-size: 14px; }
+  .field { min-height: 57px; padding: 10px 12px; } .field>span>span { font-size: 14px; line-height: 1.4; } .field input { font-size: 16px; } .field:last-child input { font-size: 16px; }
+  .field input::placeholder { font-size: 14px; color: #536588; }
+  .searchCta { margin-top: 7px; min-height: 54px; font-size: 16px; }
   .categoriesHeader { margin: 23px -5px 0; }
-  .categoriesHeader h3 { font-size: 14px; } .categoriesHeader a { font-size: 11px; }
+  .categoriesHeader h3 { font-size: 16px; } .categoriesHeader a { font-size: 13px; min-height: 44px; }
   .categories { grid-template-columns: repeat(4,minmax(0,1fr)); gap: 8px; margin: 12px -7px 0; }
-  .category { min-height: 69px; border-radius: 13px; padding: 9px 2px; } .category>svg { width: 28px; height: 28px; } .category span { font-size: 9px; }
-  .customerFree { font-size: 10px; margin-top: 14px; }
+  .category { min-height: 83px; border-radius: 13px; padding: 10px 3px; } .category>svg { width: 28px; height: 28px; } .category span { font-size: 12px; line-height: 1.35; letter-spacing: -.2px; overflow-wrap: anywhere; }
+  .customerFree { font-size: 13px; line-height: 1.5; margin-top: 16px; }
   .trust { position: relative; z-index: 4; grid-template-columns: repeat(3,1fr); border-radius: 22px 22px 0 0; padding: 18px 12px 22px; gap: 0; }
   .trust>div { flex-direction: column; gap: 7px; text-align: center; padding: 0 7px; }
   .trust>div+div { padding-left: 7px; } .trust>div:nth-child(3) { display: none; }
   .trustIcon { width: 35px; height: 35px; } .trustIcon svg { width: 21px; height: 21px; }
-  .trust strong { font-size: 10px; line-height: 1.4; } .trust small { display: none; }
+  .trust strong { font-size: 13px; line-height: 1.4; } .trust small { display: none; }
 }
-@media(max-width:359px) { .tabs { padding-inline: 8px; } .tab { gap: 4px; padding-inline: 5px; } .tab strong { font-size: 10px; } .tab small { font-size: 8px; } .panel { padding-inline: 17px; } .benefits li { font-size: 9px; } .trial { font-size: 8px; } }
+@media(max-width:359px) { .tabs { padding-inline: 8px; } .tab { gap: 5px; padding-inline: 6px; } .tabIcon { width: 25px; height: 25px; } .panel { padding-inline: 17px; } .categoriesHeader h3 { font-size: 15px; } }
