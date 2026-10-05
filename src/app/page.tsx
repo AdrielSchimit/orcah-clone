@@ -2,7 +2,6 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { FlowSection } from "@/components/home/flow-stepper";
 import { HomeCommercialHero } from "@/components/home/home-commercial-hero";
-import { HomeMobileNav } from "@/components/home/home-mobile-nav";
 import { HomeMobileStickyCta } from "@/components/home/home-mobile-sticky-cta";
 import { PagePhoneDemo } from "@/components/home/page-phone-demo";
 import { StatusSection } from "@/components/home/status-flow-demo";
@@ -29,9 +28,8 @@ const trades = [
 
 const sectionNav = [
   ["Como funciona", "#como-funciona"],
-  ["Sua página", "#pagina"],
+  ["Planos", "#plano"],
   ["Orçamentos", "#orcamentos"],
-  ["Plano", "#plano"],
   ["Perguntas", "#perguntas"],
 ] as const;
 
@@ -88,61 +86,7 @@ export default async function Home() {
 
   return (
     <div className="flex flex-1 flex-col bg-paper">
-      <header className="sticky top-0 z-20 border-b border-line/80 bg-card/95 backdrop-blur-md">
-        <div className="mx-auto flex h-16 w-full max-w-6xl items-center gap-2 px-4 lg:gap-3 lg:px-6">
-          <Link href="/" aria-label="Orçah" className="flex h-10 shrink-0 items-center">
-            <OrcahLogo priority />
-          </Link>
-          <nav aria-label="Principal" className="hidden min-w-0 flex-1 items-center gap-0.5 lg:flex">
-            {sectionNav.map(([label, href]) => (
-              <a
-                key={href}
-                href={href}
-                className="inline-flex h-10 items-center whitespace-nowrap rounded-btn px-2 text-sm font-medium text-text hover:bg-paper xl:px-2.5"
-              >
-                {label}
-              </a>
-            ))}
-            <div className="ml-auto flex items-center gap-2">
-              <Link
-                href={providerAreaHref}
-                className="inline-flex h-10 items-center gap-1.5 whitespace-nowrap rounded-btn border border-line bg-paper px-3 text-sm font-semibold text-ink focus-visible:outline-2 focus-visible:outline-offset-[3px] focus-visible:outline-focus"
-              >
-                <PanelIcon small />
-                {providerAreaLabel}
-              </Link>
-              {!loggedIn ? (
-                <Link
-                  href={appUrl("/cadastro")}
-                  className="inline-flex h-10 items-center whitespace-nowrap rounded-btn bg-gold px-4 text-sm font-semibold text-ink hover:bg-gold-press"
-                >
-                  Começar grátis
-                </Link>
-              ) : null}
-            </div>
-          </nav>
-          <div className="ml-auto flex items-center gap-1 lg:hidden">
-            <HomeMobileNav
-              providerAreaHref={providerAreaHref}
-              providerAreaLabel={providerAreaLabel}
-              loggedIn={loggedIn}
-              links={sectionNav}
-            />
-            <Link
-              href={loggedIn ? appUrl("/painel") : appUrl("/login")}
-              className={
-                loggedIn
-                  ? "inline-flex h-10 items-center rounded-btn bg-paper px-3 text-sm font-semibold text-ink"
-                  : "inline-flex h-11 items-center px-3 text-sm font-medium text-text"
-              }
-            >
-              {loggedIn ? "Painel" : "Entrar"}
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <HomeCommercialHero />
+      <HomeCommercialHero loggedIn={loggedIn} providerAreaHref={providerAreaHref} providerAreaLabel={providerAreaLabel} links={sectionNav} />
 
       <section id="oficios" className="scroll-mt-20 bg-paper px-4 pb-16 pt-2 md:pb-24 md:pt-3">
         <div className="mx-auto w-full max-w-5xl">
@@ -356,17 +300,6 @@ export default async function Home() {
 
       <HomeMobileStickyCta />
     </div>
-  );
-}
-
-function PanelIcon({ small = false }: { small?: boolean }) {
-  return (
-    <svg viewBox="0 0 24 24" className={small ? "h-4 w-4" : "h-6 w-6"} fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <rect x="3" y="3" width="8" height="8" rx="1.5" />
-      <rect x="13" y="3" width="8" height="5" rx="1.5" />
-      <rect x="13" y="10" width="8" height="11" rx="1.5" />
-      <rect x="3" y="13" width="8" height="8" rx="1.5" />
-    </svg>
   );
 }
 

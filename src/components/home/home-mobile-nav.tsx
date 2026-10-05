@@ -22,9 +22,12 @@ export function HomeMobileNav({
   }
 
   return (
-    <details ref={detailsRef} className="relative lg:hidden">
+    <details ref={detailsRef} className="relative">
       <summary className="flex min-h-11 cursor-pointer list-none items-center px-3 text-sm font-medium text-text [&::-webkit-details-marker]:hidden">
-        Menu
+        <span className="sr-only">Menu</span>
+        <svg viewBox="0 0 24 24" width="23" height="23" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+          <path d="M3 6h18M3 12h18M3 18h18" />
+        </svg>
       </summary>
       <nav
         aria-label="Menu"

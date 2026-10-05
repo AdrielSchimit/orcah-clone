@@ -6,6 +6,8 @@ import { useRef, useState } from "react";
 import type { KeyboardEvent, ReactNode } from "react";
 import { TRIAL_DAYS } from "@/lib/plan-constants";
 import { appUrl, companyPublicUrl } from "@/lib/urls";
+import { OrcahLogo } from "@/components/orcah-logo";
+import { HomeMobileNav } from "./home-mobile-nav";
 import styles from "./home-commercial-hero.module.css";
 
 type IconName = "person" | "search" | "arrow" | "pin" | "check" | "calendar" | "card" | "page" | "star" | "bolt" | "paint" | "bricks" | "water" | "snow" | "house" | "tool" | "more";
@@ -25,7 +27,17 @@ const audiences = [
   ["customer", "Preciso de um profissional", "Encontrar e pedir orçamentos", "search"],
 ] as const;
 
-export function HomeCommercialHero() {
+export function HomeCommercialHero({
+  loggedIn,
+  providerAreaHref,
+  providerAreaLabel,
+  links,
+}: {
+  loggedIn: boolean;
+  providerAreaHref: string;
+  providerAreaLabel: string;
+  links: readonly (readonly [string, string])[];
+}) {
   const [active, setActive] = useState(0);
   const [location, setLocation] = useState("");
   const tabs = useRef<(HTMLButtonElement | null)[]>([]);
@@ -44,8 +56,13 @@ export function HomeCommercialHero() {
   }
 
   return (
-    <section id="hero-comercial" className={styles.hero} data-audience={audiences[active][0]} aria-label="Orçah para profissionais e clientes">
-      <div className={styles.stage}>
+    <>
+      <header className={styles.header} data-audience={audiences[active][0]}>
+        <div className={styles.headerShell}>
+          <Link href="/" aria-label="Orçah" className={styles.logo}><OrcahLogo priority className={styles.logoImage} /></Link>
+          <nav className={styles.desktopNav} aria-label="Principal">
+            {links.map(([label, href]) => <a href={href} key={href}>{label}</a>)}
+          </nav>
         <div className={styles.tabs} role="tablist" aria-label="Como você quer usar o Orçah?">
           {audiences.map(([value, title, subtitle, icon], index) => (
             <button key={value} ref={(element) => { tabs.current[index] = element; }} id={"hero-tab-" + value} type="button" role="tab" aria-selected={active === index} aria-controls={"hero-panel-" + value} tabIndex={active === index ? 0 : -1} onClick={() => setActive(index)} onKeyDown={onTabKey} className={styles.tab}>
@@ -54,6 +71,21 @@ export function HomeCommercialHero() {
             </button>
           ))}
         </div>
+          <div className={styles.headerActions}>
+            <Link href={providerAreaHref} className={styles.areaButton}>
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>
+              {providerAreaLabel}
+            </Link>
+            {!loggedIn && <Link href={appUrl("/cadastro")} className={styles.startButton}>Começar grátis <Icon name="arrow" /></Link>}
+          </div>
+          <div className={styles.mobileActions}>
+            <HomeMobileNav providerAreaHref={providerAreaHref} providerAreaLabel={providerAreaLabel} loggedIn={loggedIn} links={links} />
+            <Link href={providerAreaHref}>{loggedIn ? "Painel" : "Entrar"}</Link>
+          </div>
+        </div>
+      </header>
+    <section id="hero-comercial" className={styles.hero} data-audience={audiences[active][0]} aria-label="Orçah para profissionais e clientes">
+      <div className={styles.stage}>
 
         <div id="hero-panel-professional" role="tabpanel" aria-labelledby="hero-tab-professional" tabIndex={0} hidden={active !== 0} className={styles.panel}>
           <div className={styles.portrait}>
@@ -114,6 +146,7 @@ export function HomeCommercialHero() {
         ] as const).map(([icon, title, subtitle]) => <div key={title}><span className={styles.trustIcon}><Icon name={icon} /></span><span><strong>{title}</strong><small>{subtitle}</small></span></div>)}
       </div>
     </section>
+    </>
   );
 }
 
