@@ -18,5 +18,13 @@
   background: linear-gradient(180deg, #68b5ff, #3094ff 48%, #0876f5);
   box-shadow: inset 0 1px 0 #d5ecffd9, 0 9px 23px #0075ed36;
 }
-.gold:focus-visible,.blue:focus-visible { outline: 3px solid #1676e9; outline-offset: 3px; }
-@media(prefers-reduced-motion:reduce) { .gold,.blue { transition: none; } }
+.secondary {
+  border: 1px solid #dfe6f0;
+  color: #080f32;
+  background: linear-gradient(180deg,#fff,#f3f6fb);
+  box-shadow: inset 0 1px 0 #fff,0 5px 15px #2337590b;
+  transition: background .2s,box-shadow .2s;
+}
+.secondary:hover { background: linear-gradient(180deg,#f8fbff,#eaf0f9); box-shadow: 0 7px 18px #23375912; }
+.gold:focus-visible,.blue:focus-visible,.secondary:focus-visible { outline: 3px solid #1676e9; outline-offset: 3px; }
+@media(prefers-reduced-motion:reduce) { .gold,.blue,.secondary { transition: none; } }

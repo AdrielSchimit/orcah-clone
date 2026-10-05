@@ -1,0 +1,32 @@
+.home { color: #080f32; background: #fff; }
+.home>section:not([aria-label]) { padding: 76px 32px; background: #fff; scroll-margin-top: 160px; }
+.home>section:not([aria-label])>div { max-width: 1136px; }
+.home>section[id="oficios"] { padding-top: 32px; padding-bottom: 48px; }
+.home>section[id="pagina"],.home>section[id="ramo"] { background: #fff7ea; }
+.home>section[id="orcamentos"] { background: #f1f7ff; }
+.home>section[id="plano"] { background: linear-gradient(120deg,#fff7ea,#fffdf8); }
+.home>section:not([aria-label]) h2 { max-width: 620px; font-size: clamp(28px,3vw,42px); line-height: 1.12; letter-spacing: -1.4px; font-weight: 750; }
+.home>section:not([aria-label]) :global(.text-text-soft) { color: #536588; line-height: 1.65; }
+.home>section:not([aria-label]) :global(.text-gold-deep) { color: #a76400; }
+.home>section:not([aria-label]) :global(.shadow-card) { border: 1px solid #e8edf4; box-shadow: inset 0 1px 0 #fff,0 8px 24px #23375908; }
+.home>section[id="ramo"] li { border-color: #f0e2cd; border-radius: 22px; background: linear-gradient(145deg,#fff,#fffcf6); }
+.home>section[id="oficios"] span { border-color: #f0e2cd; background: #fffcf6; }
+.home>section[id="perguntas"] details { padding-inline: 22px; }
+.home>section[id="perguntas"] summary { min-height: 62px; }
+.home>section[id="plano"] :global(.shadow-float) { border-radius: 28px; box-shadow: 0 18px 48px #a1702915; }
+.home>section[id="plano"] :global(.bg-ink) { color: #080f32; background: linear-gradient(135deg,#fff3d2,#ffe6ab); border-bottom: 1px solid #f2daab; }
+.home>section[id="plano"] :global(.text-ink-soft) { color: #685c43; }
+.home>section:not([id]):not([aria-label]) { color: #080f32; background: radial-gradient(ellipse at top,#ffeac0,transparent 65%),#fff7ea; }
+.home>section:not([id]):not([aria-label]) h2 { margin-inline: auto; }
+.home>section:not([id]):not([aria-label]) :global(.text-ink-soft) { color: #536588; }
+.home footer { background: #080f32; }
+.home>section[id="orcamentos"]>div,.home>section[id="como-funciona"]>div>div:last-child { grid-template-columns: 1fr 1fr; }
+@media(max-width:1023px) { .home>section[id="orcamentos"]>div,.home>section[id="como-funciona"]>div>div:last-child { grid-template-columns: 1fr; } }
+@media(max-width:767px) {
+  .home>section:not([aria-label]) { padding: 48px 22px; }
+  .home>section[id="oficios"] { padding-top: 26px; padding-bottom: 36px; }
+  .home>section:not([aria-label]) h2 { font-size: 29px; letter-spacing: -.9px; }
+  .home>section:not([aria-label]) :global(.text-xs) { font-size: 13px; }
+  .home>section:not([aria-label]) :global(.text-sm) { font-size: 15px; }
+  .home>section[id="perguntas"] details { padding-inline: 16px; }
+}

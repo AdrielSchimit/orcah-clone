@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import { WhatsAppGlyph } from "./hero-quote-demo";
 import { useInView, usePrefersReducedMotion } from "./motion";
 import { PhoneFrame } from "./phone-frame";
@@ -80,8 +81,8 @@ export function StatusSection() {
             <div className="absolute inset-0" style={{ background: WA_BG }} aria-hidden />
             <div className="relative z-10 flex items-center gap-2.5 bg-card px-3 pb-2.5 pt-1 shadow-[0_1px_0_var(--line)]">
               <span className="text-lg leading-none text-text-soft">‹</span>
-              <span className="flex h-8 w-8 items-center justify-center rounded-full bg-wait-wash text-[11px] font-semibold text-wait">
-                MS
+              <span className="relative block h-8 w-8 overflow-hidden rounded-full">
+                <Image src="/home/cliente.webp" alt="" fill sizes="32px" className="object-cover object-top" />
               </span>
               <div className="min-w-0">
                 <p className="text-sm font-semibold leading-4">Maria Silva</p>
@@ -133,7 +134,7 @@ export function StatusSection() {
             {current.note ? (
               <div
                 key={step}
-                className="absolute inset-x-2 top-10 z-30 flex animate-notify items-center gap-2.5 rounded-2xl bg-card/95 p-2.5 shadow-float backdrop-blur"
+                className="absolute inset-x-2 top-[110px] z-30 flex animate-notify items-center gap-2.5 rounded-2xl bg-card/95 p-2.5 shadow-float backdrop-blur"
               >
                 <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-xl text-sm font-bold ${step === 3 ? "bg-ok text-card" : "bg-ink text-gold"}`}>
                   {step === 3 ? "✓" : "O"}

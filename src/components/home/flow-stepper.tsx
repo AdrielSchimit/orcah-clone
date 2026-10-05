@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { WhatsAppGlyph } from "./hero-quote-demo";
 import { useInView, usePrefersReducedMotion } from "./motion";
 import { PhoneFrame } from "./phone-frame";
+import homeButtons from "./home-buttons.module.css";
 
 const STEP_MS = 4200;
 
@@ -115,7 +116,7 @@ function PageScreen() {
       <ScreenTitle>Minha página</ScreenTitle>
       <div className="rounded-2xl bg-card p-3 shadow-card">
         <div className="flex items-center gap-2.5">
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-ink text-sm font-semibold text-ink-text">PN</span>
+          <span className="relative block h-10 w-10 shrink-0 overflow-hidden rounded-full"><Image src="/home/prestador.webp" alt="" fill sizes="40px" className="object-cover object-top" /></span>
           <div>
             <p className="text-sm font-semibold">Pintura Norte</p>
             <p className="text-[11px] text-text-soft">pintura-norte.orcah.com.br</p>
@@ -141,7 +142,7 @@ function PageScreen() {
           </div>
         ))}
       </div>
-      <p className="mt-auto flex h-11 items-center justify-center rounded-xl bg-ink text-[13px] font-semibold text-ink-text">
+      <p className={`${homeButtons.gold} mt-auto flex h-11 items-center justify-center rounded-xl text-[13px] font-semibold text-ink`}>
         Copiar link da página
       </p>
     </>
@@ -158,7 +159,7 @@ function RequestScreen() {
         <p className="mt-1 text-sm font-semibold">Pintar sala e cozinha</p>
         <p className="text-[12px] text-text-soft">Maria Silva · Centro</p>
         <p className="mt-2 rounded-xl bg-paper px-3 py-2 text-[12px] text-text-soft">“Vi as fotos da sala verde. Quero algo parecido.”</p>
-        <p className="mt-3 rounded-xl bg-ink py-2 text-center text-[13px] font-semibold text-ink-text">Fazer orçamento</p>
+        <p className={`${homeButtons.gold} mt-3 rounded-xl py-2 text-center text-[13px] font-semibold text-ink`}>Fazer orçamento</p>
       </div>
       {[
         ["Textura no muro", "João Alves · ontem"],

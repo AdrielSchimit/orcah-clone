@@ -1,4 +1,5 @@
 import homeButtons from "@/components/home/home-buttons.module.css";
+import homeSections from "@/components/home/home-sections.module.css";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { FlowSection } from "@/components/home/flow-stepper";
@@ -86,7 +87,7 @@ export default async function Home() {
   const providerAreaLabel = loggedIn ? "Acessar painel" : "Área do prestador";
 
   return (
-    <div className="flex flex-1 flex-col bg-paper">
+    <div className={`${homeSections.home} flex flex-1 flex-col bg-paper`}>
       <HomeCommercialHero loggedIn={loggedIn} providerAreaHref={providerAreaHref} providerAreaLabel={providerAreaLabel} links={sectionNav} />
 
       <section id="oficios" className="scroll-mt-20 bg-paper px-4 pb-16 pt-2 md:pb-24 md:pt-3">
@@ -129,11 +130,11 @@ export default async function Home() {
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <a
                 href={companyPublicUrl(DEMO_SLUG)}
-                className="inline-flex min-h-12 items-center rounded-btn bg-ink px-5 text-sm font-semibold text-ink-text"
+                className={`${homeButtons.secondary} inline-flex min-h-12 items-center rounded-[14px] px-5 text-sm font-semibold`}
               >
                 Abrir a loja de exemplo
               </a>
-              <Link href={appUrl("/cadastro")} className="inline-flex min-h-12 items-center px-2 text-sm font-semibold text-text">
+              <Link href={appUrl("/cadastro")} className={`${homeButtons.gold} inline-flex min-h-12 items-center rounded-[14px] px-5 text-sm font-semibold text-text`}>
                 Criar a minha →
               </Link>
             </div>

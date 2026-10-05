@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { useInView } from "./motion";
 import { PhoneFrame } from "./phone-frame";
+import homeButtons from "./home-buttons.module.css";
 
 const tabs = ["Trabalhos", "Serviços", "Pedir orçamento"] as const;
 const photos = [
@@ -40,17 +41,18 @@ export function PagePhoneDemo() {
 
   return (
     <div ref={ref} className="relative mx-auto w-fit">
-      <div aria-hidden className="absolute -inset-6 -z-10 rounded-[3rem] bg-paper-alt" />
+      <div aria-hidden className="absolute -inset-6 -z-10 rounded-[3rem] bg-[#ffe7ba80]" />
       <PhoneFrame screenClassName="bg-paper">
-        <div className="relative -mt-9 h-28 shrink-0">
+        <div className="relative h-28 shrink-0">
           <Image src="/demo/trabalho-fachada.webp" alt="" fill sizes="272px" className="object-cover" />
           <div className="absolute inset-0 bg-linear-to-b from-ink/40 to-transparent" />
         </div>
         <div className="-mt-7 px-4 text-center">
-          <span className="relative mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-ink text-base font-semibold text-ink-text ring-4 ring-paper">
-            PN
+          <span className="relative mx-auto block h-14 w-14 overflow-hidden rounded-full ring-4 ring-white">
+            <Image src="/home/prestador.webp" alt="Prestador da página de exemplo" fill sizes="56px" className="object-cover object-top" />
           </span>
           <p className="mt-2 font-semibold">Pintura Norte</p>
+          <p className="text-xs text-[#b66a00]">★★★★★</p>
           <p className="text-[11px] text-text-soft">Pintor · Maravilha-SC e Região</p>
         </div>
 
@@ -123,7 +125,7 @@ export function PagePhoneDemo() {
                   Pedido enviado ✓
                 </p>
               ) : (
-                <p className="rounded-xl bg-gold py-2.5 text-center text-sm font-semibold text-ink">Pedir orçamento</p>
+                <p className={`${homeButtons.gold} rounded-xl py-2.5 text-center text-sm font-semibold text-ink`}>Pedir orçamento</p>
               )}
             </div>
           ) : null}
