@@ -183,8 +183,17 @@
   .customerActions { max-width: 530px; } .trust { padding-inline: 25px; gap: 10px; } .trust>div { gap: 8px; } .trust>div+div { padding-left: 10px; } .trustIcon { width: 36px; height: 36px; }
 }
 @media(max-width:767px) {
+  .header { padding: 8px 10px 0; background: #ffffffed; border-bottom: 1px solid #e9edf3; box-shadow: 0 5px 22px #23375908; }
+  .headerShell { min-height: 0; border-radius: 22px; background: transparent; box-shadow: none; }
+  .logo { min-height: 52px; padding-left: 5px; }
+  .logoImage { width: 124px; }
+  .mobileActions { gap: 8px; padding-right: 3px; font-size: 14px; font-weight: 650; }
+  .mobileActions summary { display: grid; place-items: center; width: 44px; min-height: 44px; padding: 0; border: 1px solid #e6eaf1; border-radius: 14px; background: linear-gradient(#fff,#f5f7fb); box-shadow: inset 0 1px 0 #fff,0 3px 8px #23375906; }
+  .mobileActions details[open]>summary { background: #edf2f9; border-color: #ccd7e6; }
+  .mobileActions>a,.mobileActions>button { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 17px; border: 1px solid #ffe1a0; border-radius: 14px; color: #875100; background: linear-gradient(180deg,#fff8e6,#ffedbf); box-shadow: inset 0 1px 0 #fff,0 4px 12px #ffae0015; }
+  .mobileActions>a:hover,.mobileActions>button:hover { background: linear-gradient(180deg,#fff2d1,#ffe5a0); }
   .stage::before { display: none; }
-  .tabs { margin: 0; width: 100%; padding: 10px 14px 13px; border: 0; border-radius: 0 0 30px 30px; background: linear-gradient(100deg,#fffaf0,#fff 48%,#f1f8ff); box-shadow: none; }
+  .tabs { margin: 0 -10px; width: calc(100% + 20px); padding: 10px 14px 13px; border: 0; border-radius: 0 0 30px 30px; background: linear-gradient(100deg,#fffaf0,#fff 48%,#f1f8ff); box-shadow: none; }
   .tab { padding: 10px 7px; gap: 7px; border-radius: 40px; min-height: 58px; }
   .tabIcon { width: 29px; height: 29px; } .tabIcon svg { width: 18px; height: 18px; }
   .tabs { grid-template-columns: repeat(2,minmax(0,1fr)); }

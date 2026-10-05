@@ -1,6 +1,7 @@
 "use client";
 
 import homeButtons from "@/components/home/home-buttons.module.css";
+import heroStyles from "./home-commercial-hero.module.css";
 
 import Link from "next/link";
 import { useRef } from "react";
@@ -48,12 +49,12 @@ export function HomeMobileNav({
           </a>
         ))}
         <div className="my-2 h-px bg-line" />
-        {!loggedIn && loginPopoverId ? <button type="button" popoverTarget={loginPopoverId} aria-haspopup="dialog" onClick={close} className="flex min-h-11 w-full items-center rounded-btn bg-paper px-3 text-sm font-semibold text-ink">{providerAreaLabel}</button> : <Link
+        {!loggedIn && loginPopoverId ? <button type="button" popoverTarget={loginPopoverId} aria-haspopup="dialog" onClick={close} className={`${heroStyles.areaButton} w-full`}><ProviderIcon />{providerAreaLabel}</button> : <Link
           href={providerAreaHref}
           onClick={close}
-          className="flex min-h-11 items-center rounded-btn bg-paper px-3 text-sm font-semibold text-ink"
+          className={`${heroStyles.areaButton} w-full`}
         >
-          {providerAreaLabel}
+          <ProviderIcon />{providerAreaLabel}
         </Link>}
         {!loggedIn ? (
           <Link
@@ -67,4 +68,8 @@ export function HomeMobileNav({
       </nav>
     </details>
   );
+}
+
+function ProviderIcon() {
+  return <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5" /><rect x="14" y="3" width="7" height="7" rx="1.5" /><rect x="3" y="14" width="7" height="7" rx="1.5" /><rect x="14" y="14" width="7" height="7" rx="1.5" /></svg>;
 }
