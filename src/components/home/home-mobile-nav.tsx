@@ -1,5 +1,7 @@
 "use client";
 
+import homeButtons from "@/components/home/home-buttons.module.css";
+
 import Link from "next/link";
 import { useRef } from "react";
 import { appUrl } from "@/lib/urls";
@@ -57,7 +59,7 @@ export function HomeMobileNav({
           <Link
             href={appUrl("/cadastro")}
             onClick={close}
-            className="mt-1 flex min-h-11 items-center justify-center rounded-btn bg-gold px-3 text-sm font-semibold text-ink"
+            className={`mt-1 flex min-h-11 items-center justify-center rounded-btn bg-gold px-3 text-sm font-semibold text-ink ${homeButtons.gold}`}
           >
             Começar grátis
           </Link>

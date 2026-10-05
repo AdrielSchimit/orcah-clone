@@ -1,5 +1,7 @@
 "use client";
 
+import homeButtons from "@/components/home/home-buttons.module.css";
+
 import { FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
@@ -36,7 +38,7 @@ export function HomeProviderSearch() {
         <input type="hidden" name="ordenar" value="relevancia" />
         <button
           type="submit"
-          className="mr-[5px] inline-flex h-9 shrink-0 items-center rounded-[10px] bg-gold px-3.5 text-sm font-semibold text-ink hover:bg-gold-press focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus md:h-10 md:px-[18px]"
+          className={`mr-[5px] inline-flex h-9 shrink-0 items-center rounded-[10px] bg-gold px-3.5 text-sm font-semibold text-ink hover:bg-gold-press focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus md:h-10 md:px-[18px] ${homeButtons.gold}`}
         >
           Buscar
         </button>

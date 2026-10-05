@@ -1,3 +1,4 @@
+import homeButtons from "@/components/home/home-buttons.module.css";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { FlowSection } from "@/components/home/flow-stepper";
@@ -221,7 +222,7 @@ export default async function Home() {
               </ul>
               <Link
                 href={appUrl("/cadastro")}
-                className="mt-7 flex min-h-12 items-center justify-center rounded-btn bg-gold px-6 font-semibold text-ink transition-colors hover:bg-gold-press"
+                className={`mt-7 flex min-h-12 items-center justify-center rounded-btn bg-gold px-6 font-semibold text-ink transition-colors hover:bg-gold-press ${homeButtons.gold}`}
               >
                 Começar {TRIAL_DAYS} dias grátis
               </Link>
@@ -252,7 +253,7 @@ export default async function Home() {
         </p>
         <Link
           href={appUrl("/cadastro")}
-          className="mt-5 inline-flex min-h-12 items-center rounded-btn bg-gold px-6 font-semibold text-ink"
+          className={`mt-5 inline-flex min-h-12 items-center rounded-btn bg-gold px-6 font-semibold text-ink ${homeButtons.gold}`}
         >
           Começar grátis
         </Link>
