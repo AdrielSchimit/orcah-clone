@@ -10,7 +10,7 @@ import { appUrl, companyPublicUrl } from "@/lib/urls";
 
 type HomeIntent = "provider" | "search";
 
-const STORAGE_KEY = "orcah-home-intent-v3";
+const STORAGE_KEY = "orcah-home-intent-v4";
 const DEMO_SLUG = "pintura-norte";
 const quickServices = ["Eletricista", "Pintor", "Pedreiro", "Encanador", "Limpeza", "Fotógrafo"];
 
@@ -46,50 +46,60 @@ export function HomeProviderSearch() {
   }
 
   return (
-    <section className="relative overflow-hidden px-3 pb-8 pt-5 sm:px-5 sm:pb-12 sm:pt-8 lg:px-6 lg:pb-16">
+    <section className="relative overflow-hidden px-3 pb-9 pt-7 sm:px-5 sm:pb-12 sm:pt-10 lg:px-6 lg:pb-16">
       <div className="pointer-events-none absolute inset-0 -z-20 bg-paper" />
       <div
-        className={`pointer-events-none absolute inset-x-0 top-0 -z-10 h-[50rem] transition-opacity duration-500 ${
+        className={`pointer-events-none absolute inset-x-0 top-0 -z-10 h-[52rem] transition-opacity duration-500 ${
           intent === "provider"
-            ? "bg-[radial-gradient(circle_at_72%_8%,rgba(255,176,32,.19),transparent_31%),radial-gradient(circle_at_14%_4%,rgba(21,31,56,.055),transparent_28%)]"
-            : "bg-[radial-gradient(circle_at_70%_8%,rgba(79,121,255,.10),transparent_30%),radial-gradient(circle_at_14%_0%,rgba(21,31,56,.06),transparent_28%)]"
+            ? "bg-[radial-gradient(circle_at_72%_8%,rgba(255,176,32,.18),transparent_31%),radial-gradient(circle_at_14%_4%,rgba(21,31,56,.055),transparent_28%)]"
+            : "bg-[radial-gradient(circle_at_70%_8%,rgba(79,121,255,.09),transparent_30%),radial-gradient(circle_at_14%_0%,rgba(21,31,56,.06),transparent_28%)]"
         }`}
       />
 
-      <div className="mx-auto w-full max-w-7xl">
-        <div className="mx-auto mb-5 w-full max-w-[650px] sm:mb-7">
-          <div className="grid grid-cols-2 rounded-[18px] border border-line/80 bg-card/85 p-1.5 shadow-[0_18px_55px_-38px_rgba(15,23,42,.55)] backdrop-blur-xl">
-            <IntentButton
-              active={intent === "provider"}
-              onClick={() => chooseIntent("provider")}
-              icon={<ProviderIcon />}
-              title="Sou profissional"
-              subtitle="Quero divulgar e orçar"
-            />
-            <IntentButton
-              active={intent === "search"}
-              onClick={() => chooseIntent("search")}
-              icon={<SearchIcon compact />}
-              title="Preciso de um profissional"
-              subtitle="Quero encontrar alguém"
-            />
-          </div>
-        </div>
-
+      <div className="mx-auto w-full max-w-7xl pt-12 sm:pt-14">
         <div
-          className={`relative overflow-hidden rounded-[28px] border border-line/80 shadow-[0_28px_90px_-60px_rgba(15,23,42,.42)] transition-colors duration-500 sm:rounded-[34px] ${
+          className={`relative overflow-hidden rounded-[28px] border border-line/80 pt-14 shadow-[0_30px_95px_-62px_rgba(15,23,42,.46)] transition-colors duration-500 sm:rounded-[36px] sm:pt-16 ${
             intent === "provider" ? "bg-[#fffaf0]" : "bg-[#f5f8ff]"
           }`}
         >
           <div
             className={`pointer-events-none absolute inset-0 transition-opacity duration-500 ${
               intent === "provider"
-                ? "bg-[linear-gradient(120deg,rgba(255,255,255,.84),rgba(255,248,231,.42)_50%,rgba(255,190,67,.08))]"
-                : "bg-[linear-gradient(120deg,rgba(255,255,255,.88),rgba(245,248,255,.50)_52%,rgba(66,102,190,.06))]"
+                ? "bg-[linear-gradient(120deg,rgba(255,255,255,.86),rgba(255,248,231,.43)_50%,rgba(255,190,67,.08))]"
+                : "bg-[linear-gradient(120deg,rgba(255,255,255,.9),rgba(245,248,255,.52)_52%,rgba(66,102,190,.06))]"
             }`}
           />
 
-          <div className="relative min-h-[610px] sm:min-h-[650px] lg:min-h-[620px]">
+          <div className="absolute left-1/2 top-0 z-30 w-[calc(100%-1rem)] max-w-[760px] -translate-x-1/2 -translate-y-1/2 sm:w-[calc(100%-3rem)]">
+            <div className="rounded-[22px] border border-line/80 bg-card/95 p-1.5 shadow-[0_22px_65px_-38px_rgba(15,23,42,.58)] backdrop-blur-2xl sm:p-2">
+              <div className="mb-1 hidden items-center justify-center gap-2 px-3 pt-1 text-[10px] font-semibold uppercase tracking-[0.11em] text-text-soft sm:flex">
+                <span className="h-px w-8 bg-line" />
+                Como você quer usar o Orçah?
+                <span className="h-px w-8 bg-line" />
+              </div>
+              <div className="relative grid grid-cols-2 gap-1">
+                <IntentButton
+                  active={intent === "provider"}
+                  onClick={() => chooseIntent("provider")}
+                  icon={<ProviderIcon />}
+                  title="Sou profissional"
+                  subtitle="Quero divulgar e fazer orçamentos"
+                  tone="provider"
+                />
+                <IntentButton
+                  active={intent === "search"}
+                  onClick={() => chooseIntent("search")}
+                  icon={<SearchIcon compact />}
+                  title="Preciso de um profissional"
+                  subtitle="Quero encontrar alguém"
+                  tone="search"
+                />
+                <span className="pointer-events-none absolute left-1/2 top-1/2 hidden h-7 w-px -translate-x-1/2 -translate-y-1/2 bg-line/80 sm:block" />
+              </div>
+            </div>
+          </div>
+
+          <div className="relative min-h-[600px] sm:min-h-[650px] lg:min-h-[610px]">
             {intent === "provider" ? (
               <ProviderScene />
             ) : (
@@ -100,7 +110,7 @@ export function HomeProviderSearch() {
 
         <div className="mt-4 flex items-center justify-center gap-2 text-[11px] text-text-soft sm:text-xs">
           <span className="h-1.5 w-1.5 rounded-full bg-ok" />
-          O Orçah lembra sua escolha neste navegador.
+          Sua escolha fica salva neste navegador.
         </div>
       </div>
     </section>
@@ -109,7 +119,7 @@ export function HomeProviderSearch() {
 
 function ProviderScene() {
   return (
-    <div className="grid min-h-[610px] items-center gap-8 px-5 py-8 sm:px-8 sm:py-10 lg:grid-cols-[.95fr_1.05fr] lg:gap-8 lg:px-12 lg:py-9 xl:px-16">
+    <div className="grid min-h-[600px] items-center gap-8 px-5 pb-8 pt-4 sm:px-8 sm:pb-10 sm:pt-7 lg:grid-cols-[.95fr_1.05fr] lg:gap-8 lg:px-12 lg:pb-9 lg:pt-5 xl:px-16">
       <div className="relative z-10 max-w-[610px]">
         <div className="inline-flex items-center gap-2 rounded-full border border-gold/25 bg-card/80 px-3 py-1.5 text-xs font-semibold text-gold-deep shadow-card backdrop-blur">
           <span className="h-2 w-2 rounded-full bg-gold shadow-[0_0_0_4px_rgba(255,176,32,.13)]" />
@@ -177,7 +187,7 @@ function SearchScene({
   onQuickSearch: (service: string) => void;
 }) {
   return (
-    <div className="grid min-h-[610px] items-center gap-8 px-5 py-8 sm:px-8 sm:py-10 lg:grid-cols-[1fr_1fr] lg:gap-10 lg:px-12 lg:py-9 xl:px-16">
+    <div className="grid min-h-[600px] items-center gap-8 px-5 pb-8 pt-4 sm:px-8 sm:pb-10 sm:pt-7 lg:grid-cols-[1fr_1fr] lg:gap-10 lg:px-12 lg:pb-9 lg:pt-5 xl:px-16">
       <div className="relative z-10 max-w-[620px]">
         <div className="inline-flex items-center gap-2 rounded-full border border-[#4169a6]/15 bg-card/80 px-3 py-1.5 text-xs font-semibold text-[#365885] shadow-card backdrop-blur">
           <LocationPinIcon /> Profissionais para o que você precisa
@@ -244,31 +254,43 @@ function IntentButton({
   icon,
   title,
   subtitle,
+  tone,
 }: {
   active: boolean;
   onClick: () => void;
   icon: ReactNode;
   title: string;
   subtitle: string;
+  tone: "provider" | "search";
 }) {
+  const activeStyle =
+    tone === "provider"
+      ? "border-gold/25 bg-[#fff8e8] text-ink shadow-[0_12px_32px_-24px_rgba(229,153,26,.92)]"
+      : "border-[#4169a6]/18 bg-[#f3f7ff] text-ink shadow-[0_12px_32px_-24px_rgba(65,105,166,.52)]";
+
+  const iconStyle = active
+    ? tone === "provider"
+      ? "bg-gold-wash text-gold-deep"
+      : "bg-[#e8f0ff] text-[#4169a6]"
+    : "bg-paper-alt text-text-soft";
+
   return (
     <button
       type="button"
       onClick={onClick}
       aria-pressed={active}
-      className={`flex min-w-0 items-center gap-2 rounded-[13px] px-2.5 py-2.5 text-left transition duration-300 sm:gap-3 sm:px-4 ${
-        active
-          ? "border border-gold/20 bg-card text-ink shadow-[0_8px_26px_-20px_rgba(15,23,42,.42)]"
-          : "border border-transparent text-text-soft hover:bg-paper/70 hover:text-ink"
+      className={`group flex min-w-0 items-center gap-2 rounded-[14px] border px-2.5 py-2.5 text-left transition duration-300 sm:gap-3 sm:px-4 ${
+        active ? activeStyle : "border-transparent bg-transparent text-text-soft hover:bg-paper/75 hover:text-ink"
       }`}
     >
-      <span className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] transition sm:h-9 sm:w-9 ${active ? "bg-gold-wash text-gold-deep" : "bg-paper-alt text-text-soft"}`}>
+      <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-[11px] transition sm:h-10 sm:w-10 ${iconStyle}`}>
         {icon}
       </span>
       <span className="min-w-0">
         <span className="block text-[11px] font-semibold leading-4 sm:text-sm">{title}</span>
         <span className="mt-0.5 hidden truncate text-[11px] font-medium text-text-soft sm:block">{subtitle}</span>
       </span>
+      <span className={`ml-auto hidden h-2 w-2 shrink-0 rounded-full transition sm:block ${active ? (tone === "provider" ? "bg-gold" : "bg-[#4169a6]") : "bg-line"}`} />
     </button>
   );
 }
