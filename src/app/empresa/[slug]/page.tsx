@@ -5,6 +5,7 @@ import { CompanyGallery } from "@/components/company-gallery";
 import { OrcahLogo } from "@/components/orcah-logo";
 import { PageViewTracker, TrackedLink } from "@/components/page-tracking";
 import { QuoteRequestForm } from "@/components/quote-request-form";
+import { ServiceCoverPlaceholder } from "@/components/service-cover-placeholder";
 import { facebookUrl, instagramUrl, websiteUrl } from "@/lib/company-display";
 import { prisma } from "@/lib/db";
 import { formatBRL } from "@/lib/money";
@@ -66,15 +67,19 @@ export default async function EmpresaPublicaPage({
   const site = websiteUrl(page.website);
   const heroBg = page.primaryColor ?? "#0b1120";
   const heroText = readableTextColor(heroBg);
-  const accent = page.secondaryColor ?? "#ffb020";
+  const accent = "#ffb020";
   const accentText = readableTextColor(accent);
   const categories = [...new Set(page.services.map((service) => service.category).filter(Boolean))];
 
   return (
-    <div className="min-h-full w-full flex-1 bg-paper text-text">
+    <div className="public-company-page min-h-full w-full flex-1 bg-paper text-text">
       <PageViewTracker slug={page.slug} />
 
       <header style={{ backgroundColor: heroBg, color: heroText }} className="relative overflow-hidden">
+        {page.coverPath ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={page.coverPath} alt="" className="h-48 w-full bg-[#151f38] object-contain sm:h-64" />
+        ) : <ServiceCoverPlaceholder category={page.coverCategory} />}
         <div
           aria-hidden
           className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full opacity-25 blur-3xl"

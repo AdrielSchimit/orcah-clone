@@ -1,0 +1,22 @@
+import assert from "node:assert/strict";
+import { it } from "node:test";
+import { chooseCompanyCover } from "../src/lib/company-cover";
+import { table, withTransaction } from "./helpers/fake-db";
+import type { PrismaClient } from "@prisma/client";
+it("capa só permite fotos ativas da própria empresa e coloca a escolhida primeiro",async()=>{
+ const companyPhoto=table({active:true,sortOrder:0});
+ const first=await companyPhoto.create({data:{companyId:1,sortOrder:0}});
+ const second=await companyPhoto.create({data:{companyId:1,sortOrder:1}});
+ const foreign=await companyPhoto.create({data:{companyId:2}});
+ const inactive=await companyPhoto.create({data:{companyId:1,active:false}});
+ const db=withTransaction({companyPhoto}) as unknown as Pick<PrismaClient,"$transaction">;
+ assert.equal(await chooseCompanyCover(db,1,Number(foreign.id)),false);
+ assert.equal(await chooseCompanyCover(db,1,Number(inactive.id)),false);
+ assert.equal(await chooseCompanyCover(db,1,999),false);
+ assert.equal(await chooseCompanyCover(db,1,Number(second.id)),true);
+ assert.equal((await companyPhoto.findFirst({where:{companyId:1,active:true},orderBy:{sortOrder:"asc"}}))?.id,second.id);
+ const order=companyPhoto.rows.find(row=>row.id===second.id)?.sortOrder;
+ assert.equal(await chooseCompanyCover(db,1,Number(second.id)),true);
+ assert.equal(companyPhoto.rows.find(row=>row.id===second.id)?.sortOrder,order);
+ assert.equal(companyPhoto.rows.find(row=>row.id===first.id)?.sortOrder,0);
+});

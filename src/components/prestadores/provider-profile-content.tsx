@@ -2,13 +2,14 @@
 
 import { CompanyGallery } from "@/components/company-gallery";
 import { QuoteRequestForm } from "@/components/quote-request-form";
-import { ProviderAvatar } from "@/components/prestadores/provider-avatar";
+import { ServiceCoverPlaceholder } from "@/components/service-cover-placeholder";
 import { formatBRL } from "@/lib/money";
 
 export type ProviderProfileData = {
   slug: string;
   name: string;
   category: string;
+  coverCategory?: string | null;
   place: string;
   servesSearchRegion: boolean;
   description: string | null;
@@ -37,20 +38,18 @@ export function ProviderProfileContent({
   onRequestQuoteScroll?: () => void;
   showInlineQuote?: boolean;
 }) {
-  const cover = profile.photos[0]?.path ?? profile.coverPath ?? profile.logoPath;
+  const cover = profile.coverPath;
   const serviceNames = profile.services.map((service) => service.name);
 
   return (
     <div className="space-y-8">
       <section className="overflow-hidden rounded-box border border-line bg-card shadow-card">
-        <div className="relative aspect-[21/9] min-h-[10rem] bg-paper-alt">
+        <div className={cover ? "relative aspect-[21/9] min-h-[10rem] bg-paper-alt" : "relative bg-paper-alt"}>
           {cover ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={cover} alt="" className="h-full w-full object-cover" />
           ) : (
-            <div className="flex h-full items-end bg-brand-wash p-6">
-              <ProviderAvatar name={profile.name} logoPath={profile.logoPath} className="h-20 w-20 rounded-2xl border border-line" />
-            </div>
+            <ServiceCoverPlaceholder category={profile.coverCategory ?? profile.category} />
           )}
         </div>
         <div className="p-5 md:p-6">

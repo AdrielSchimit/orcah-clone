@@ -276,15 +276,6 @@ export function ContactForm({
 
 // ---------- aparência ----------
 
-const PRESETS = [
-  { primary: "#0b1120", secondary: "#ffb020", label: "Orçah" },
-  { primary: "#14532d", secondary: "#facc15", label: "Verde" },
-  { primary: "#1e3a8a", secondary: "#f97316", label: "Azul" },
-  { primary: "#7f1d1d", secondary: "#fbbf24", label: "Vinho" },
-  { primary: "#f5f0e6", secondary: "#151f38", label: "Creme" },
-  { primary: "#262626", secondary: "#e5e5e5", label: "Grafite" },
-];
-
 export function AppearanceForm({
   company,
 }: {
@@ -292,9 +283,6 @@ export function AppearanceForm({
 }) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
-  const { saving, saved, error, save } = useSave();
-  const [primary, setPrimary] = useState(company.primaryColor ?? PRESETS[0].primary);
-  const [secondary, setSecondary] = useState(company.secondaryColor ?? PRESETS[0].secondary);
   const [logoError, setLogoError] = useState("");
   const [uploading, setUploading] = useState(false);
   const [pendingLogo, setPendingLogo] = useState<File | null>(null);
@@ -371,74 +359,21 @@ export function AppearanceForm({
 
       {pendingLogo && <LogoCropper key={`${pendingLogo.name}-${pendingLogo.lastModified}`} file={pendingLogo} busy={uploading} uploadError={logoError} onCancel={() => { setPendingLogo(null); setLogoError(""); }} onSave={onLogo} />}
 
-      <div>
-        <p className="mb-2 text-sm font-medium">Cores da página</p>
-        <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
-          {PRESETS.map((preset) => {
-            const active = preset.primary === primary && preset.secondary === secondary;
-            return (
-              <button
-                key={preset.label}
-                type="button"
-                onClick={() => {
-                  setPrimary(preset.primary);
-                  setSecondary(preset.secondary);
-                }}
-                aria-pressed={active}
-                className={`flex min-h-14 flex-col items-center justify-center gap-1 rounded-btn border px-1 py-2 text-xs ${
-                  active ? "gold-glow border-gold" : "border-line"
-                }`}
-              >
-                <span className="flex">
-                  <span className="h-5 w-5 rounded-full border border-black/10" style={{ backgroundColor: preset.primary }} />
-                  <span className="-ml-1.5 h-5 w-5 rounded-full border border-black/10" style={{ backgroundColor: preset.secondary }} />
-                </span>
-                {preset.label}
-              </button>
-            );
-          })}
-        </div>
-        <div className="mt-3 grid grid-cols-2 gap-3">
-          <label className="flex min-h-12 items-center gap-2 rounded-btn border border-line px-3 text-sm">
-            <input type="color" value={primary} onChange={(event) => setPrimary(event.target.value)} className="h-8 w-8 shrink-0 cursor-pointer rounded border-0 bg-transparent p-0" />
-            Principal
-          </label>
-          <label className="flex min-h-12 items-center gap-2 rounded-btn border border-line px-3 text-sm">
-            <input type="color" value={secondary} onChange={(event) => setSecondary(event.target.value)} className="h-8 w-8 shrink-0 cursor-pointer rounded border-0 bg-transparent p-0" />
-            Destaque
-          </label>
-        </div>
-        <div className="mt-3 overflow-hidden rounded-box border border-line" aria-hidden>
-          <div className="relative px-4 py-5" style={{ backgroundColor: primary }}>
-            <span
-              className="absolute -right-6 -top-6 h-20 w-20 rounded-full opacity-30 blur-2xl"
-              style={{ backgroundColor: secondary }}
-            />
-            <p className="relative font-semibold" style={{ color: readable(primary) }}>
-              {company.name}
-            </p>
-            <span className="relative mt-2 inline-block rounded-btn bg-gold px-3 py-1.5 text-xs font-semibold text-ink">Pedir orçamento</span>
-          </div>
-        </div>
-      </div>
+      {logoPath ? <button type="button" disabled={uploading} className="min-h-10 text-sm text-no" onClick={async () => {
+        setUploading(true);
+        setLogoError("");
+        try {
+          const response = await fetch("/api/empresa/logo", { method: "DELETE" });
+          if (!response.ok) throw new Error();
+          setLogoPath(null);
+          router.refresh();
+        } catch { setLogoError("Não foi possível remover a foto."); }
+        finally { setUploading(false); }
+      }}>Remover foto de perfil</button> : null}
 
-      <Feedback saved={saved} error={error} />
-      <button
-        type="button"
-        disabled={saving}
-        onClick={() => void save({ primaryColor: primary, secondaryColor: secondary })}
-        className={saveClass}
-      >
-        {saving ? "Salvando…" : "Salvar cores"}
-      </button>
+
     </div>
   );
-}
-
-function readable(hex: string) {
-  const value = hex.replace("#", "");
-  const [r, g, b] = [0, 2, 4].map((i) => parseInt(value.slice(i, i + 2), 16) / 255);
-  return 0.2126 * r + 0.7152 * g + 0.0722 * b > 0.55 ? "#151f38" : "#ffffff";
 }
 
 // ---------- fotos ----------
@@ -457,15 +392,19 @@ export function GalleryManager({ photos, limit }: { photos: Photo[]; limit: numb
     if (!file) return;
     setError("");
     setUploading(true);
-    const result = await uploadImage("/api/empresa/fotos", file, title.trim() ? { title: title.trim() } : undefined);
-    setUploading(false);
-    if (fileRef.current) fileRef.current.value = "";
-    if (!result.ok) {
-      setError(result.error);
-      return;
+    try {
+      const result = await uploadImage("/api/empresa/fotos", file, title.trim() ? { title: title.trim() } : undefined);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      setTitle("");
+      router.refresh();
+    } catch { setError("Não foi possível enviar a foto. Tente novamente."); }
+    finally {
+      setUploading(false);
+      if (fileRef.current) fileRef.current.value = "";
     }
-    setTitle("");
-    router.refresh();
   }
 
   async function remove(id: number) {
@@ -501,21 +440,24 @@ export function GalleryManager({ photos, limit }: { photos: Photo[]; limit: numb
         <p className="text-sm text-text-soft">Você chegou ao limite de {limit} fotos. Remova uma para adicionar outra.</p>
       ) : (
         <>
+          <details>
+          <summary className="cursor-pointer text-xs text-text-soft">Adicionar legenda (opcional)</summary>
           <input
             value={title}
             onChange={(event) => setTitle(event.target.value)}
             maxLength={120}
             aria-label="Legenda da foto"
             placeholder="Legenda (opcional): Fachada pintada no Centro"
-            className={inputClass}
+            className={`${inputClass} mt-2`}
           />
+          </details>
           <button
             type="button"
             onClick={() => fileRef.current?.click()}
             disabled={uploading}
-            className="gold-glow min-h-12 rounded-btn bg-gold px-4 text-base font-semibold text-ink hover:bg-gold-press disabled:opacity-60"
+            className={`${buttonStyles.gold} min-h-11 rounded-btn px-4 text-sm font-semibold text-ink disabled:opacity-60`}
           >
-            {uploading ? "Enviando foto…" : "+ Tirar ou escolher foto"}
+            {uploading ? "Enviando foto…" : "+ Adicionar fotos"}
           </button>
           <p className="text-xs text-text-soft">
             {photos.length} de {limit} fotos. A gente ajusta o tamanho para carregar rápido.

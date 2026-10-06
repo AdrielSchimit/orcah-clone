@@ -84,10 +84,12 @@ async function resolveCategory(db: SearchDb, servico: string) {
 }
 
 function pickCoverPath(company: {
+  coverPath?: string | null;
   logoPath: string | null;
   photos: { path: string }[];
   services: { imagePath: string | null }[];
 }) {
+  if (company.coverPath) return company.coverPath;
   if (company.photos[0]?.path) return company.photos[0].path;
   const serviceImage = company.services.find((service) => service.imagePath)?.imagePath;
   if (serviceImage) return serviceImage;
@@ -142,6 +144,7 @@ export async function searchPublicProviders(db: SearchDb, input: SearchProviders
       name: true,
       tradeName: true,
       logoPath: true,
+      coverPath: true,
       servesRegion: true,
       cityId: true,
       stateId: true,

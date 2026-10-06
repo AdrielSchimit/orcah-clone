@@ -25,3 +25,14 @@ export async function DELETE(
   await removeCompanyImage(auth.company.id, photo.path).catch(() => false);
   return NextResponse.json({ ok: true });
 }
+
+export async function PATCH(_request: Request, context: {params: Promise<{id:string}>}) {
+  const auth = await requireActivePlan();
+  if ("error" in auth) return auth.error;
+  const id = Number((await context.params).id);
+  if (!Number.isInteger(id) || id <= 0) return NextResponse.json({error:"Foto não encontrada."},{status:404});
+  const { chooseCompanyCover } = await import("@/lib/company-cover");
+  const found = await chooseCompanyCover(prisma, auth.company.id, id);
+  if (!found) return NextResponse.json({error:"Foto não encontrada."},{status:404});
+  return NextResponse.json({ok:true});
+}

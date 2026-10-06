@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Assistente } from "@/components/assistente";
 import { OrcahLogo } from "@/components/orcah-logo";
+import { PainelCompanyHeader } from "@/components/painel-company-header";
 import { PainelNav } from "@/components/painel-nav";
 import { PlanBanner } from "@/components/plan-banner";
 import { isAdmin } from "@/lib/admin";
@@ -46,7 +47,7 @@ export default async function PainelLayout({ children }: { children: React.React
 
   return (
     <div className="min-h-full w-full bg-paper md:pl-56">
-      <header className="w-full border-b border-line bg-card px-4 pb-4 pt-[max(1.25rem,env(safe-area-inset-top))] text-text">
+      <PainelCompanyHeader><header className="w-full border-b border-line bg-card px-4 pb-4 pt-[max(1.25rem,env(safe-area-inset-top))] text-text">
         <div className="mx-auto flex max-w-lg items-center gap-3 md:max-w-4xl">
           {user.company.logoPath ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -71,7 +72,7 @@ export default async function PainelLayout({ children }: { children: React.React
             <OrcahLogo className="h-7 w-auto" />
           </Link>
         </div>
-      </header>
+      </header></PainelCompanyHeader>
       <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pb-36 pt-5 md:max-w-4xl md:pb-10">
         {plan.kind === "admin" || plan.kind === "exempt" ? null : (
           <PlanBanner kind={plan.kind} label={plan.label} detail={plan.detail} />

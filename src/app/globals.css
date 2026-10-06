@@ -207,3 +207,8 @@ textarea:focus,
     0 0 0 1px rgb(255 176 32 / 0.18),
     0 10px 30px -14px rgb(255 176 32 / 0.5);
 }
+/* A página pública acompanha a preferência de tema do visitante. */
+.public-company-page { --paper:#fff; --card:#fff; color-scheme:light dark; }
+@media(prefers-color-scheme:dark) {
+ .public-company-page { --paper:#101114; --paper-alt:#202228; --card:#181a20; --line:#30343e; --text:#f4f5f8; --text-soft:#aeb7c7; --gold-wash:#302515; --gold-deep:#ffca68; --brand-wash:#222735; }
+}

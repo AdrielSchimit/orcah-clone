@@ -102,7 +102,7 @@ export function pageCompleteness(input: CompletenessInput) {
     { key: "servicos", label: "Cadastrar um serviço", done: input.servicesCount > 0, href: "/painel/servicos/novo" },
     { key: "fotos", label: "Adicionar fotos dos seus trabalhos", done: input.photosCount > 0, href: "#fotos" },
     { key: "descricao", label: "Escrever o que você faz", done: Boolean(input.description?.trim()), href: "#perfil" },
-    { key: "logo", label: "Colocar sua logo", done: Boolean(input.logoPath), href: "#aparencia" },
+    { key: "logo", label: "Colocar sua logo", done: Boolean(input.logoPath), href: "#logo" },
     { key: "whatsapp", label: "Conferir o WhatsApp", done: Boolean(input.whatsapp && input.whatsapp.length >= 10), href: "#contato" },
     { key: "horario", label: "Informar o horário", done: Boolean(input.openingHours?.trim()), href: "#perfil" },
     { key: "redes", label: "Instagram, Facebook ou site", done: Boolean(input.instagram || input.website || input.facebook), href: "#contato" },

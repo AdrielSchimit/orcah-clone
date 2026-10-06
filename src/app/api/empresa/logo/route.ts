@@ -28,3 +28,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Não foi possível enviar a logo." }, { status: 500 });
   }
 }
+
+export async function DELETE() {
+  const auth = await requireActivePlan();
+  if ("error" in auth) return auth.error;
+  const previous = auth.company.logoPath;
+  await prisma.company.update({where:{id:auth.company.id},data:{logoPath:null}});
+  await removeCompanyImage(auth.company.id,previous).catch(()=>false);
+  return NextResponse.json({ok:true});
+}

@@ -146,6 +146,7 @@ model AuthAttempt {
 }
 
 model Company {
+  coverHistory       Json     @default("[]") @map("cover_history")
   id                 Int      @id @default(autoincrement())
   userId             Int      @unique @map("user_id")
   businessCategoryId Int?     @map("business_category_id")
@@ -170,6 +171,7 @@ model Company {
   openingHours       String?  @map("opening_hours") @db.VarChar(160)
   primaryColor       String?  @map("primary_color") @db.VarChar(7)
   secondaryColor     String?  @map("secondary_color") @db.VarChar(7)
+  coverPath          String?  @map("cover_path") @db.VarChar(255)
   logoPath           String?  @map("logo_path") @db.VarChar(255)
   slug               String   @unique @db.VarChar(160)
   createdAt          DateTime @default(now()) @map("created_at")

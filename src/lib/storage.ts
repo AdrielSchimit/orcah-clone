@@ -18,9 +18,9 @@ const ALLOWED: Record<string, string[]> = {
   "image/webp": ["webp"],
 };
 
-export type ImageKind = "logo" | "gallery" | "service" | "budget";
+export type ImageKind = "logo" | "cover" | "gallery" | "service" | "budget";
 
-const MAX_SIDE: Record<ImageKind, number> = { logo: 512, gallery: 1600, service: 1200, budget: 1600 };
+const MAX_SIDE: Record<ImageKind, number> = { cover: 1600, logo: 512, gallery: 1600, service: 1200, budget: 1600 };
 
 export class UploadError extends Error {}
 
