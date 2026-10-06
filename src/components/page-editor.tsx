@@ -6,6 +6,7 @@ import { PhoneInput } from "@/components/phone-input";
 import { Toggle } from "@/components/toggle";
 import { uploadImage } from "@/lib/client-image";
 import { instagramHandle } from "@/lib/instagram";
+import { LogoCropper } from "@/components/logo-cropper";
 
 const inputClass = "w-full rounded-btn border border-line bg-card px-4 py-3 text-base text-text";
 const saveClass =
@@ -295,18 +296,27 @@ export function AppearanceForm({
   const [secondary, setSecondary] = useState(company.secondaryColor ?? PRESETS[0].secondary);
   const [logoError, setLogoError] = useState("");
   const [uploading, setUploading] = useState(false);
+  const [pendingLogo, setPendingLogo] = useState<File | null>(null);
+  const [logoPath, setLogoPath] = useState(company.logoPath);
 
   async function onLogo(file: File | undefined) {
     if (!file) return;
     setLogoError("");
     setUploading(true);
-    const result = await uploadImage("/api/empresa/logo", file);
-    setUploading(false);
-    if (!result.ok) {
-      setLogoError(result.error);
-      return;
+    try {
+      const result = await uploadImage("/api/empresa/logo", file);
+      if (!result.ok) {
+        setLogoError(result.error);
+        return;
+      }
+      if (typeof result.data.logoPath === "string") setLogoPath(result.data.logoPath);
+      setPendingLogo(null);
+      router.refresh();
+    } catch {
+      setLogoError("Não foi possível enviar a logo. Tente novamente.");
+    } finally {
+      setUploading(false);
     }
-    router.refresh();
   }
 
   return (
@@ -315,12 +325,13 @@ export function AppearanceForm({
         <button
           type="button"
           onClick={() => fileRef.current?.click()}
-          className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-line bg-paper text-2xl text-gold-deep"
+          disabled={uploading}
+          className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-full border border-dashed border-line bg-paper text-2xl text-gold-deep disabled:opacity-60"
           aria-label="Trocar logo"
         >
-          {company.logoPath ? (
+          {logoPath ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={company.logoPath} alt="" className="h-full w-full object-cover" />
+            <img src={logoPath} alt="" className="h-full w-full object-cover" />
           ) : (
             "+"
           )}
@@ -332,19 +343,32 @@ export function AppearanceForm({
             disabled={uploading}
             className="min-h-11 rounded-btn border border-line px-4 text-sm font-medium disabled:opacity-60"
           >
-            {uploading ? "Enviando…" : company.logoPath ? "Trocar logo" : "Enviar logo"}
+            {uploading ? "Enviando…" : logoPath ? "Trocar logo" : "Enviar logo"}
           </button>
-          <p className="mt-1 text-xs text-text-soft">Quadrada fica melhor. JPG, PNG ou WEBP.</p>
-          {logoError ? <p className="mt-1 text-sm text-no">{logoError}</p> : null}
+          <p className="mt-1 text-xs text-text-soft">Escolha e ajuste o enquadramento. JPG, PNG ou WEBP.</p>
+          {logoError ? <p role="alert" className="mt-1 text-sm text-no">{logoError}</p> : null}
         </div>
         <input
           ref={fileRef}
           type="file"
           accept="image/jpeg,image/png,image/webp"
           className="sr-only"
-          onChange={(event) => void onLogo(event.target.files?.[0])}
+          disabled={uploading}
+          onChange={(event) => {
+            const file = event.target.files?.[0];
+            event.target.value = "";
+            if (!file) return;
+            setLogoError("");
+            if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+              setLogoError("Use uma imagem JPG, PNG ou WEBP.");
+              return;
+            }
+            setPendingLogo(file);
+          }}
         />
       </div>
+
+      {pendingLogo && <LogoCropper key={`${pendingLogo.name}-${pendingLogo.lastModified}`} file={pendingLogo} busy={uploading} uploadError={logoError} onCancel={() => { setPendingLogo(null); setLogoError(""); }} onSave={onLogo} />}
 
       <div>
         <p className="mb-2 text-sm font-medium">Cores da página</p>
