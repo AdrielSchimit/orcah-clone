@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
-import { PLAN_PRICE } from "@/lib/plan-constants";
 import { type AsaasPayment, paymentIsOverdue, paymentIsPaid } from "@/lib/asaas";
+import { PLAN_PRICE } from "@/lib/plan-constants";
+import { isBillingExempt } from "@/lib/plan";
 
 export async function markPaid(input: {
   companyId: number;
@@ -52,6 +53,12 @@ export async function applyAsaasPayment(payment: AsaasPayment) {
       });
 
   if (!subscription) return null;
+
+  const company = await prisma.company.findUnique({
+    where: { id: subscription.companyId },
+    select: { userId: true },
+  });
+  if (isBillingExempt({ id: company?.userId })) return subscription;
 
   if (paymentIsPaid(payment.status)) {
     return markPaid({

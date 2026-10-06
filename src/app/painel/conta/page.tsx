@@ -2,7 +2,7 @@ import Link from "next/link";
 import { LogoutButton } from "@/components/logout-button";
 import { isAdmin } from "@/lib/admin";
 import { ramoLabel, serviceAreaLabel } from "@/lib/company-display";
-import { ensureSubscription, planView } from "@/lib/plan";
+import { ensureSubscription, isBillingExempt, planView } from "@/lib/plan";
 import { getSessionUser } from "@/lib/session";
 
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
@@ -27,7 +27,8 @@ export default async function ContaPage() {
   const user = await getSessionUser();
   if (!user?.company) return null;
   const admin = isAdmin(user);
-  const plan = planView(await ensureSubscription(user.company.id), { isAdmin: admin });
+  const billingExempt = isBillingExempt(user);
+  const plan = planView(await ensureSubscription(user.company.id), { isAdmin: admin, billingExempt });
 
   return (
     <>
@@ -50,7 +51,7 @@ export default async function ContaPage() {
         <Card title="Plano">
           <Line label="Situação" value={plan.label} />
           <p className="mt-1 text-sm text-text-soft">{plan.detail}</p>
-          {admin ? null : (
+          {admin || billingExempt ? null : (
             <Link href="/painel/plano" className="mt-3 flex min-h-12 items-center justify-center rounded-btn border border-line text-sm font-medium">
               Ver plano
             </Link>

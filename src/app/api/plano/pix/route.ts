@@ -10,12 +10,12 @@ import {
 import { requireCompany } from "@/lib/company";
 import { prisma } from "@/lib/db";
 import { digitsOnly, isCpfCnpj } from "@/lib/document";
-import { ensureSubscription } from "@/lib/plan";
+import { ensureSubscription, isBillingExempt } from "@/lib/plan";
 
 export async function POST(request: Request) {
   const auth = await requireCompany();
   if ("error" in auth) return auth.error;
-  if (isAdmin(auth.user)) {
+  if (isAdmin(auth.user) || isBillingExempt(auth.user)) {
     return NextResponse.json({ error: "Esta conta não tem cobrança." }, { status: 400 });
   }
   if (!asaasConfigured()) {

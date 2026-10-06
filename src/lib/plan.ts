@@ -6,7 +6,54 @@ import { PLAN_PRICE, PLAN_PRICE_LABEL, TRIAL_DAYS } from "@/lib/plan-constants";
 
 export { PLAN_PRICE, PLAN_PRICE_LABEL, TRIAL_DAYS } from "@/lib/plan-constants";
 
+/** Contas internas: plano liberado, sem trial e sem cobrança. Não concede papel de admin. */
+const BILLING_EXEMPT_USER_IDS = new Set([1, 2]);
+
+export function isBillingExempt(user: { id?: number | null } | null | undefined) {
+  return typeof user?.id === "number" && BILLING_EXEMPT_USER_IDS.has(user.id);
+}
+
+async function ensureComplimentarySubscription(companyId: number) {
+  const existing = await prisma.subscription.findUnique({ where: { companyId } });
+  if (
+    existing?.provider === "complimentary" &&
+    existing.status === "active" &&
+    existing.endsAt == null &&
+    Number(existing.amount) === 0
+  ) {
+    return existing;
+  }
+
+  const data = {
+    provider: "complimentary",
+    status: "active" as const,
+    plan: "unico",
+    amount: 0,
+    endsAt: null,
+    billingType: null,
+    providerSubscriptionId: null,
+    providerCustomerId: null,
+    providerPaymentId: null,
+  };
+
+  if (existing) {
+    return prisma.subscription.update({ where: { companyId }, data });
+  }
+
+  return prisma.subscription.create({
+    data: { companyId, startsAt: new Date(), ...data },
+  });
+}
+
 export async function ensureSubscription(companyId: number) {
+  const company = await prisma.company.findUnique({
+    where: { id: companyId },
+    select: { userId: true },
+  });
+  if (isBillingExempt({ id: company?.userId })) {
+    return ensureComplimentarySubscription(companyId);
+  }
+
   const existing = await prisma.subscription.findUnique({ where: { companyId } });
   if (existing) return existing;
 
@@ -31,9 +78,10 @@ export function planView(
   subscription: {
     status: string;
     endsAt: Date | null;
+    provider?: string | null;
     amount?: { toString(): string } | number | string;
   },
-  options?: { isAdmin?: boolean },
+  options?: { isAdmin?: boolean; billingExempt?: boolean },
 ) {
   if (options?.isAdmin) {
     return {
@@ -42,6 +90,16 @@ export function planView(
       daysLeft: 0,
       label: "Conta de análise",
       detail: "Todos os moldes. Sem trial e sem cobrança.",
+    };
+  }
+
+  if (options?.billingExempt || subscription.provider === "complimentary") {
+    return {
+      ok: true,
+      kind: "exempt" as const,
+      daysLeft: 0,
+      label: "Plano liberado",
+      detail: "Sem trial e sem cobrança.",
     };
   }
 
@@ -83,7 +141,7 @@ export function planView(
 export async function requireActivePlan() {
   const auth = await requireCompany();
   if ("error" in auth) return auth;
-  if (isAdmin(auth.user)) return auth;
+  if (isAdmin(auth.user) || isBillingExempt(auth.user)) return auth;
 
   const subscription = await ensureSubscription(auth.company.id);
   const plan = planView(subscription);

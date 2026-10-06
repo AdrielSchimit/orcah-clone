@@ -8,7 +8,7 @@ import { PlanBanner } from "@/components/plan-banner";
 import { isAdmin } from "@/lib/admin";
 import { ramoLabel, serviceAreaLabel } from "@/lib/company-display";
 import { prisma } from "@/lib/db";
-import { ensureSubscription, planView } from "@/lib/plan";
+import { ensureSubscription, isBillingExempt, planView } from "@/lib/plan";
 import { getSessionUser } from "@/lib/session";
 import { appUrl, companyPublicUrl, sessionCookieIsShared, tenantSlugFromHost } from "@/lib/urls";
 
@@ -18,6 +18,7 @@ export default async function PainelLayout({ children }: { children: React.React
   if (!user.company) redirect(appUrl("/onboarding"));
 
   const admin = isAdmin(user);
+  const billingExempt = isBillingExempt(user);
   const host = (await headers()).get("host") ?? "";
   const tenant = tenantSlugFromHost(host);
   if (tenant && tenant !== user.company.slug) {
@@ -27,9 +28,9 @@ export default async function PainelLayout({ children }: { children: React.React
         : appUrl("/painel"),
     );
   }
-  const plan = planView(await ensureSubscription(user.company.id), { isAdmin: admin });
+  const plan = planView(await ensureSubscription(user.company.id), { isAdmin: admin, billingExempt });
   const path = (await headers()).get("x-orcah-path") ?? "";
-  if (!admin && !plan.ok && !path.startsWith("/painel/plano")) {
+  if (!admin && !billingExempt && !plan.ok && !path.startsWith("/painel/plano")) {
     redirect("/painel/plano");
   }
 
@@ -72,7 +73,7 @@ export default async function PainelLayout({ children }: { children: React.React
         </div>
       </header>
       <div className="mx-auto flex w-full max-w-lg flex-1 flex-col px-4 pb-36 pt-5 md:max-w-4xl md:pb-10">
-        {plan.kind === "admin" ? null : (
+        {plan.kind === "admin" || plan.kind === "exempt" ? null : (
           <PlanBanner kind={plan.kind} label={plan.label} detail={plan.detail} />
         )}
         {children}

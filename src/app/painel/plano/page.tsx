@@ -2,7 +2,7 @@ import { PlanCheckout } from "@/components/plan-checkout";
 import { isAdmin } from "@/lib/admin";
 import { asaasConfigured } from "@/lib/asaas";
 import { PLAN_PRICE_LABEL } from "@/lib/plan-constants";
-import { ensureSubscription, planView } from "@/lib/plan";
+import { ensureSubscription, isBillingExempt, planView } from "@/lib/plan";
 import { getSessionUser } from "@/lib/session";
 
 export default async function PlanoPage() {
@@ -10,8 +10,9 @@ export default async function PlanoPage() {
   if (!user?.company) return null;
 
   const admin = isAdmin(user);
+  const billingExempt = isBillingExempt(user);
   const subscription = await ensureSubscription(user.company.id);
-  const plan = planView(subscription, { isAdmin: admin });
+  const plan = planView(subscription, { isAdmin: admin, billingExempt });
 
   if (admin) {
     return (
@@ -26,6 +27,19 @@ export default async function PlanoPage() {
             <li>Troca de molde por ramo, inclusive Outro</li>
             <li>Orçamentos e PDFs ficam só nessa empresa</li>
           </ul>
+        </section>
+      </>
+    );
+  }
+
+  if (billingExempt) {
+    return (
+      <>
+        <h1 className="mb-2 text-xl font-semibold">Plano</h1>
+        <section className="rounded-box border border-line bg-card p-5">
+          <p className="text-xs font-medium uppercase tracking-[0.04em] text-gold-deep">Plano liberado</p>
+          <p className="mt-1 text-2xl font-semibold">{plan.label}</p>
+          <p className="mt-3 text-sm text-text-soft">{plan.detail}</p>
         </section>
       </>
     );

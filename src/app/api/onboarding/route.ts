@@ -3,6 +3,7 @@ import { findOrCreateCity } from "@/lib/city";
 import { prisma } from "@/lib/db";
 import { buildCompanyDescription, normalizeOnboardingPayload } from "@/lib/onboarding";
 import { TRIAL_DAYS } from "@/lib/plan-constants";
+import { isBillingExempt } from "@/lib/plan";
 import { createSession, getSessionUser } from "@/lib/session";
 import { isReservedCompanySlug, sessionCookieIsShared } from "@/lib/urls";
 import { slugify } from "@/lib/text";
@@ -90,14 +91,23 @@ export async function POST(request: Request) {
         description,
         slug,
         subscription: {
-          create: {
-            provider: "local",
-            status: "trialing",
-            plan: "unico",
-            amount: "29.00",
-            startsAt: new Date(),
-            endsAt: new Date(Date.now() + TRIAL_DAYS * 86_400_000),
-          },
+          create: isBillingExempt(user)
+            ? {
+                provider: "complimentary",
+                status: "active",
+                plan: "unico",
+                amount: 0,
+                startsAt: new Date(),
+                endsAt: null,
+              }
+            : {
+                provider: "local",
+                status: "trialing",
+                plan: "unico",
+                amount: "29.00",
+                startsAt: new Date(),
+                endsAt: new Date(Date.now() + TRIAL_DAYS * 86_400_000),
+              },
         },
       },
     });
