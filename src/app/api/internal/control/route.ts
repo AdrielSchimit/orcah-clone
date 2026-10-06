@@ -1,13 +1,10 @@
 import { timingSafeEqual } from "node:crypto";
-import { createElement } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { familiasAgrupadas, inventarioRamos, previewCliente } from "@/lib/ramo-catalogo";
 import { ramoMoldes } from "@/lib/ramo-moldes";
-import { ServiceCoverPlaceholder } from "@/components/service-cover-placeholder";
-import { resolveServiceCoverTheme } from "@/lib/service-cover-themes";
+import { resolveServiceCoverTheme, serviceCoverIcons } from "@/lib/service-cover-themes";
 
 export const dynamic = "force-dynamic";
 
@@ -261,22 +258,19 @@ export async function POST(request: Request) {
         const rows = inventarioRamos().map((ramo) => {
           const molde = ramoMoldes[ramo.slug];
           const theme = resolveServiceCoverTheme(ramo.slug);
-          const coverMarkup = renderToStaticMarkup(
-            createElement(ServiceCoverPlaceholder, { category: ramo.slug }),
-          );
-          const coverSvg = coverMarkup.match(/<svg[\s\S]*?<\/svg>/)?.[0] ?? "";
-
           return {
             ...ramo,
             preview: previewCliente(ramo.slug),
             exemplos: molde?.suggestions.slice(0, 5) ?? [],
             form: molde?.form ?? null,
-            coverSvg,
             coverTheme: {
               background: theme.background,
               accent: theme.accent,
-              icons: theme.icons,
-              patternCount: theme.pattern.length,
+              icons: theme.icons.map((name) => ({
+                name,
+                paths: serviceCoverIcons[name],
+              })),
+              pattern: theme.pattern,
             },
           };
         });
