@@ -1,9 +1,13 @@
 import { timingSafeEqual } from "node:crypto";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { familiasAgrupadas, inventarioRamos, previewCliente } from "@/lib/ramo-catalogo";
 import { ramoMoldes } from "@/lib/ramo-moldes";
+import { ServiceCoverPlaceholder } from "@/components/service-cover-placeholder";
+import { resolveServiceCoverTheme } from "@/lib/service-cover-themes";
 
 export const dynamic = "force-dynamic";
 
@@ -254,25 +258,34 @@ export async function POST(request: Request) {
       }
 
       case "templates": {
-        const origin = new URL(request.url).origin;
         const rows = inventarioRamos().map((ramo) => {
           const molde = ramoMoldes[ramo.slug];
+          const theme = resolveServiceCoverTheme(ramo.slug);
           return {
             ...ramo,
             preview: previewCliente(ramo.slug),
             exemplos: molde?.suggestions.slice(0, 5) ?? [],
             form: molde?.form ?? null,
-            capaUrl: `${origin}/ramo-capas/${ramo.slug}.svg`,
-            placeholderUrl: `${origin}/ramo-placeholders/${ramo.slug}.svg`,
+            coverHtml: renderToStaticMarkup(
+              createElement(ServiceCoverPlaceholder, { category: ramo.slug }),
+            ),
+            coverTheme: {
+              background: theme.background,
+              accent: theme.accent,
+              icons: theme.icons,
+              patternCount: theme.pattern.length,
+            },
           };
         });
 
         return NextResponse.json({
           rows,
           familias: familiasAgrupadas(),
-          assetConvention: {
-            capas: "/ramo-capas/{slug}.svg",
-            placeholders: "/ramo-placeholders/{slug}.svg",
+          catalog: {
+            covers: 83,
+            icons: 225,
+            renderer: "src/components/service-cover-placeholder.tsx",
+            themes: "src/lib/service-cover-themes.ts",
           },
         });
       }
