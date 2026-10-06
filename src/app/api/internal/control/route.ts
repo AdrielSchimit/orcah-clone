@@ -2,6 +2,8 @@ import { timingSafeEqual } from "node:crypto";
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { familiasAgrupadas, inventarioRamos, previewCliente } from "@/lib/ramo-catalogo";
+import { ramoMoldes } from "@/lib/ramo-moldes";
 
 export const dynamic = "force-dynamic";
 
@@ -14,7 +16,8 @@ type ControlAction =
   | "budgets"
   | "budget"
   | "subscriptions"
-  | "events";
+  | "events"
+  | "templates";
 
 type ControlRequest = {
   action?: ControlAction;
@@ -248,6 +251,30 @@ export async function POST(request: Request) {
           },
         });
         return NextResponse.json({ rows });
+      }
+
+      case "templates": {
+        const origin = new URL(request.url).origin;
+        const rows = inventarioRamos().map((ramo) => {
+          const molde = ramoMoldes[ramo.slug];
+          return {
+            ...ramo,
+            preview: previewCliente(ramo.slug),
+            exemplos: molde?.suggestions.slice(0, 5) ?? [],
+            form: molde?.form ?? null,
+            capaUrl: `${origin}/ramo-capas/${ramo.slug}.svg`,
+            placeholderUrl: `${origin}/ramo-placeholders/${ramo.slug}.svg`,
+          };
+        });
+
+        return NextResponse.json({
+          rows,
+          familias: familiasAgrupadas(),
+          assetConvention: {
+            capas: "/ramo-capas/{slug}.svg",
+            placeholders: "/ramo-placeholders/{slug}.svg",
+          },
+        });
       }
 
       default:
