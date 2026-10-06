@@ -261,14 +261,17 @@ export async function POST(request: Request) {
         const rows = inventarioRamos().map((ramo) => {
           const molde = ramoMoldes[ramo.slug];
           const theme = resolveServiceCoverTheme(ramo.slug);
+          const coverMarkup = renderToStaticMarkup(
+            createElement(ServiceCoverPlaceholder, { category: ramo.slug }),
+          );
+          const coverSvg = coverMarkup.match(/<svg[\s\S]*?<\/svg>/)?.[0] ?? "";
+
           return {
             ...ramo,
             preview: previewCliente(ramo.slug),
             exemplos: molde?.suggestions.slice(0, 5) ?? [],
             form: molde?.form ?? null,
-            coverHtml: renderToStaticMarkup(
-              createElement(ServiceCoverPlaceholder, { category: ramo.slug }),
-            ),
+            coverSvg,
             coverTheme: {
               background: theme.background,
               accent: theme.accent,
