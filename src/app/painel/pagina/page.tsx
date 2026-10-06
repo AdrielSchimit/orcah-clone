@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { MascoteAvatar } from "@/components/mascote";
+import styles from "./page.module.css";
+import homeButtons from "@/components/home/home-buttons.module.css";
 import { OpenDetailsOnHash } from "@/components/open-details-on-hash";
 import {
   AppearanceForm,
@@ -15,7 +16,6 @@ import { ramoLabel } from "@/lib/company-display";
 import { companySharePreview } from "@/lib/share-preview";
 import { pageCompleteness } from "@/lib/company-page";
 import { prisma } from "@/lib/db";
-import { statsForPeriod, sumStats } from "@/lib/page-stats";
 import { publicServiceOrder } from "@/lib/services";
 import { getSessionUser } from "@/lib/session";
 import { companyPublicUrl } from "@/lib/urls";
@@ -36,7 +36,7 @@ function Section({
   children: React.ReactNode;
 }) {
   return (
-    <details id={id} className="group scroll-mt-4 rounded-box border border-line bg-card open:shadow-card">
+    <details id={id} className={`${styles.accordion} group`}>
       <summary className="flex min-h-16 cursor-pointer list-none items-center gap-3 px-4 py-3 [&::-webkit-details-marker]:hidden">
         <span
           aria-hidden
@@ -64,7 +64,7 @@ export default async function PaginaPage() {
   if (!user?.company) return null;
   const company = user.company;
 
-  const [photos, services, servicesCount, states, setup, stats] = await Promise.all([
+  const [photos, services, servicesCount, states, setup] = await Promise.all([
     prisma.companyPhoto.findMany({
       where: { companyId: company.id, active: true },
       orderBy: { sortOrder: "asc" },
@@ -79,7 +79,6 @@ export default async function PaginaPage() {
     prisma.service.count({ where: { companyId: company.id, active: true } }),
     prisma.state.findMany({ orderBy: { uf: "asc" }, select: { id: true, name: true, uf: true } }),
     findActiveAssistedSetup(prisma, company.id),
-    statsForPeriod(prisma, company.id, 7),
   ]);
 
   const url = companyPublicUrl(company.slug);
@@ -91,7 +90,6 @@ export default async function PaginaPage() {
     description: company.description,
     host: url,
   });
-  const views7 = sumStats(stats).views;
   const progress = pageCompleteness({
     logoPath: company.logoPath,
     description: company.description,
@@ -105,63 +103,45 @@ export default async function PaginaPage() {
   });
   const done = (key: string) => progress.items.find((item) => item.key === key)?.done ?? false;
 
-  const tip =
-    servicesCount === 0
-      ? "Cadastre seu primeiro serviço para ele aparecer na sua página."
-      : photos.length === 0
-        ? "Uma foto boa ajuda seu cliente a entender o que você faz."
-        : progress.percent === 100
-          ? "Sua página tá ficando profissional 😎"
-          : "Uma página com fotos e serviços passa mais confiança 👀";
-
   return (
-    <>
+    <div className={styles.editor}>
       <OpenDetailsOnHash />
-      <h1 className="text-xl font-semibold">Sua página</h1>
-      <p className="mb-4 text-sm text-text-soft">Preencha, salve e pronto: já fica bonito para o cliente.</p>
-
-      <section className="gold-edge mb-4 rounded-box border bg-ink p-4 text-ink-text">
-        <p className="text-xs font-medium uppercase tracking-[0.04em] text-gold">Seu link</p>
-        <p className="mt-1 break-all text-sm font-semibold">{url.replace(/^https?:\/\//, "")}</p>
-        <p className="mt-2 break-all text-xs text-ink-soft">
-          Na bio do Instagram use {url.replace(/^https?:\/\//, "")}?utm_source=instagram para contar a origem.
-        </p>
-        <p className="mt-1 text-xs text-ink-soft">
-          {views7 === 1 ? "1 acesso" : `${views7} acessos`} nos últimos 7 dias ·{" "}
-          <Link href="/painel/relatorios" className="underline underline-offset-2">
-            ver relatório
-          </Link>
-        </p>
-        <a
-          href={url}
-          target="_blank"
-          rel="noreferrer"
-          className="gold-glow mt-3 flex min-h-12 items-center justify-center rounded-btn bg-gold px-4 text-base font-semibold text-ink hover:bg-gold-press"
-        >
-          Visualizar minha página
-        </a>
-      </section>
-      <div className="mb-5 flex flex-col gap-3">
-        <SharePreviewCard preview={sharePreview} />
-        <p className="text-xs text-text-soft">Assim o link aparece quando alguém compartilha, inclusive no Instagram.</p>
+      <h1 className="sr-only">Editar página</h1>
+      <header className={styles.heading}>
+        <div className={styles.headingRow}>
+        <span className={styles.headingIcon} aria-hidden="true"><svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H5v20h14V7Z" /><path d="M14 2v6h5M8 12h8M8 16h8" /></svg></span>
+        <div className={styles.headingText}>
+          <h2 className={styles.cardTitle}>Sua Página</h2>
+        </div>
+          <span className={styles.liveBadge}>No ar</span>
+        </div>
+        <div className={styles.shareActions}>
         <ShareBar url={url} name={company.name} />
-      </div>
+        </div>
+        <details className={styles.shareDetails}>
+          <summary>Prévia do link e dica para o Instagram</summary>
+          <div className={styles.shareContent}>
+            <SharePreviewCard preview={sharePreview} />
+            <p className="text-xs text-text-soft break-words">
+              Para acompanhar os acessos pela bio do Instagram, use <strong>{url}?utm_source=instagram</strong>.
+            </p>
+          </div>
+        </details>
+      </header>
 
-      <section className="mb-5 rounded-box border border-line bg-card p-4">
+      <section className={styles.progress}>
         <div className="flex items-center justify-between gap-3">
-          <p className="font-semibold">Sua página está {progress.percent}% completa</p>
+          <p className="font-semibold">Página completa</p>
           <span className="text-sm font-semibold text-gold-deep">{progress.percent}%</span>
         </div>
-        <div className="mt-2 h-2 overflow-hidden rounded-full bg-paper-alt">
+        <div role="progressbar" aria-label="Página completa" aria-valuenow={progress.percent} aria-valuemin={0} aria-valuemax={100} className="mt-2 h-2 overflow-hidden rounded-full bg-paper-alt">
           <div className="h-full rounded-full bg-gold" style={{ width: `${Math.max(4, progress.percent)}%` }} />
         </div>
-        <div className="mt-3 flex items-start gap-2">
-          <MascoteAvatar className="h-9 w-9 shrink-0" />
-          <p className="rounded-box rounded-tl-md bg-gold-wash px-3 py-2 text-sm">{tip}</p>
-        </div>
         {progress.missing.length > 0 ? (
-          <ul className="mt-3 grid gap-1">
-            {progress.missing.slice(0, 3).map((item) => (
+          <details className={styles.suggestions}>
+            <summary>{progress.missing.length} sugestões para completar</summary>
+            <ul className="mt-2 grid gap-1">
+            {progress.missing.map((item) => (
               <li key={item.key}>
                 <a href={item.href} className="flex min-h-10 items-center justify-between rounded-btn px-2 text-sm hover:bg-paper">
                   <span>{item.label}</span>
@@ -171,12 +151,13 @@ export default async function PaginaPage() {
                 </a>
               </li>
             ))}
-          </ul>
+            </ul>
+          </details>
         ) : null}
-        <p className="mt-2 text-xs text-text-soft">Sua página já está no ar. Completar só deixa ela mais forte.</p>
       </section>
 
-      <div className="flex flex-col gap-3">
+      <div className={styles.sectionHeading}><h2>Editar página</h2></div>
+      <div className={styles.sections}>
         <Section id="perfil" title="Perfil" summary="Nome, o que você faz, cidade e horário" done={done("descricao") && done("horario")}>
           <ProfileForm
             company={{
@@ -224,7 +205,7 @@ export default async function PaginaPage() {
           <div className="grid grid-cols-2 gap-2">
             <Link
               href="/painel/servicos/novo"
-              className="flex min-h-12 items-center justify-center rounded-btn bg-ink px-3 text-sm font-semibold text-ink-text"
+              className={`${homeButtons.gold} flex min-h-12 items-center justify-center rounded-[14px] px-3 text-sm font-semibold text-ink`}
             >
               + Cadastrar serviço
             </Link>
@@ -274,12 +255,13 @@ export default async function PaginaPage() {
         </Section>
       </div>
 
-      <div className="mt-6">
+      <details className={styles.assisted} open={Boolean(setup)}>
+        <summary>{setup ? "Configuração assistida em andamento" : "Precisa de ajuda para montar sua página?"}</summary>
         <AssistedSetupCard
           priceLabel={ASSISTED_SETUP_PRICE_LABEL}
           active={setup ? { status: setup.status, statusLabel: ASSISTED_SETUP_STATUS_LABEL[setup.status] } : null}
         />
-      </div>
-    </>
+      </details>
+    </div>
   );
 }

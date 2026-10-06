@@ -7,6 +7,7 @@ import { Toggle } from "@/components/toggle";
 import { uploadImage } from "@/lib/client-image";
 import { instagramHandle } from "@/lib/instagram";
 import { LogoCropper } from "@/components/logo-cropper";
+import buttonStyles from "@/components/home/home-buttons.module.css";
 
 const inputClass = "w-full rounded-btn border border-line bg-card px-4 py-3 text-base text-text";
 const saveClass =
@@ -91,19 +92,19 @@ export function ShareBar({ url, name }: { url: string; name: string }) {
 
   return (
     <div className="grid grid-cols-3 gap-2">
-      <button type="button" onClick={() => void copy()} className="min-h-12 rounded-btn border border-line bg-card px-2 text-sm font-medium">
+      <button type="button" onClick={() => void copy()} className={`${buttonStyles.secondary} min-h-10 rounded-btn px-3 text-sm font-medium`}>
         {copied ? "Copiado ✓" : "Copiar link"}
       </button>
-      <button type="button" onClick={() => void share()} className="min-h-12 rounded-btn border border-line bg-card px-2 text-sm font-medium">
+      <button type="button" onClick={() => void share()} className={`${buttonStyles.secondary} min-h-10 rounded-btn px-3 text-sm font-medium`}>
         Compartilhar
       </button>
       <a
         href={url}
         target="_blank"
         rel="noreferrer"
-        className="flex min-h-12 items-center justify-center rounded-btn border border-line bg-card px-2 text-center text-sm font-medium"
+        className={`${buttonStyles.secondary} flex min-h-10 items-center justify-center rounded-btn px-3 text-center text-sm font-medium`}
       >
-        Abrir
+        Visualizar
       </a>
     </div>
   );
