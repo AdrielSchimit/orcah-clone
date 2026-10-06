@@ -280,9 +280,13 @@ export async function POST(request: Request) {
           familias: familiasAgrupadas(),
           catalog: {
             covers: 83,
-            icons: 225,
+            icons: Object.keys(serviceCoverIcons).length,
             renderer: "src/components/service-cover-placeholder.tsx",
             themes: "src/lib/service-cover-themes.ts",
+            iconLibrary: Object.entries(serviceCoverIcons).map(([name, paths]) => ({
+              name,
+              paths,
+            })),
           },
         });
       }
