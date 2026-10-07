@@ -176,7 +176,6 @@ export function companyServesSearchCity(
 ) {
   if (!searchCity) return true;
   if (searchCity.id > 0 && (company.cityId === searchCity.id || company.serviceCityIds?.includes(searchCity.id))) return true;
-  if (company.servesRegion && company.stateId === searchCity.stateId) return true;
   return false;
 }
 
