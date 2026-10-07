@@ -1,5 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import { normalizeSearch, slugify } from "@/lib/text";
+import { readMunicipios } from "@/lib/municipios-server";
+import { normalizeMunicipioSearch, searchMunicipios } from "@/lib/municipios";
 
 export type ResolvedSearchCity = {
   id: number;
@@ -37,12 +39,28 @@ export async function resolveCitySearchParam(db: Pick<PrismaClient, "city" | "st
     where: { stateId_slug: { stateId: state.id, slug: parsed.citySlug } },
     select: { id: true, name: true, slug: true, stateId: true },
   });
-  if (!city) return null;
+  if (city) {
+    return {
+      id: city.id,
+      name: city.name,
+      slug: city.slug,
+      stateId: state.id,
+      stateName: state.name,
+      uf: state.uf,
+    } satisfies ResolvedSearchCity;
+  }
+
+  // A busca pública usa a base nacional mesmo antes de a cidade ter sido
+  // persistida no Postgres. id=0 significa "cidade válida, ainda não materializada".
+  const municipality = (await readMunicipios()).find(
+    (item) => item.uf === state.uf && slugify(item.nome) === parsed.citySlug,
+  );
+  if (!municipality) return null;
 
   return {
-    id: city.id,
-    name: city.name,
-    slug: city.slug,
+    id: 0,
+    name: municipality.nome,
+    slug: parsed.citySlug,
     stateId: state.id,
     stateName: state.name,
     uf: state.uf,
@@ -54,7 +72,7 @@ export async function resolveCityFreeText(db: Pick<PrismaClient, "city" | "state
   const trimmed = text.trim();
   if (!trimmed) return null;
 
-  const param = parseCitySearchParam(trimmed.replace(/\s+/g, "-").replace(/,/g, "-"));
+  const param = parseCitySearchParam(trimmed.replace(/s+/g, "-").replace(/,/g, "-"));
   if (param) {
     const fromParam = await resolveCitySearchParam(db, `${param.citySlug}-${param.uf.toLowerCase()}`);
     if (fromParam) return fromParam;
@@ -109,15 +127,46 @@ export async function resolveCityFreeText(db: Pick<PrismaClient, "city" | "state
 
   const exact = cities.find((city) => normalizeSearch(`${city.name}-${city.state.uf}`) === needle);
   const pick = exact ?? cities.find((city) => normalizeSearch(city.name) === needle) ?? cities[0];
-  if (!pick) return null;
+  if (pick) {
+    return {
+      id: pick.id,
+      name: pick.name,
+      slug: pick.slug,
+      stateId: pick.stateId,
+      stateName: pick.state.name,
+      uf: pick.state.uf,
+    } satisfies ResolvedSearchCity;
+  }
+
+  // Fallback nacional: impede uma cidade válida, porém ainda não persistida,
+  // de virar uma busca sem filtro.
+  const municipalityItems = await readMunicipios();
+  const candidates = searchMunicipios(municipalityItems, trimmed, 30);
+  const normalized = normalizeMunicipioSearch(trimmed);
+  const municipality =
+    candidates.find((item) => normalizeMunicipioSearch(`${item.nome} ${item.uf}`) === normalized) ??
+    candidates.find((item) => normalizeMunicipioSearch(item.nome) === normalized) ??
+    candidates[0];
+  if (!municipality) return null;
+
+  const state = await db.state.findUnique({
+    where: { uf: municipality.uf },
+    select: { id: true, name: true, uf: true },
+  });
+  if (!state) return null;
+
+  const persisted = await db.city.findUnique({
+    where: { stateId_slug: { stateId: state.id, slug: slugify(municipality.nome) } },
+    select: { id: true, name: true, slug: true, stateId: true },
+  });
 
   return {
-    id: pick.id,
-    name: pick.name,
-    slug: pick.slug,
-    stateId: pick.stateId,
-    stateName: pick.state.name,
-    uf: pick.state.uf,
+    id: persisted?.id ?? 0,
+    name: municipality.nome,
+    slug: persisted?.slug ?? slugify(municipality.nome),
+    stateId: state.id,
+    stateName: state.name,
+    uf: state.uf,
   } satisfies ResolvedSearchCity;
 }
 
@@ -126,7 +175,7 @@ export function companyServesSearchCity(
   searchCity: ResolvedSearchCity | null,
 ) {
   if (!searchCity) return true;
-  if (company.cityId === searchCity.id || company.serviceCityIds?.includes(searchCity.id)) return true;
+  if (searchCity.id > 0 && (company.cityId === searchCity.id || company.serviceCityIds?.includes(searchCity.id))) return true;
   if (company.servesRegion && company.stateId === searchCity.stateId) return true;
   return false;
 }
