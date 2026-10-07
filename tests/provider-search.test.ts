@@ -12,10 +12,10 @@ describe("companyServesSearchCity", () => {
     );
   });
 
-  it("atende região no mesmo estado", () => {
+  it("não trata o estado inteiro como área de atendimento", () => {
     assert.equal(
       companyServesSearchCity({ cityId: 2, stateId: 10, servesRegion: true }, maravilha),
-      true,
+      false,
     );
   });
 
@@ -26,9 +26,9 @@ describe("companyServesSearchCity", () => {
     );
   });
 
-  it("cidade válida ainda não persistida só encontra atendimento regional", () => {
+  it("cidade válida ainda não persistida não vira atendimento estadual", () => {
     const bora = { id: 0, name: "Borá", slug: "bora", stateId: 25, stateName: "São Paulo", uf: "SP" };
-    assert.equal(companyServesSearchCity({ cityId: 99, stateId: 25, servesRegion: true }, bora), true);
+    assert.equal(companyServesSearchCity({ cityId: 99, stateId: 25, servesRegion: true }, bora), false);
     assert.equal(companyServesSearchCity({ cityId: 99, stateId: 25, servesRegion: false }, bora), false);
   });
 });
