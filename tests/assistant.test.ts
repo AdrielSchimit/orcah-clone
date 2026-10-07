@@ -13,6 +13,7 @@ describe("retrieval versionado do ORÇAH", () => {
     ["Como funciona meu plano?", "plano"], ["Trocar meu logo", "logo"], ["Trocar capa", "capa"],
     ["cidades atendidas", "area-atendimento"], ["Cliente pediu alteração", "pedido-alteracao"],
     ["como destacar serviço?", "destaques"], ["Buscar prestador", "busca"], ["Cliente aprova", "aprovacao"],
+    ["Como compartilhar minha página?", "compartilhar"], ["Como alterar a cidade?", "cidades"], ["Como funciona o teste grátis?", "plano"],
   ]) it(`encontra a orientação: ${question}`, () => { assert.equal(localRetriever.retrieve(question, "/painel")[0]?.id, id); });
   it("normaliza acentos e retorna no máximo três trechos", () => {
     assert.equal(normalize("ORÇAMENTO"), "orcamento");

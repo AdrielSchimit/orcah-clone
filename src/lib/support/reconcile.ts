@@ -6,8 +6,13 @@ export function reconcileMessages(server: SupportMessageDTO[], pending: PendingM
 }
 export function mergeSnapshot(previous: SupportSnapshot | null, next: SupportSnapshot): SupportSnapshot {
   if (!previous || previous.thread.id !== next.thread.id) return next;
-  if (previous.thread.lastMessageAt > next.thread.lastMessageAt) return previous;
+  const latest = previous.thread.lastMessageAt > next.thread.lastMessageAt ? previous : next;
   const all = new Map(previous.messages.map(m => [m.id, m]));
-  for (const message of next.messages) all.set(message.id, message);
-  return { ...next, messages: [...all.values()].sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id)), olderCursor: previous.messages.length > 100 ? previous.olderCursor : next.olderCursor };
+  for (const message of next.messages) all.set(message.id, { ...message, readAt: all.get(message.id)?.readAt || message.readAt });
+  return { ...next, thread: latest.thread, messages: [...all.values()].sort((a, b) => a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id)), olderCursor: previous.messages.length || next.incremental ? previous.olderCursor : next.olderCursor };
+}
+// Mutations return the latest page, which can skip a gap after a long disconnection.
+// Synchronization advances only through polling; optimistic messages stay until then.
+export function mutationSnapshot<T extends SupportSnapshot>(next: T): T {
+  return { ...next, messages: [], incremental: true };
 }

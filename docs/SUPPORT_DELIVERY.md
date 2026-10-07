@@ -22,7 +22,7 @@ Control: CONTROL_APP_URL apontando para a main correspondente, segredo da ponte 
 
 ## Validação
 
-Suites: main 233 testes; Control 18. TypeScript, ESLint dos arquivos modificados e builds de ambos executados. Resultados finais também constam na entrega da conversa.
+Suites: main 265 testes; Control 37. TypeScript, ESLint dos arquivos modificados e builds de ambos executados. Revisão final, achados e estimativas: [SUPPORT_REVIEW.md](SUPPORT_REVIEW.md). Deploy/rollback: [SUPPORT_RUNBOOK.md](SUPPORT_RUNBOOK.md).
 
 Teste HTTP real scripts/support-integration.ts: dois servidores Next, duas contas fictícias e PostgreSQL local. Cobre isolamento, remetente forjado, segredo/sessão, RAG, persistência, idempotência, fila, claim, resposta humana, leitura, prioridade, resolução, retorno ao mascote, retries simultâneos, disputa de dois operadores, tamanho/rate limit, paginação e 16 permissões SQL de browser negadas com RLS ativo.
 

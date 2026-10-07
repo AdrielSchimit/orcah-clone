@@ -3,14 +3,17 @@ import assert from "node:assert/strict";
 import { randomUUID, pbkdf2Sync } from "node:crypto";
 import { spawn } from "node:child_process";
 import { join, resolve } from "node:path";
+import { access, mkdtemp, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
 import { PrismaClient } from "@prisma/client";
 import { SignJWT } from "jose";
+import { verifySupportDatabase } from "./support-db-qa";
 
 async function main() {
   const databaseUrl = process.env.SUPPORT_TEST_DATABASE_URL;
   if (!databaseUrl) throw new Error("Defina SUPPORT_TEST_DATABASE_URL para um PostgreSQL LOCAL dedicado chamado orcah_support_test. Aplique somente nele o schema/migration antes do teste.");
   const url = new URL(databaseUrl);
-  if (!["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) || url.pathname !== "/orcah_support_test") throw new Error("Este teste aceita apenas banco LOCAL orcah_support_test.");
+  if (url.protocol !== "postgresql:" || url.hostname !== "127.0.0.1" || url.port !== "55439" || url.pathname !== "/orcah_support_test" || url.search || url.hash) throw new Error("Este teste aceita apenas PostgreSQL 127.0.0.1:55439/orcah_support_test sem parâmetros adicionais.");
   const repo = process.cwd(), control = resolve(process.env.SUPPORT_TEST_CONTROL_DIR || join(repo, "..", "orcah-control"));
   const db = new PrismaClient({ datasources: { db: { url: databaseUrl } } });
   const nonce = randomUUID().slice(0, 8), password = "Support-QA!2026";
@@ -23,11 +26,9 @@ async function main() {
   const adminHash = `pbkdf2_sha256$210000$${salt.toString("base64url")}$${pbkdf2Sync(password, salt, 210000, 32, "sha256").toString("base64url")}`;
   const users: number[] = [];
   const processes: ReturnType<typeof spawn>[] = [];
-  const logs: string[] = [];
   function start(directory: string, port: number, env: Record<string, string>) {
-    const child = spawn(process.execPath, [join(directory, "node_modules/next/dist/bin/next"), "dev", "--port", String(port)], { cwd: directory, env: { ...process.env, ...env }, windowsHide: true, stdio: ["ignore", "pipe", "pipe"] });
+    const child = spawn(process.execPath, [join(directory, "node_modules/next/dist/bin/next"), "dev", "--hostname", "127.0.0.1", "--port", String(port)], { cwd: directory, env: { ...process.env, ...env }, windowsHide: true, stdio: "ignore" });
     processes.push(child);
-    child.stdout?.on("data", chunk => logs.push(chunk.toString())); child.stderr?.on("data", chunk => logs.push(chunk.toString()));
   }
   async function ready(base: string) {
     for (let n = 0; n < 60; n++) { try { const r = await fetch(`${base}/login`, { signal: AbortSignal.timeout(5000) }); if (r.ok) return; } catch {} await new Promise(r => setTimeout(r, 500)); }
@@ -44,9 +45,11 @@ async function main() {
       const user = await db.user.create({ data: { name: `Prestador QA ${label}`, email: `support-${label.toLowerCase()}-${nonce}@example.test`, emailVerifiedAt: new Date(), passwordHash: hash, company: { create: { name: `Empresa QA ${label}`, slug: `support-qa-${label.toLowerCase()}-${nonce}`, phone: "11999999999", whatsapp: "11999999999", email: `support-${label.toLowerCase()}-${nonce}@example.test`, stateId: state.id, customRamoName: "Pintura", subscription: { create: { status: "active", amount: 29, provider: "local", startsAt: new Date() } } } } } });
       users.push(user.id);
     }
-    start(repo, 3100, { DATABASE_URL: databaseUrl, DIRECT_URL: databaseUrl, AUTH_SECRET: mainSecret, CONTROL_INTERNAL_SECRET: bridgeSecret, NEXT_PUBLIC_APP_URL: app, OPENAI_API_KEY: "", SUPPORT_AI_MODEL: "" });
-    // Control has no DB credentials and all support reads/writes use the bridge.
-    start(control, 3101, { DATABASE_URL: "", DIRECT_URL: "", CONTROL_APP_URL: app, CONTROL_INTERNAL_SECRET: bridgeSecret, CONTROL_AUTH_SECRET: controlSecret, CONTROL_ADMIN_USER: "adriel", CONTROL_ADMIN_PASSWORD_HASH: adminHash });
+    if (process.env.SUPPORT_TEST_ATTACH_SERVERS !== "1") {
+      start(repo, 3100, { DATABASE_URL: databaseUrl, DIRECT_URL: databaseUrl, AUTH_SECRET: mainSecret, CONTROL_INTERNAL_SECRET: bridgeSecret, NEXT_PUBLIC_APP_URL: app, OPENAI_API_KEY: "", SUPPORT_AI_MODEL: "" });
+      // Control has no DB credentials and all support reads/writes use the bridge.
+      start(control, 3101, { DATABASE_URL: "", DIRECT_URL: "", CONTROL_APP_URL: app, CONTROL_INTERNAL_SECRET: bridgeSecret, CONTROL_AUTH_SECRET: controlSecret, CONTROL_ADMIN_USER: "adriel", CONTROL_ADMIN_PASSWORD_HASH: adminHash });
+    }
     await Promise.all([ready(app), ready(inbox)]);
     console.log("PASS: dois servidores locais prontos; Control sem credenciais de banco");
     const provider = `orcah_session=${await jwt({ userId: users[0] }, mainSecret)}`;
@@ -103,20 +106,69 @@ async function main() {
     const ids = [...older.messages, ...latest.messages].map((message: { id: string }) => message.id);
     assert.equal(new Set(ids).size, ids.length);
     console.log("PASS: paginação de histórico real sem perda ou duplicação");
-    // Verify actual PostgreSQL grants and RLS, including SELECT/INSERT/UPDATE/DELETE privileges.
-    const protectedTables = await db.$queryRaw<{ relname: string; relrowsecurity: boolean }[]>`SELECT relname, relrowsecurity FROM pg_class WHERE relname IN ('support_threads', 'support_messages')`;
-    assert.equal(protectedTables.length, 2); assert.ok(protectedTables.every(t => t.relrowsecurity));
-    for (const role of ["anon", "authenticated"]) for (const table of ["support_threads", "support_messages"]) for (const privilege of ["SELECT", "INSERT", "UPDATE", "DELETE"]) {
-      const rows = await db.$queryRaw<{ allowed: boolean }[]>`SELECT has_table_privilege(${role}, ${table}, ${privilege}) AS allowed`; assert.equal(rows[0].allowed, false);
+    const through = latest.messages.at(-1).id;
+    const unchanged = await call(app, `/api/support/thread?threadId=${id}&after=${encodeURIComponent(through)}`, provider);
+    assert.equal(unchanged.response.status, 200); assert.equal(unchanged.data.incremental, true); assert.equal(unchanged.data.messages.length, 0);
+    assert.equal((await call(app, `/api/support/thread?threadId=${id}&before=${encodeURIComponent(through)}&after=${encodeURIComponent(through)}`, provider)).response.status, 400);
+    const afterMessage = await call(app, "/api/support/messages", provider, { threadId: id, content: "Como criar orçamento?", clientId: randomUUID() });
+    assert.equal(afterMessage.response.status, 200);
+    const changed = await call(app, `/api/support/thread?threadId=${id}&after=${encodeURIComponent(through)}`, provider);
+    assert.equal(changed.response.status, 200); assert.equal(changed.data.incremental, true); assert.equal(changed.data.messages.length, 2);
+    assert.ok(changed.data.messages.every((message: { id: string }) => message.id !== through));
+    console.log("PASS: polling incremental after vazio sem replay; apenas 2 mensagens novas; before/after mutuamente exclusivos");
+    // Seed only disposable, fictitious accounts; 100 inbox rows and 20 histories of 50 messages.
+    const queryPrefix = `Support fixture ${nonce} `;
+    const loadFixtures: { threadId: string; cookie: string }[] = [];
+    for (let n = 0; n < 100; n++) {
+      const user = await db.user.create({ data: {
+        name: `Prestador fixture ${n}`, email: `fixture-${nonce}-${n}@example.test`, emailVerifiedAt: new Date(), passwordHash: hash,
+        company: { create: { name: `${queryPrefix}${n === 0 ? "only-one" : String(n).padStart(3, "0")}`, slug: `fixture-${nonce}-${n}`, phone: "11999999999", whatsapp: "11999999999", email: `fixture-${nonce}-${n}@example.test`, stateId: state.id, customRamoName: "Pintura" } },
+      }, include: { company: true } });
+      users.push(user.id);
+      const thread = await db.supportThread.create({ data: { userId: user.id, companyId: user.company!.id, status: "QUEUED", queuedAt: new Date(Date.now() - 600_000 + n), lastMessageAt: new Date(Date.now() - 600_000 + n) } });
+      if (n < 20) {
+        loadFixtures.push({ threadId: thread.id, cookie: `orcah_session=${await jwt({ userId: user.id }, mainSecret)}` });
+        await db.supportMessage.createMany({ data: Array.from({ length: 50 }, (_, m) => ({ id: randomUUID(), threadId: thread.id, senderType: "USER" as const, clientId: randomUUID(), content: "Histórico fictício para carga local", createdAt: new Date(Date.now() - 600_000 + m) })) });
+      }
     }
-    console.log("PASS: migration SQL aplicada somente no PostgreSQL local; RLS ativo e 16 permissões de browser negadas");
-    if (process.env.SUPPORT_TEST_KEEP_SERVERS === "1") {
-      console.log(`QA local: ${app}/login e ${inbox}/login. Usuário prestador: support-a-${nonce}@example.test. Control: adriel. Senha de teste: ${password}`);
-      console.log("Servidores mantidos para inspeção visual. Interrompa com Ctrl+C para limpar fixtures.");
-      await new Promise<void>(resolve => { process.once("SIGINT", resolve); process.once("SIGTERM", resolve); });
+    const pageOne = (await call(inbox, `/api/support/inbox?status=QUEUED&q=${encodeURIComponent(queryPrefix)}`, operator)).data;
+    assert.equal(pageOne.rows.length, 60); assert.equal(pageOne.nextOffset, 60);
+    const pageTwo = (await call(inbox, `/api/support/inbox?status=QUEUED&q=${encodeURIComponent(queryPrefix)}&offset=60`, operator)).data;
+    assert.equal(pageTwo.rows.length, 40); assert.equal(pageTwo.nextOffset, null);
+    assert.equal(new Set([...pageOne.rows, ...pageTwo.rows].map((row: { id: string }) => row.id)).size, 100);
+    const latencies: number[] = []; let sent = 0;
+    await Promise.all(Array.from({ length: 5 }, async (_, worker) => {
+      for (let job = worker; job < 50; job += 5) {
+        const fixture = loadFixtures[job % loadFixtures.length]; const started = performance.now();
+        const sentMessage = await call(app, "/api/support/messages", fixture.cookie, { threadId: fixture.threadId, content: "Mensagem fictícia de carga local", clientId: randomUUID() });
+        assert.equal(sentMessage.response.status, 200); sent++;
+        const polled = await call(app, `/api/support/thread?threadId=${fixture.threadId}&after=${encodeURIComponent(sentMessage.data.messages.at(-1).id)}`, fixture.cookie);
+        assert.equal(polled.response.status, 200);
+        assert.equal(polled.data.incremental, true); assert.equal(polled.data.messages.length, 0);
+        latencies.push(performance.now() - started);
+      }
+    }));
+    assert.equal(sent, 50);
+    const persistedLoad = await db.supportMessage.count({ where: { threadId: { in: loadFixtures.map(f => f.threadId) }, senderType: "USER" } });
+    assert.equal(persistedLoad, 1050);
+    latencies.sort((a, b) => a - b);
+    console.log(`PASS: 20 threads x 50 históricos + 50 envios/50 polls HTTP, 5 clientes simultâneos; p50=${Math.round(latencies[24])}ms p95=${Math.round(latencies[47])}ms; inbox 100 fixtures=60+40 sem duplicação`);
+    await verifySupportDatabase(db, loadFixtures[0].threadId, databaseUrl, queryPrefix);
+    if (process.env.SUPPORT_TEST_KEEP_SERVERS === "1" && process.env.SUPPORT_TEST_ATTACH_SERVERS !== "1") {
+      const fixtureDir = await mkdtemp(join(tmpdir(), "orcah-support-ui-"));
+      const fixturePath = join(fixtureDir, "fixtures.json");
+      const stopFile = join(fixtureDir, "stop");
+      await writeFile(fixturePath, JSON.stringify({ app, inbox, stopFile, provider: { email: `support-a-${nonce}@example.test`, password }, control: { identifier: "adriel", password }, queryPrefix, fixtureCount: 100, historyThreads: 20, historyMessages: 50 }, null, 2), { mode: 0o600 });
+      console.log(`QA local: fixture credentials written only to temporary file ${fixturePath}`);
+      console.log("Servidores locais mantidos para inspeção visual. Interrompa com Ctrl+C para limpar fixtures.");
+      await new Promise<void>(resolve => {
+        const finish = () => { clearInterval(checkStop); process.removeListener("SIGINT", finish); process.removeListener("SIGTERM", finish); resolve(); };
+        const checkStop = setInterval(() => { void access(stopFile).then(finish).catch(() => {}); }, 500);
+        process.once("SIGINT", finish); process.once("SIGTERM", finish);
+      });
     }
   } catch (error) {
-    console.error(logs.slice(-12).join("\n")); throw error;
+    throw error;
   } finally {
     for (const child of processes) {
       if (child.pid && process.platform === "win32") spawn("taskkill", ["/pid", String(child.pid), "/t", "/f"], { windowsHide: true, stdio: "ignore" });
@@ -125,4 +177,4 @@ async function main() {
     await db.user.deleteMany({ where: { id: { in: users } } }); await db.$disconnect();
   }
 }
-main().catch(error => { console.error(error instanceof Error ? error.message : "Falha na integração local"); process.exitCode = 1; });
+main().catch(error => { console.error(error instanceof Error ? `${error.name}: integração local falhou; conteúdo/credenciais omitidos` : "Falha na integração local"); process.exitCode = 1; });

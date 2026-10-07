@@ -42,6 +42,16 @@ export function Assistente({ contexto }: { contexto: AssistenteContexto }) {
     document.addEventListener("keydown", keydown);
     return () => { document.body.style.overflow = original; document.removeEventListener("keydown", keydown); };
   }, [open]);
+  useEffect(() => {
+    if (!open || !window.visualViewport) return;
+    const viewport = window.visualViewport;
+    const fit = () => {
+      dialog.current?.style.setProperty("--support-visible-height", `${viewport.height}px`);
+      dialog.current?.style.setProperty("--support-visible-top", `${viewport.offsetTop}px`);
+    };
+    fit(); viewport.addEventListener("resize", fit); viewport.addEventListener("scroll", fit);
+    return () => { viewport.removeEventListener("resize", fit); viewport.removeEventListener("scroll", fit); };
+  }, [open]);
   const lastId = chat.messages.at(-1)?.id;
   useEffect(() => { if (open) end.current?.scrollIntoView({ block: "nearest" }); }, [open, lastId]);
 

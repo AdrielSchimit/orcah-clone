@@ -17,7 +17,7 @@ export async function controlSupport(params: Record<string, unknown>) {
   if (typeof params.threadId !== "string" || !params.threadId || params.threadId.length > 100) throw new SupportError(400, "Conversa inválida.");
   const id = params.threadId;
   let result;
-  if (operation === "thread") result = await readSupportThread(prisma, operator, id, typeof params.before === "string" ? params.before : undefined);
+  if (operation === "thread") result = await readSupportThread(prisma, operator, id, typeof params.before === "string" ? params.before : undefined, typeof params.after === "string" ? params.after : undefined);
   else if (operation === "messages") result = await sendSupportMessage(prisma, operator, id, { content: params.content, clientId: params.clientId });
   else if (operation === "read") {
     if (typeof params.throughId !== "string") throw new SupportError(400, "Mensagem inválida.");

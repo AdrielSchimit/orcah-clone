@@ -15,7 +15,7 @@ export type SupportThreadDTO = {
   humanStartedAt: string | null; resolvedAt: string | null; unread: number;
 };
 export type SupportSnapshot = {
-  thread: SupportThreadDTO; messages: SupportMessageDTO[]; olderCursor: string | null;
+  thread: SupportThreadDTO; messages: SupportMessageDTO[]; olderCursor: string | null; incremental?: boolean;
 };
 export type SupportContext = {
   companyId: number; company: string; provider: string; category: string; city: string;

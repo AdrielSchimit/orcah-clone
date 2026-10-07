@@ -89,3 +89,20 @@ END $$;
 
 ALTER TABLE "support_messages" ADD CONSTRAINT "support_messages_content_length_check"
   CHECK (char_length(content) BETWEEN 1 AND 2000);
+
+-- HUMAN has an assigned operator; other states do not retain an assignment.
+ALTER TABLE "support_threads" ADD CONSTRAINT "support_threads_assignment_check"
+  CHECK (
+    (status = 'HUMAN' AND assigned_operator_id IS NOT NULL AND assigned_operator IS NOT NULL
+      AND char_length(btrim(assigned_operator_id)) > 0 AND char_length(btrim(assigned_operator)) > 0)
+    OR (status <> 'HUMAN' AND assigned_operator_id IS NULL AND assigned_operator IS NULL)
+  );
+
+-- Handoff cycle timestamps follow BOT -> QUEUED -> HUMAN -> RESOLVED.
+ALTER TABLE "support_threads" ADD CONSTRAINT "support_threads_cycle_check"
+  CHECK (
+    (status = 'BOT' AND queued_at IS NULL AND human_started_at IS NULL AND resolved_at IS NULL) OR
+    (status = 'QUEUED' AND queued_at IS NOT NULL AND human_started_at IS NULL AND resolved_at IS NULL) OR
+    (status = 'HUMAN' AND queued_at IS NOT NULL AND human_started_at IS NOT NULL AND resolved_at IS NULL) OR
+    (status = 'RESOLVED' AND queued_at IS NOT NULL AND human_started_at IS NOT NULL AND resolved_at IS NOT NULL)
+  );

@@ -20,7 +20,7 @@ export async function GET(request: Request, ctx: Context) {
     const url = new URL(request.url);
     const requested = url.searchParams.get("threadId");
     const id = requested || (await ensureSupportThread(prisma, actor)).id;
-    return supportResponse(await readSupportThread(prisma, actor, id, url.searchParams.get("before") || undefined));
+    return supportResponse(await readSupportThread(prisma, actor, id, url.searchParams.get("before") || undefined, url.searchParams.get("after") || undefined));
   } catch (error) { return supportFailure(error); }
 }
 
@@ -37,8 +37,7 @@ export async function POST(request: Request, ctx: Context) {
       case "messages": {
         const human = typeof body.content === "string" && wantsHuman(body.content);
         const generate = (question: string, route: string) => assistantReply(question, { route, company: auth.company.name, category: auth.company.customRamoName || auth.company.businessCategory?.name || "" });
-        result = await sendSupportMessage(prisma, actor, body.threadId, body, human ? undefined : generate, typeof body.route === "string" ? body.route : "/painel");
-        if (human) result = await actOnSupportThread(prisma, actor, body.threadId, "escalate");
+        result = await sendSupportMessage(prisma, actor, body.threadId, body, human ? undefined : generate, typeof body.route === "string" ? body.route : "/painel", human);
         break;
       }
       case "escalate": case "cancel-human": case "return-to-bot": result = await actOnSupportThread(prisma, actor, body.threadId, action); break;
