@@ -5,8 +5,17 @@ import type { Prisma } from "@prisma/client";
 import { slugify } from "./text";
 
 // Apenas no servidor; nunca importar o JSON no componente cliente.
-export async function readMunicipios() {
-  return JSON.parse(await readFile(join(process.cwd(), "public/data/municipios-br.json"), "utf8")) as Municipio[];
+// O arquivo só muda com um novo deploy, então é seguro reutilizar a leitura
+// durante a vida da instância serverless.
+let municipiosCache: Promise<Municipio[]> | undefined;
+
+export function readMunicipios() {
+  return municipiosCache ??= readFile(join(process.cwd(), "public/data/municipios-br.json"), "utf8")
+    .then((content) => JSON.parse(content) as Municipio[])
+    .catch((error) => {
+      municipiosCache = undefined;
+      throw error;
+    });
 }
 
 export function resolveMunicipio(items: Municipio[], ibge: unknown) {
