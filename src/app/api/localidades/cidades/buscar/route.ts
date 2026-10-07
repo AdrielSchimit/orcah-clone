@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { readMunicipios } from "@/lib/municipios-server";
+import { searchMunicipios } from "@/lib/municipios";
 import { formatCitySearchParam } from "@/lib/provider-location";
-import { normalizeSearch, slugify } from "@/lib/text";
+import { slugify } from "@/lib/text";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -10,40 +12,40 @@ export async function GET(request: Request) {
     return NextResponse.json([]);
   }
 
-  const needle = normalizeSearch(q);
-  const slugNeedle = slugify(q);
+  const cities = searchMunicipios(await readMunicipios(), q, 12);
+  const ufs = [...new Set(cities.map((city) => city.uf))];
 
-  const cities = await prisma.city.findMany({
-    where: {
-      OR: [
-        { name: { contains: q, mode: "insensitive" } },
-        ...(slugNeedle ? [{ slug: { contains: slugNeedle } }] : []),
-      ],
-    },
-    orderBy: [{ name: "asc" }],
-    take: 12,
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      state: { select: { uf: true, name: true } },
-    },
-  });
+  const [states, persistedCities] = await Promise.all([
+    prisma.state.findMany({
+      where: { uf: { in: ufs } },
+      select: { id: true, uf: true, name: true },
+    }),
+    prisma.city.findMany({
+      where: { ibgeCode: { in: cities.map((city) => city.ibge) } },
+      select: { id: true, ibgeCode: true },
+    }),
+  ]);
 
-  const ranked = [...cities].sort((a, b) => {
-    const aExact = normalizeSearch(a.name) === needle ? 0 : 1;
-    const bExact = normalizeSearch(b.name) === needle ? 0 : 1;
-    return aExact - bExact || a.name.localeCompare(b.name, "pt-BR");
-  });
+  const stateByUf = new Map(states.map((state) => [state.uf, state]));
+  const persistedByIbge = new Map(
+    persistedCities
+      .filter((city): city is typeof city & { ibgeCode: string } => Boolean(city.ibgeCode))
+      .map((city) => [city.ibgeCode, city.id]),
+  );
 
   return NextResponse.json(
-    ranked.map((city) => ({
-      id: city.id,
-      name: city.name,
-      uf: city.state.uf,
-      stateName: city.state.name,
-      label: `${city.name} - ${city.state.uf}`,
-      param: formatCitySearchParam(city, city.state),
-    })),
+    cities.map((city) => {
+      const state = stateByUf.get(city.uf);
+      const slug = slugify(city.nome);
+      return {
+        id: persistedByIbge.get(city.ibge) ?? 0,
+        ibge: city.ibge,
+        name: city.nome,
+        uf: city.uf,
+        stateName: state?.name ?? city.uf,
+        label: `${city.nome} - ${city.uf}`,
+        param: formatCitySearchParam({ slug }, { uf: city.uf }),
+      };
+    }),
   );
 }
