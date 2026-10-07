@@ -133,7 +133,16 @@ export async function searchPublicProviders(db: SearchDb, input: SearchProviders
   }
 
   if (searchCity) {
-    where.AND = [{ OR: [{stateId:searchCity.stateId},{serviceCityIds:{has:searchCity.id}}] }];
+    const locationFilters: Prisma.CompanyWhereInput[] = [
+      { servesRegion: true, stateId: searchCity.stateId },
+    ];
+    if (searchCity.id > 0) {
+      locationFilters.push(
+        { cityId: searchCity.id },
+        { serviceCityIds: { has: searchCity.id } },
+      );
+    }
+    where.AND = [{ OR: locationFilters }];
   }
 
   const companies = await db.company.findMany({
