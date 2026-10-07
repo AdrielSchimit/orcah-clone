@@ -1,4 +1,6 @@
-import { timingSafeEqual } from "node:crypto";
+import { controlAuthorized, supportBody } from "@/lib/support/security";
+import { controlSupport } from "@/lib/support/control-gateway";
+import { SupportError } from "@/lib/support/domain";
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
@@ -18,7 +20,8 @@ type ControlAction =
   | "budget"
   | "subscriptions"
   | "events"
-  | "templates";
+  | "templates"
+  | "support";
 
 type ControlRequest = {
   action?: ControlAction;
@@ -26,10 +29,7 @@ type ControlRequest = {
 };
 
 function authorized(request: Request) {
-  const expected = process.env.CONTROL_INTERNAL_SECRET?.trim() ?? "";
-  const received = request.headers.get("x-orcah-control-secret")?.trim() ?? "";
-  if (expected.length < 32 || received.length !== expected.length) return false;
-  return timingSafeEqual(Buffer.from(received), Buffer.from(expected));
+  return controlAuthorized(request);
 }
 
 function text(value: unknown) {
@@ -48,8 +48,10 @@ export async function POST(request: Request) {
 
   let body: ControlRequest;
   try {
-    body = (await request.json()) as ControlRequest;
-  } catch {
+    body = (await supportBody(request)) as ControlRequest;
+    if (body.params && (typeof body.params !== "object" || Array.isArray(body.params))) throw new Error();
+  } catch (error) {
+    if (error instanceof SupportError) return NextResponse.json({ error: error.message }, { status: error.status });
     return NextResponse.json({ error: "invalid_json" }, { status: 400 });
   }
 
@@ -57,6 +59,8 @@ export async function POST(request: Request) {
 
   try {
     switch (body.action) {
+      case "support":
+        return NextResponse.json(await controlSupport(params), { headers: { "cache-control": "private, no-store" } });
       case "health": {
         await prisma.$queryRaw`SELECT 1`;
         return NextResponse.json({ ok: true });
@@ -106,6 +110,11 @@ export async function POST(request: Request) {
         const q = text(params.q);
         const status = text(params.status);
         const where: Prisma.CompanyWhereInput = {};
+        if (Array.isArray(params.ids)) {
+          const ids = params.ids.filter((value): value is number => typeof value === "number" && Number.isSafeInteger(value) && value > 0).slice(0, 100);
+          const rows = await prisma.company.findMany({ where: { id: { in: ids } }, select: { id: true, name: true } });
+          return NextResponse.json({ rows });
+        }
 
         if (q) {
           where.OR = [
@@ -295,6 +304,7 @@ export async function POST(request: Request) {
         return NextResponse.json({ error: "unknown_action" }, { status: 400 });
     }
   } catch (error) {
+    if (error instanceof SupportError) return NextResponse.json({ error: error.message }, { status: error.status, headers: { "cache-control": "private, no-store" } });
     console.error("[control-gateway] request failed", error instanceof Error ? error.name : "error");
     return NextResponse.json({ error: "control_gateway_failed" }, { status: 500 });
   }

@@ -1,241 +1,104 @@
 "use client";
-
-import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { Mascote, MascoteAvatar } from "@/components/mascote";
-import {
-  dicaDaTela,
-  perguntasRapidas,
-  type AssistenteContexto,
-  type AssistenteFala,
-} from "@/lib/assistente";
+import { useEffect, useRef, useState } from "react";
+import { MascoteAvatar } from "@/components/mascote";
+import type { AssistenteContexto } from "@/lib/assistente";
+import { useSupportThread } from "@/lib/support/use-support-thread";
+import { MESSAGE_MAX_LENGTH } from "@/lib/support/types";
+import type { PendingMessage } from "@/lib/support/reconcile";
+import styles from "./support-chat.module.css";
 
-type Mensagem = { de: "assistente"; fala: AssistenteFala } | { de: "voce"; texto: string; id: string };
-
-const VISTOS_KEY = "orcah-assistente-vistos";
-const vistosEvent = "orcah-assistente-vistos";
-
-function lerVistos(): string {
-  try {
-    return localStorage.getItem(VISTOS_KEY) ?? "";
-  } catch {
-    return "";
-  }
-}
-
-function marcarVisto(id: string) {
-  const atual = lerVistos().split(",").filter(Boolean);
-  if (atual.includes(id)) return;
-  try {
-    localStorage.setItem(VISTOS_KEY, [...atual, id].slice(-40).join(","));
-  } catch {
-    // sem storage (aba privada, bloqueio): o ponto de aviso só não some
-  }
-  window.dispatchEvent(new Event(vistosEvent));
-}
-
-function assinarVistos(onChange: () => void) {
-  window.addEventListener(vistosEvent, onChange);
-  window.addEventListener("storage", onChange);
-  return () => {
-    window.removeEventListener(vistosEvent, onChange);
-    window.removeEventListener("storage", onChange);
-  };
-}
+const suggestions = ["Como criar um orçamento?", "Como configurar minha página?", "Como adicionar um serviço?", "Como funciona meu plano?"];
+const time = (value: string) => new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit" }).format(new Date(value));
 
 export function Assistente({ contexto }: { contexto: AssistenteContexto }) {
+  void contexto;
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState("");
   const pathname = usePathname();
-  const dica = dicaDaTela(pathname, contexto);
-  const [aberto, setAberto] = useState(false);
-  const [conversa, setConversa] = useState<{ tela: string; mensagens: Mensagem[] }>({ tela: "", mensagens: [] });
-  const vistos = useSyncExternalStore(assinarVistos, lerVistos, () => null);
-  const botaoRef = useRef<HTMLButtonElement>(null);
-  const fecharRef = useRef<HTMLButtonElement>(null);
-  const fimRef = useRef<HTMLDivElement>(null);
-
-  // a conversa recomeça quando a tela muda (a dica é outra)
-  const mensagens: Mensagem[] =
-    conversa.tela === dica.id ? conversa.mensagens : [{ de: "assistente", fala: dica }];
-  const ultimaFala = [...mensagens].reverse().find((m) => m.de === "assistente");
-  const pose = ultimaFala?.de === "assistente" ? ultimaFala.fala.pose : dica.pose;
-  const feitas = new Set(mensagens.flatMap((m) => (m.de === "voce" ? [m.id] : [])));
-  const novidade = vistos !== null && !vistos.split(",").includes(dica.id);
-
-  const jaAbriu = useRef(false);
-  useEffect(() => {
-    if (!aberto) {
-      // devolve o foco ao botão só depois de ter aberto uma vez
-      if (jaAbriu.current) botaoRef.current?.focus();
-      return;
-    }
-    jaAbriu.current = true;
-    fecharRef.current?.focus();
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setAberto(false);
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [aberto]);
+  const chat = useSupportThread(pathname, open);
+  const launcher = useRef<HTMLButtonElement>(null);
+  const dialog = useRef<HTMLElement>(null);
+  const close = useRef<HTMLButtonElement>(null);
+  const end = useRef<HTMLDivElement>(null);
+  const wasOpen = useRef(false);
+  const thread = chat.snapshot?.thread;
+  const status = thread?.status || "BOT";
+  const indicator = status === "HUMAN" ? `Atendimento com ${thread?.assignedOperator}` : status === "QUEUED" ? "Na fila para atendimento" : status === "RESOLVED" ? "Atendimento resolvido" : "Assistente virtual";
 
   useEffect(() => {
-    fimRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  }, [mensagens.length]);
-
-  // o botão flutuante nunca fica em cima de botão, link ou campo: some enquanto houver um embaixo dele
-  const [livre, setLivre] = useState(true);
+    if (!open) { if (wasOpen.current) launcher.current?.focus(); return; }
+    wasOpen.current = true; close.current?.focus();
+    const original = document.body.style.overflow; document.body.style.overflow = "hidden";
+    const keydown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+      if (e.key !== "Tab") return;
+      const nodes = dialog.current?.querySelectorAll<HTMLElement>('button:not(:disabled), textarea:not(:disabled), a[href], [tabindex="0"]');
+      if (!nodes?.length) return;
+      const first = nodes[0], last = nodes[nodes.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    };
+    document.addEventListener("keydown", keydown);
+    return () => { document.body.style.overflow = original; document.removeEventListener("keydown", keydown); };
+  }, [open]);
   useEffect(() => {
-    if (aberto) return;
-    let frame = 0;
-    const checar = () => {
-      frame = 0;
-      const botao = botaoRef.current;
-      if (!botao) return;
-      const r = botao.getBoundingClientRect();
-      if (!r.width) return;
-      const pontos: [number, number][] = [
-        [r.left + 4, r.top + 4],
-        [r.right - 4, r.top + 4],
-        [r.left + 4, r.bottom - 4],
-        [r.right - 4, r.bottom - 4],
-        [r.left + r.width / 2, r.top + r.height / 2],
-      ];
-      const cobre = pontos.some(([x, y]) =>
-        document
-          .elementsFromPoint(x, y)
-          .some((el) => !botao.contains(el) && el.closest("a[href], button, input, select, textarea, label, [role=button]")),
-      );
-      setLivre(!cobre);
+    if (!open || !window.visualViewport) return;
+    const viewport = window.visualViewport;
+    const fit = () => {
+      dialog.current?.style.setProperty("--support-visible-height", `${viewport.height}px`);
+      dialog.current?.style.setProperty("--support-visible-top", `${viewport.offsetTop}px`);
     };
-    const agendar = () => {
-      if (!frame) frame = requestAnimationFrame(checar);
-    };
-    agendar();
-    const observer = new ResizeObserver(agendar);
-    observer.observe(document.body);
-    window.addEventListener("scroll", agendar, { passive: true });
-    window.addEventListener("resize", agendar);
-    return () => {
-      cancelAnimationFrame(frame);
-      observer.disconnect();
-      window.removeEventListener("scroll", agendar);
-      window.removeEventListener("resize", agendar);
-    };
-  }, [aberto, pathname]);
+    fit(); viewport.addEventListener("resize", fit); viewport.addEventListener("scroll", fit);
+    return () => { viewport.removeEventListener("resize", fit); viewport.removeEventListener("scroll", fit); };
+  }, [open]);
+  const lastId = chat.messages.at(-1)?.id;
+  useEffect(() => { if (open) end.current?.scrollIntoView({ block: "nearest" }); }, [open, lastId]);
 
-  function abrir() {
-    setAberto(true);
-    marcarVisto(dica.id);
+  function submit() {
+    if (!draft.trim() || chat.busy || !thread) return;
+    const content = draft.trim(); setDraft(""); void chat.send(content);
   }
-
-  function perguntar(id: string) {
-    const item = perguntasRapidas.find((p) => p.id === id);
-    if (!item) return;
-    setConversa({
-      tela: dica.id,
-      mensagens: [...mensagens, { de: "voce", texto: item.pergunta, id: item.id }, { de: "assistente", fala: item.resposta }],
-    });
-  }
-
-  // no celular, o formulário de orçamento tem barra fixa embaixo: o botão sai do caminho
-  const escondeNoCelular = pathname.startsWith("/painel/orcamentos/");
-
-  return (
-    <>
-      {aberto ? (
-        <div
-          role="dialog"
-          aria-modal="false"
-          aria-label="Assistente Orçah"
-          className="fixed inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-40 flex max-h-[min(34rem,calc(100dvh-7rem))] animate-pop flex-col overflow-hidden rounded-box border border-line bg-card text-text shadow-float md:inset-x-auto md:bottom-6 md:right-6 md:w-96"
-        >
-          <div className="relative flex items-end gap-3 bg-gold-wash px-4 pt-4">
-            <Mascote key={pose} pose={pose} className="h-28 w-auto shrink-0 animate-pop" />
-            <div className="min-w-0 flex-1 pb-4">
-              <p className="font-semibold">Assistente Orçah</p>
-              <p className="text-xs text-text-soft">Dicas rápidas para você fechar mais</p>
-            </div>
-            <button
-              ref={fecharRef}
-              type="button"
-              onClick={() => setAberto(false)}
-              aria-label="Fechar assistente"
-              className="absolute right-2 top-2 flex h-10 w-10 items-center justify-center rounded-full text-text-soft hover:bg-card/70"
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" aria-hidden>
-                <path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-              </svg>
-            </button>
-          </div>
-
-          <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4" aria-live="polite">
-            {mensagens.map((m, i) =>
-              m.de === "voce" ? (
-                <p
-                  key={`${m.id}-${i}`}
-                  className="ml-auto w-fit max-w-[85%] animate-rise rounded-box rounded-br-md bg-ink px-4 py-2.5 text-sm text-ink-text"
-                >
-                  {m.texto}
-                </p>
-              ) : (
-                <div key={`${m.fala.id}-${i}`} className="flex max-w-[92%] animate-rise items-end gap-2">
-                  <MascoteAvatar className="h-8 w-8 shrink-0" />
-                  <div className="rounded-box rounded-bl-md bg-paper px-4 py-2.5 text-sm">
-                    <p>{m.fala.texto}</p>
-                    {m.fala.acao ? (
-                      <Link
-                        href={m.fala.acao.href}
-                        onClick={() => setAberto(false)}
-                        className="mt-2 inline-flex min-h-10 items-center rounded-btn bg-gold px-3 text-sm font-semibold text-ink"
-                      >
-                        {m.fala.acao.label}
-                      </Link>
-                    ) : null}
-                  </div>
-                </div>
-              ),
-            )}
-            <div ref={fimRef} />
-          </div>
-
-          {perguntasRapidas.some((p) => !feitas.has(p.id)) ? (
-            <div className="border-t border-line px-4 py-3">
-              <p className="mb-2 text-xs font-medium uppercase tracking-[0.04em] text-text-soft">Perguntas rápidas</p>
-              <div className="flex flex-wrap gap-2">
-                {perguntasRapidas
-                  .filter((p) => !feitas.has(p.id))
-                  .map((p) => (
-                    <button
-                      key={p.id}
-                      type="button"
-                      onClick={() => perguntar(p.id)}
-                      className="min-h-10 rounded-full border border-gold/50 bg-card px-3 text-left text-sm font-medium hover:bg-gold-wash"
-                    >
-                      {p.pergunta}
-                    </button>
-                  ))}
-              </div>
-            </div>
-          ) : null}
+  return <>
+    <button ref={launcher} type="button" onClick={() => setOpen(true)} className={styles.launcher} aria-label={`Abrir Assistente ORÇAH${thread?.unread ? `, ${thread.unread} mensagens novas` : ""}`} aria-expanded={open} aria-controls="orcah-support-chat" hidden={open}>
+      <MascoteAvatar className="h-full w-full" />
+      {Boolean(thread?.unread) && <span className={styles.badge}>{Math.min(thread!.unread, 99)}</span>}
+    </button>
+    {!open && status === "HUMAN" && Boolean(thread?.unread) && <button type="button" className={styles.notice} onClick={() => setOpen(true)}>{indicator} · Ver conversa</button>}
+    <span className="sr-only" role="status">{indicator}{thread?.unread ? `, ${thread.unread} mensagens novas` : ""}</span>
+    {open && <>
+      <button className={styles.backdrop} type="button" tabIndex={-1} aria-label="Fechar conversa" onClick={() => setOpen(false)} />
+      <section ref={dialog} id="orcah-support-chat" className={styles.drawer} role="dialog" aria-modal="true" aria-labelledby="support-title">
+        <header className={styles.header}>
+          <MascoteAvatar className="h-12 w-12 shrink-0" />
+          <div className={styles.identity}><h2 id="support-title">Assistente ORÇAH</h2><p><span className={styles.dot} data-human={status === "HUMAN"} />{indicator}</p></div>
+          <button ref={close} type="button" onClick={() => setOpen(false)} className={styles.iconButton} aria-label="Fechar assistente">×</button>
+        </header>
+        {!chat.connected && <p className={styles.connection} role="status">Reconectando ao suporte…</p>}
+        <div className={styles.history} role="log" aria-label="Histórico da conversa" aria-live="polite" aria-relevant="additions text">
+          {chat.snapshot?.olderCursor && <button type="button" className={styles.older} disabled={chat.busy} onClick={() => void chat.older()}>Ver mensagens anteriores</button>}
+          {!chat.messages.length && <div className={styles.welcome}><MascoteAvatar className="mx-auto h-20 w-20" /><h3>Como posso ajudar?</h3><p>Tire dúvidas sobre o ORÇAH ou fale com uma pessoa. Sua conversa fica salva aqui.</p></div>}
+          {chat.messages.map(m => m.senderType === "SYSTEM" ? <p key={m.id} className={styles.system}>{m.content}</p> : <div key={m.id} className={styles.message} data-sender={m.senderType}>
+            <span className={styles.sender}>{m.senderType === "USER" ? "Você" : m.senderType === "ASSISTANT" ? "Assistente ORÇAH" : m.senderName}</span>
+            <p>{m.content}</p>
+            <span className={styles.time}>{time(m.createdAt)}{"delivery" in m && m.delivery === "sending" ? " · Enviando…" : ""}</span>
+            {"delivery" in m && m.delivery === "failed" && <button type="button" className={styles.retry} disabled={chat.busy} onClick={() => void chat.send(m.content, m as PendingMessage)}>Não enviada · Tentar novamente</button>}
+          </div>)}
+          <div ref={end} />
         </div>
-      ) : (
-        <button
-          ref={botaoRef}
-          type="button"
-          onClick={abrir}
-          aria-label={novidade ? "Abrir assistente (dica nova)" : "Abrir assistente"}
-          aria-hidden={livre ? undefined : true}
-          tabIndex={livre ? undefined : -1}
-          className={`fixed bottom-[calc(5.25rem+env(safe-area-inset-bottom))] right-4 z-40 h-14 w-14 items-center justify-center rounded-full border-2 border-gold bg-gold-wash shadow-float transition-[opacity,transform] duration-200 hover:scale-105 active:scale-95 md:bottom-6 md:right-6 md:flex ${
-            escondeNoCelular ? "hidden" : "flex"
-          } ${livre ? "" : "pointer-events-none opacity-0"}`}
-        >
-          <MascoteAvatar className="h-full w-full" />
-          {novidade ? (
-            <span className="absolute -right-0.5 -top-0.5 h-4 w-4 rounded-full border-2 border-card bg-no" aria-hidden />
-          ) : null}
-        </button>
-      )}
-    </>
-  );
+        {status === "BOT" && chat.messages.length < 3 && <div className={styles.suggestions}>{suggestions.map(text => <button key={text} type="button" disabled={chat.busy || !thread} onClick={() => void chat.send(text)}>{text}</button>)}</div>}
+        {chat.error && <p className={styles.error} role="alert">{chat.error}</p>}
+        <div className={styles.handoff}>
+          {status === "BOT" || status === "RESOLVED" ? <button type="button" disabled={chat.busy || !thread} onClick={() => void chat.action("escalate")}>Falar com uma pessoa</button> : status === "QUEUED" ? <><span>Você pode continuar usando o ORÇAH.</span><button type="button" disabled={chat.busy} onClick={() => void chat.action("cancel-human")}>Cancelar e voltar ao assistente</button></> : <span>A pessoa do suporte continua nesta conversa.</span>}
+          {status === "RESOLVED" && <button type="button" disabled={chat.busy} onClick={() => void chat.action("return-to-bot")}>Voltar ao assistente</button>}
+        </div>
+        <form className={styles.composer} onSubmit={e => { e.preventDefault(); submit(); }}>
+          <label className="sr-only" htmlFor="support-draft">Sua mensagem</label>
+          <textarea id="support-draft" value={draft} onChange={e => setDraft(e.target.value)} maxLength={MESSAGE_MAX_LENGTH} rows={2} placeholder={status === "RESOLVED" ? "Volte ao assistente para conversar" : "Escreva sua mensagem…"} disabled={status === "RESOLVED" || !thread} onKeyDown={e => { if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) { e.preventDefault(); submit(); } }} />
+          <button type="submit" aria-label="Enviar mensagem" disabled={!draft.trim() || chat.busy || !thread || status === "RESOLVED"}>↑</button>
+          <span className={styles.count}>{draft.length}/{MESSAGE_MAX_LENGTH}</span>
+        </form>
+      </section>
+    </>}
+  </>;
 }
