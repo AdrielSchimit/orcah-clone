@@ -8,7 +8,10 @@ import { uploadImage } from "@/lib/client-image";
 import { instagramHandle } from "@/lib/instagram";
 import { LogoCropper } from "@/components/logo-cropper";
 import buttonStyles from "@/components/home/home-buttons.module.css";
-import { BusinessLocationField, ServiceCitiesPicker, type ServiceCity } from "@/components/business-location-field";
+import { ServiceCitiesPicker, type ServiceCity } from "@/components/business-location-field";
+
+import { CityAutocomplete } from "@/components/city-autocomplete";
+import type { SelectedMunicipio } from "@/lib/municipios";
 
 const inputClass = "w-full rounded-btn border border-line bg-card px-4 py-3 text-base text-text";
 const saveClass =
@@ -304,17 +307,17 @@ export function ContactForm({
   return fieldsOnly ? fields : <form onSubmit={onSubmit}>{fields}</form>;
 }
 
-export function BusinessInformationForm({company,states}:{company:{name:string;description:string|null;openingHours:string|null;stateId:number;cityName:string;servesRegion:boolean;serviceRadiusKm:number|null;serviceCities:ServiceCity[];whatsapp:string;phone:string;instagram:string|null;instagramConfirmed:boolean;facebook:string|null;website:string|null};states:State[]}) {
+export function BusinessInformationForm({company}:{company:{name:string;description:string|null;openingHours:string|null;stateId:number;cityName:string;servesRegion:boolean;serviceRadiusKm:number|null;serviceCities:ServiceCity[];whatsapp:string;phone:string;instagram:string|null;instagramConfirmed:boolean;facebook:string|null;website:string|null;municipio:SelectedMunicipio|null}}) {
   const {saving,saved,error,save}=useSave();
-  const [area,setArea]=useState(company.serviceRadiusKm ? "distance" : company.servesRegion ? "region" : "city");
-  const [baseCity,setBaseCity]=useState(company.cityName);
+  const [selectedCity,setSelectedCity]=useState(company.municipio);
   const [showHours,setShowHours]=useState(Boolean(company.openingHours));
   const [specificCities,setSpecificCities]=useState(company.serviceCities.length>0);
   const [cities,setCities]=useState(company.serviceCities);
   async function onSubmit(event:FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!selectedCity) return;
     const form=new FormData(event.currentTarget);
-    await save({name:form.get("name"),description:form.get("description"),openingHours:showHours ? form.get("openingHours") : "",serviceCityIds:specificCities ? cities.map(city=>city.id) : [],stateId:form.get("stateId"),cityName:form.get("cityName"),servesRegion:area!=="city",serviceRadiusKm:area==="distance" ? form.get("serviceRadiusKm") : null,whatsapp:form.get("whatsapp"),phone:form.get("phone"),instagram:form.get("instagram"),instagramConfirmed:form.get("instagramConfirmed")==="true",facebook:form.get("facebook"),website:form.get("website")});
+    await save({name:form.get("name"),description:form.get("description"),openingHours:showHours ? form.get("openingHours") : "",serviceCityIds:specificCities ? cities.filter(city=>!city.ibge).map(city=>city.id) : [],serviceMunicipios:specificCities ? cities.filter(city=>city.ibge).map(city=>city.ibge) : [],cityIbge:selectedCity?.ibge,servesRegion:false,serviceRadiusKm:null,whatsapp:form.get("whatsapp"),phone:form.get("phone"),instagram:form.get("instagram"),instagramConfirmed:form.get("instagramConfirmed")==="true",facebook:form.get("facebook"),website:form.get("website")});
   }
   const heading="mb-3 border-t border-line pt-4 text-base font-semibold text-text";
   return <form onSubmit={onSubmit} className="flex flex-col gap-3"><fieldset disabled={saving} className="contents">
@@ -322,10 +325,8 @@ export function BusinessInformationForm({company,states}:{company:{name:string;d
     <Field label="Nome do negócio"><input name="name" required maxLength={160} defaultValue={company.name} className={inputClass}/></Field>
     <Field label="Descrição do negócio"><textarea name="description" rows={3} maxLength={600} defaultValue={company.description ?? ""} placeholder="Conte em poucas palavras o que você faz e seu diferencial." className={inputClass}/></Field>
     <div><div className="flex items-center justify-between gap-2"><span className="text-sm font-medium">Horário de atendimento <span className="font-normal text-text-soft">(opcional)</span></span><select aria-label="Adicionar horário de atendimento" value={showHours ? "yes" : "no"} onChange={event=>setShowHours(event.target.value==="yes")} className="rounded-lg border border-line bg-card px-2 py-1.5 text-sm"><option value="no">Não informar</option><option value="yes">Adicionar</option></select></div>{showHours && <input aria-label="Horário de atendimento" name="openingHours" defaultValue={company.openingHours ?? ""} placeholder="Seg a sáb, 8h às 18h" className={`${inputClass} mt-2`}/>}</div>
-    <section className="mt-2"><h3 className={heading}>Área de atendimento</h3><BusinessLocationField cityName={company.cityName} stateId={company.stateId} states={states} onCityChange={setBaseCity} className={inputClass}/>
-      <div role="group" aria-label="Área de atendimento" className="mt-3 grid grid-cols-3 gap-2">{[["city","Minha cidade"],["region","Cidade e região"],["distance","Por distância"]].map(([value,label])=><button key={value} type="button" aria-pressed={area===value} onClick={()=>{setArea(value);if(value!=="city") setSpecificCities(false);}} className={`min-h-12 rounded-xl border px-2 py-2 text-sm leading-tight ${area===value ? "border-gold bg-gold-wash font-medium text-ink" : "border-line bg-card text-text-soft"}`}>{label}</button>)}</div>
-      {area==="distance" && <label className="mt-3 flex flex-wrap items-center gap-2 text-sm">Até<input aria-label="Raio de atendimento em km" name="serviceRadiusKm" type="number" required min={1} max={500} defaultValue={company.serviceRadiusKm ?? 40} className={`${inputClass} max-w-24`}/>km de {baseCity || "sua cidade"}</label>}
-      <button type="button" aria-expanded={specificCities} onClick={()=>{setSpecificCities(!specificCities);setArea("city");}} className="mt-2 min-h-9 text-sm font-medium text-gold-deep">{specificCities ? "− Ocultar cidades específicas" : "+ Adicionar cidades onde trabalho"}</button>
+    <section className="mt-2"><h3 className={heading}>Área de atendimento</h3><CityAutocomplete initialValue={company.municipio} onChange={setSelectedCity} className={inputClass}/><p className="mt-2 text-sm text-text-soft">Atendimento na cidade selecionada. Adicione outras cidades, se necessário.</p>
+      <button type="button" aria-expanded={specificCities} onClick={()=>setSpecificCities(!specificCities)} className="mt-2 min-h-9 text-sm font-medium text-gold-deep">{specificCities ? "− Ocultar cidades específicas" : "+ Adicionar cidades onde trabalho"}</button>
       {specificCities && <ServiceCitiesPicker cities={cities} onChange={setCities} className={inputClass}/>}
     </section>
     <section className="mt-2"><h3 className={heading}>Contato</h3><ContactForm company={company} fieldsOnly/></section>

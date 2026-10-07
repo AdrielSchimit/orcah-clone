@@ -27,6 +27,8 @@ import { publicServiceOrder, serializeService } from "@/lib/services";
 import { getSessionUser } from "@/lib/session";
 import { companyPublicUrl } from "@/lib/urls";
 
+import { readMunicipios, resolveSavedMunicipio } from "@/lib/municipios-server";
+
 const GALLERY_LIMIT = 12;
 
 export default async function PaginaPage() {
@@ -36,7 +38,7 @@ export default async function PaginaPage() {
   const serviceTemplate = companyTemplate(company);
   const serviceDefaults = {nameExample:serviceTemplate.suggestions[0]?.name ?? "Nome do serviço que você oferece",units:serviceTemplate.units,defaultUnit:serviceTemplate.defaultUnit,suggestions:serviceTemplate.suggestions.map(item=>item.name)};
 
-  const [photos, services, servicesCount, states, setup] = await Promise.all([
+  const [photos, services, servicesCount, setup] = await Promise.all([
     prisma.companyPhoto.findMany({
       where: { companyId: company.id, active: true },
       orderBy: { sortOrder: "asc" },
@@ -48,7 +50,6 @@ export default async function PaginaPage() {
       take: 60,
     }),
     prisma.service.count({ where: { companyId: company.id, active: true } }),
-    prisma.state.findMany({ orderBy: { uf: "asc" }, select: { id: true, name: true, uf: true } }),
     findActiveAssistedSetup(prisma, company.id),
   ]);
 
@@ -76,7 +77,8 @@ export default async function PaginaPage() {
   const cover = company.coverPath;
   const coverCategory = ramoLabel(company);
   const defaultCoverTheme = resolveServiceCoverTheme(coverCategory);
-  const profileInfo = {name:company.name,description:company.description,openingHours:company.openingHours,servesRegion:company.servesRegion,serviceRadiusKm:company.serviceRadiusKm,serviceCities:selectedCities,stateId:company.stateId,cityName:company.city?.name ?? "",whatsapp:company.whatsapp,phone:company.phone,instagram:company.instagram,instagramConfirmed:company.instagramConfirmed,facebook:company.facebook,website:company.website};
+  const municipio = resolveSavedMunicipio(await readMunicipios(), company.city, company.state.uf);
+  const profileInfo = {municipio,name:company.name,description:company.description,openingHours:company.openingHours,servesRegion:company.servesRegion,serviceRadiusKm:company.serviceRadiusKm,serviceCities:selectedCities,stateId:company.stateId,cityName:company.city?.name ?? "",whatsapp:company.whatsapp,phone:company.phone,instagram:company.instagram,instagramConfirmed:company.instagramConfirmed,facebook:company.facebook,website:company.website};
   return (
     <div className={styles.editor}>
       <header className={styles.toolbar}>
@@ -98,13 +100,13 @@ export default async function PaginaPage() {
             <p className={styles.category}>{ramoLabel(company)}</p>
             <h2>{company.name}</h2>
             <p className={styles.description}>{company.description || "Conte aos clientes o que você faz."}</p>
-            <p className={styles.location}>⌖ {place}{company.serviceRadiusKm ? ` + até ${company.serviceRadiusKm} km` : company.servesRegion ? " e região" : ""}</p>
+            <p className={styles.location}>⌖ {place}</p>
             {company.openingHours ? <p className={styles.location}>{company.openingHours}</p> : null}
           </div>
           <p className={styles.reviews}>Ainda sem avaliações</p>
         </div>
         <EditorModal id="perfil" title="Editar informações" label="✎ Editar informações" className={styles.profileEdit}>
-          <BusinessInformationForm company={profileInfo} states={states} />
+          <BusinessInformationForm company={profileInfo} />
         </EditorModal>
       </section>
       <section className={styles.progress} aria-label="Progresso da página">
@@ -120,14 +122,6 @@ export default async function PaginaPage() {
       <section id="fotos" className={styles.workspace}>
         <div className={styles.sectionHeader}><div><h2>Fotos do trabalho</h2><p>Seus trabalhos, à vista dos clientes</p></div><span className={styles.count}>{photos.length}/{GALLERY_LIMIT}</span></div>
         <GalleryManager photos={photos} limit={GALLERY_LIMIT} />
-      </section>
-      <section className={styles.workspace}>
-        <div className={styles.sectionHeader}><h2>Área de atendimento</h2></div>
-        <p className={styles.areaText}>⌖ {place}{company.serviceRadiusKm ? ` + até ${company.serviceRadiusKm} km` : company.servesRegion ? " e região" : ""}{selectedCities.length>0 ? ` · ${selectedCities.map(city=>`${city.name}, ${city.uf}`).join(" · ")}` : ""}</p>
-      </section>
-      <section className={styles.workspace}>
-        <div className={styles.sectionHeader}><h2>Contato</h2></div>
-        <div className={styles.contactList}>{[["WhatsApp principal",Boolean(company.whatsapp)],["Instagram",Boolean(company.instagram && company.instagramConfirmed)],["Facebook",Boolean(company.facebook)],["Site",Boolean(company.website)]].map(([label,active]) => <span key={String(label)}><strong className={active ? styles.connected : styles.missing}>{active ? "✓" : "+"}</strong> {label}</span>)}</div>
       </section>
       <details className={styles.assisted} open={Boolean(setup)}><summary>{setup ? "Configuração assistida em andamento" : "Precisa de ajuda para montar sua página?"}</summary><AssistedSetupCard priceLabel={ASSISTED_SETUP_PRICE_LABEL} active={setup ? {status:setup.status,statusLabel:ASSISTED_SETUP_STATUS_LABEL[setup.status]} : null} /></details>
     </div>

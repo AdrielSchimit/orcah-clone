@@ -16,7 +16,8 @@
     "typecheck": "tsc --noEmit",
     "db:validate": "prisma validate",
     "db:deploy": "prisma migrate deploy",
-    "db:resolve-baseline": "prisma migrate resolve --applied 20260924194650_baseline_orcah_postgres"
+    "db:resolve-baseline": "prisma migrate resolve --applied 20260924194650_baseline_orcah_postgres",
+    "update:municipios": "tsx scripts/update-municipios.ts"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
