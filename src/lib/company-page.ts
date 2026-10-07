@@ -19,6 +19,8 @@ export type CompanyPagePatch = {
   primaryColor?: string | null;
   secondaryColor?: string | null;
   servesRegion?: boolean;
+  serviceRadiusKm?: number | null;
+  serviceCityIds?: number[];
 };
 
 export type RegionPatch = { stateId: number; cityName: string } | null;
@@ -73,8 +75,21 @@ export function normalizeCompanyPagePatch(body: Record<string, unknown>):
     }
   }
   if ("servesRegion" in body) data.servesRegion = body.servesRegion === true || body.servesRegion === "true";
+  if ("serviceRadiusKm" in body) {
+    const raw=body.serviceRadiusKm;
+    const radius=raw===null || raw==="" ? null : Number(raw);
+    if(radius!==null && (!Number.isInteger(radius) || radius<1 || radius>500)) return {error:"Informe uma distância entre 1 e 500 km."};
+    data.serviceRadiusKm=radius;
+    if(radius!==null) data.servesRegion=true;
+  }
 
   let region: RegionPatch = null;
+  if ("serviceCityIds" in body) {
+    const ids = body.serviceCityIds;
+    if (!Array.isArray(ids) || ids.length > 30 || ids.some(id => !Number.isInteger(id) || id <= 0)) return {error:"Escolha até 30 cidades válidas."};
+    data.serviceCityIds = [...new Set(ids)] as number[];
+    if (data.serviceCityIds.length) { data.servesRegion = false; data.serviceRadiusKm = null; }
+  }
   if ("stateId" in body) {
     const stateId = Number(body.stateId);
     if (!Number.isInteger(stateId) || stateId <= 0) return { error: "Escolha o estado." };
@@ -85,6 +100,8 @@ export function normalizeCompanyPagePatch(body: Record<string, unknown>):
 }
 
 export type CompletenessInput = {
+  coverPath?: string | null;
+  cityId?: number | null;
   logoPath: string | null;
   description: string | null;
   whatsapp: string | null;
@@ -100,12 +117,12 @@ export type CompletenessInput = {
 export function pageCompleteness(input: CompletenessInput) {
   const items = [
     { key: "servicos", label: "Cadastrar um serviço", done: input.servicesCount > 0, href: "/painel/servicos/novo" },
-    { key: "fotos", label: "Adicionar fotos dos seus trabalhos", done: input.photosCount > 0, href: "#fotos" },
+    { key: "fotos", label: "Adicione pelo menos 3 fotos dos seus trabalhos", done: input.photosCount >= 3, href: "#fotos" },
     { key: "descricao", label: "Escrever o que você faz", done: Boolean(input.description?.trim()), href: "#perfil" },
     { key: "logo", label: "Colocar sua logo", done: Boolean(input.logoPath), href: "#logo" },
-    { key: "whatsapp", label: "Conferir o WhatsApp", done: Boolean(input.whatsapp && input.whatsapp.length >= 10), href: "#contato" },
-    { key: "horario", label: "Informar o horário", done: Boolean(input.openingHours?.trim()), href: "#perfil" },
-    { key: "redes", label: "Instagram, Facebook ou site", done: Boolean(input.instagram || input.website || input.facebook), href: "#contato" },
+    { key: "whatsapp", label: "Conferir o WhatsApp", done: Boolean(input.whatsapp && input.whatsapp.length >= 10), href: "#perfil" },
+    { key: "capa", label: "Escolha uma capa para sua página", done: Boolean(input.coverPath), href: "#capa" },
+    { key: "area", label: "Defina sua área de atendimento", done: Boolean(input.cityId), href: "#perfil" },
   ];
   const done = items.filter((item) => item.done).length;
   return { percent: Math.round((done / items.length) * 100), items, missing: items.filter((item) => !item.done) };

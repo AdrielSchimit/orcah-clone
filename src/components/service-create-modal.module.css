@@ -1,0 +1,19 @@
+.modal { position:fixed; inset:0; margin:auto; width:calc(100% - 32px); max-width:560px; max-height:90dvh; overflow:hidden; border:1px solid #e4eaf3; border-radius:24px; background:#fff; color:#080f32; padding:0; text-align:left; box-shadow:0 24px 80px #080f3233; }
+.modal[open] { display:flex; flex-direction:column; }
+.modal::backdrop { background:#080f3266; backdrop-filter:blur(4px); }
+.header { flex-shrink:0; display:flex; align-items:flex-start; justify-content:space-between; gap:16px; padding:18px 26px; border-bottom:1px solid #e4eaf3; background:#fff; }
+.header h2 { margin:5px 0; font-size:23px; font-weight:750; letter-spacing:-.5px; }
+.header p { font-size:13px; color:#536588; line-height:1.5; }
+.header button { flex-shrink:0; width:40px; height:40px; background:#f4f7fb; border-radius:12px; font-size:25px; }
+.body { min-height:0; overflow-y:auto; overscroll-behavior:contain; scrollbar-width:thin; scrollbar-color:#c0c9d8 transparent; padding:18px 26px 20px; }
+.body::-webkit-scrollbar { width:7px; }
+.body::-webkit-scrollbar-track { background:transparent; margin-block:12px; }
+.body::-webkit-scrollbar-thumb { background:#c0c9d8; border:2px solid #f7f9fc; border-radius:10px; }
+.body::-webkit-scrollbar-thumb:hover { background:#8c9bb2; }
+.form { display:flex; flex-direction:column; gap:10px; }
+.form label>span:first-child { display:block; margin-bottom:6px; font-size:13px; font-weight:600; }
+.form input:not([type=file]):not([type=checkbox]),.form textarea,.form select { border-radius:11px; font-size:14px; padding-block:10px; }
+.form [data-service-options] { border-top:1px solid #edf0f5; padding-top:8px; }
+.form [role=switch] { border:0; background:transparent; padding:0; border-radius:0; min-height:44px; }
+.form button[type=submit] { border-radius:12px; background:linear-gradient(#ffd56b,#ffb020); color:#080f32; }
+@media(max-width:600px) { .modal { max-height:94dvh; width:calc(100% - 20px); border-radius:20px; } .header { padding:18px; } .body { padding:18px; } .header h2 { font-size:21px; } .form input:not([type=file]):not([type=checkbox]),.form textarea,.form select { font-size:16px; } }

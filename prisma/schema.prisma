@@ -154,6 +154,8 @@ model Company {
   stateId            Int      @map("state_id")
   cityId             Int?     @map("city_id")
   servesRegion       Boolean  @default(false) @map("serves_region")
+  serviceRadiusKm    Int?     @map("service_radius_km")
+  serviceCityIds     Int[]    @default([]) @map("service_city_ids")
   name               String   @db.VarChar(160)
   tradeName          String?  @map("trade_name") @db.VarChar(160)
   document           String?  @db.VarChar(20)

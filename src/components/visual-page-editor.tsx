@@ -12,6 +12,18 @@ export function EditorModal({id,title,label,className,children}:{id:string;title
   const dialog=useRef<HTMLDialogElement>(null);
   const titleId=useId();
   useEffect(()=>{
+    const element=dialog.current;
+    if(!element) return;
+    let previous:string|null=null;
+    const sync=()=>{
+      if(element.open && previous===null){previous=document.documentElement.style.overflow;document.documentElement.style.overflow="hidden";}
+      else if(!element.open && previous!==null){document.documentElement.style.overflow=previous;previous=null;}
+    };
+    element.addEventListener("toggle",sync);
+    element.addEventListener("close",sync);
+    return ()=>{element.removeEventListener("toggle",sync);element.removeEventListener("close",sync);if(previous!==null) document.documentElement.style.overflow=previous;};
+  },[]);
+  useEffect(()=>{
     const open=()=>{if(window.location.hash === `#${id}` && !dialog.current?.open) dialog.current?.showModal();};
     open(); window.addEventListener("hashchange",open);
     return ()=>window.removeEventListener("hashchange",open);
@@ -19,7 +31,7 @@ export function EditorModal({id,title,label,className,children}:{id:string;title
   const close=()=>{dialog.current?.close();};
   return <>
     <button type="button" className={className} aria-haspopup="dialog" onClick={()=>dialog.current?.showModal()}>{label}</button>
-    <dialog ref={dialog} className={styles.modal} aria-labelledby={titleId} onClose={()=>{if(window.location.hash === `#${id}`) window.history.replaceState(null,"",window.location.pathname+window.location.search);}} onClick={event=>{if(event.target===event.currentTarget) close();}}>
+    <dialog ref={dialog} className={styles.modal} aria-labelledby={titleId} onClose={()=>{if(window.location.hash === `#${id}`) window.history.replaceState(null,"",window.location.pathname+window.location.search);}} onClick={event=>{if(event.target===event.currentTarget){const rect=event.currentTarget.getBoundingClientRect();if(event.clientX<rect.left || event.clientX>rect.right || event.clientY<rect.top || event.clientY>rect.bottom) close();}}}>
       <div className={styles.modalHeader}><h2 id={titleId}>{title}</h2><button type="button" onClick={close} aria-label="Fechar edição">×</button></div>
       <div className={styles.modalBody}>{children}</div>
     </dialog>

@@ -23,6 +23,10 @@ export async function PATCH(request: Request) {
   }
 
   const data: Record<string, unknown> = { ...normalized.data };
+  if (normalized.data.serviceCityIds?.length) {
+    const count = await prisma.city.count({where:{id:{in:normalized.data.serviceCityIds}}});
+    if (count !== normalized.data.serviceCityIds.length) return NextResponse.json({error:"Uma das cidades selecionadas não está disponível."},{status:400});
+  }
   if (normalized.region) {
     const state = await prisma.state.findUnique({ where: { id: normalized.region.stateId }, select: { id: true } });
     if (!state) return NextResponse.json({ error: "Estado inválido." }, { status: 400 });

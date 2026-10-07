@@ -22,6 +22,18 @@ beforeEach(() => {
 });
 
 describe("serviços", () => {
+  it("limita os destaques por empresa e permite trocar o destaque", async () => {
+    for(const name of ["Primeiro","Segundo","Terceiro"]) await saveServiceByName(db,EMPRESA_A,{name,featured:true});
+    assert.ok("error" in await saveServiceByName(db,EMPRESA_A,{name:"Quarto",featured:true}));
+    const fourth=await saveServiceByName(db,EMPRESA_A,{name:"Quarto"});
+    assert.ok("service" in fourth);
+    assert.ok("error" in await updateCompanyService(db,EMPRESA_A,fourth.service.id,{featured:true}));
+    assert.ok("service" in await updateCompanyService(db,EMPRESA_A,Number(service.rows[0].id),{featured:true,description:"Atualizado"}));
+    assert.ok("service" in await saveServiceByName(db,EMPRESA_B,{name:"Outra empresa",featured:true}));
+    await updateCompanyService(db,EMPRESA_A,Number(service.rows[0].id),{featured:false});
+    assert.ok("service" in await updateCompanyService(db,EMPRESA_A,fourth.service.id,{featured:true}));
+    assert.equal(service.rows.filter(row=>row.companyId===EMPRESA_A && row.featured).length,3);
+  });
   it("cria com os campos da página e preço escondido por padrão", async () => {
     const result = await saveServiceByName(db, EMPRESA_A, {
       name: "  Pintura   residencial ",

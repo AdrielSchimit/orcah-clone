@@ -3,6 +3,19 @@ import { moneyString, parseMoney } from "@/lib/money";
 
 /** Só o que o catálogo de serviços usa do Prisma; nos testes entra um banco em memória. */
 export type ServiceDb = Pick<PrismaClient, "service" | "$transaction">;
+export const SERVICE_FEATURED_LIMIT = 3;
+const featuredLimitError = "Você pode destacar até 3 serviços. Remova um destaque para escolher outro.";
+
+async function serviceTransaction<T>(db: ServiceDb, action: (tx: Pick<ServiceDb,"service">) => Promise<T>): Promise<T> {
+  for (let attempt = 0; ; attempt++) {
+    try { return await db.$transaction(tx => action(tx), { isolationLevel: "Serializable" }); }
+    catch (error) { if (attempt >= 2 || !error || typeof error !== "object" || !("code" in error) || error.code !== "P2034") throw error; }
+  }
+}
+
+async function canFeature(db: Pick<ServiceDb,"service">, companyId: number, id?: number) {
+  return await db.service.count({where:{companyId,featured:true,...(id ? {id:{not:id}} : {})}}) < SERVICE_FEATURED_LIMIT;
+}
 
 export type ServiceInput = {
   name?: unknown;
@@ -95,17 +108,21 @@ export function serializeService(service: {
   };
 }
 
-export async function findCompanyService(db: ServiceDb, companyId: number, id: number) {
+export async function findCompanyService(db: Pick<ServiceDb,"service">, companyId: number, id: number) {
   if (!Number.isInteger(id) || id <= 0) return null;
   return db.service.findFirst({ where: { id, companyId } });
 }
 
 /** Cria ou atualiza pelo nome (sem duplicar "Pintura" duas vezes na mesma empresa). */
 export async function saveServiceByName(db: ServiceDb, companyId: number, input: ServiceInput) {
+  return serviceTransaction(db, tx => saveServiceByNameInTransaction(tx,companyId,input));
+}
+async function saveServiceByNameInTransaction(db: Pick<ServiceDb,"service">, companyId: number, input: ServiceInput) {
   const normalized = normalizeServiceInput(input, { requireName: true });
   if ("error" in normalized) return normalized;
   const { data } = normalized;
   const existing = await db.service.findFirst({ where: { companyId, name: data.name } });
+  if(data.featured === true && !await canFeature(db,companyId,existing?.id)) return {error:featuredLimitError};
   if (existing) {
     const service = await db.service.update({ where: { id: existing.id }, data: { ...data, active: data.active ?? true } });
     return { service, created: false };
@@ -129,10 +146,14 @@ export async function saveServiceByName(db: ServiceDb, companyId: number, input:
 }
 
 export async function updateCompanyService(db: ServiceDb, companyId: number, id: number, input: ServiceInput) {
+  return serviceTransaction(db, tx => updateCompanyServiceInTransaction(tx,companyId,id,input));
+}
+async function updateCompanyServiceInTransaction(db: Pick<ServiceDb,"service">, companyId: number, id: number, input: ServiceInput) {
   const existing = await findCompanyService(db, companyId, id);
   if (!existing) return { notFound: true as const };
   const normalized = normalizeServiceInput(input);
   if ("error" in normalized) return normalized;
+  if(normalized.data.featured === true && !await canFeature(db,companyId,id)) return {error:featuredLimitError};
   if (normalized.data.name && normalized.data.name !== existing.name) {
     const clash = await db.service.findFirst({ where: { companyId, name: normalized.data.name } });
     if (clash && clash.id !== existing.id) return { error: "Já existe um serviço com esse nome." };

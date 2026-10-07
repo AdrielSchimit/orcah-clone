@@ -1,13 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { PhoneInput } from "@/components/phone-input";
 import { Toggle } from "@/components/toggle";
 import { uploadImage } from "@/lib/client-image";
 import { instagramHandle } from "@/lib/instagram";
 import { LogoCropper } from "@/components/logo-cropper";
 import buttonStyles from "@/components/home/home-buttons.module.css";
+import { BusinessLocationField, ServiceCitiesPicker, type ServiceCity } from "@/components/business-location-field";
 
 const inputClass = "w-full rounded-btn border border-line bg-card px-4 py-3 text-base text-text";
 const saveClass =
@@ -66,6 +67,26 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
 
 export function ShareBar({ url, name }: { url: string; name: string }) {
   const [copied, setCopied] = useState(false);
+  const menuRef = useRef<HTMLDetailsElement>(null);
+  useEffect(() => {
+    const closeOutside = (event: Event) => {
+      if (event.target instanceof Node && !menuRef.current?.contains(event.target) && menuRef.current) menuRef.current.open = false;
+    };
+    const closeEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && menuRef.current?.open) {
+        menuRef.current.open = false;
+        menuRef.current.querySelector("summary")?.focus();
+      }
+    };
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("focusin", closeOutside);
+    document.addEventListener("keydown", closeEscape);
+    return () => {
+      document.removeEventListener("pointerdown", closeOutside);
+      document.removeEventListener("focusin", closeOutside);
+      document.removeEventListener("keydown", closeEscape);
+    };
+  }, []);
 
   async function copy() {
     try {
@@ -91,20 +112,21 @@ export function ShareBar({ url, name }: { url: string; name: string }) {
   }
 
   return (
-    <div className="grid grid-cols-3 gap-2">
-      <button type="button" onClick={() => void copy()} className={`${buttonStyles.secondary} min-h-10 rounded-btn px-3 text-sm font-medium`}>
-        {copied ? "Copiado ✓" : "Copiar link"}
-      </button>
-      <button type="button" onClick={() => void share()} className={`${buttonStyles.secondary} min-h-10 rounded-btn px-3 text-sm font-medium`}>
-        Compartilhar
-      </button>
+    <div className="grid grid-cols-2 gap-2">
+      <details ref={menuRef} className="relative">
+        <summary className={`${buttonStyles.secondary} flex min-h-10 cursor-pointer list-none items-center justify-center rounded-btn px-3 text-sm font-medium`}>Compartilhar</summary>
+        <div className="absolute right-0 top-full z-20 mt-2 w-48 rounded-xl border border-line bg-card p-2 shadow-lg">
+          <button type="button" onClick={() => void copy()} className="min-h-11 w-full rounded-lg px-3 text-left text-sm hover:bg-paper">{copied ? "Copiado ✓" : "Copiar link"}</button>
+          <button type="button" onClick={() => void share()} className="min-h-11 w-full rounded-lg px-3 text-left text-sm hover:bg-paper">Compartilhar página</button>
+        </div>
+      </details>
       <a
         href={url}
         target="_blank"
         rel="noreferrer"
         className={`${buttonStyles.secondary} flex min-h-10 items-center justify-center rounded-btn px-3 text-center text-sm font-medium`}
       >
-        Visualizar
+        Visualizar página ↗
       </a>
     </div>
   );
@@ -117,6 +139,7 @@ type State = { id: number; name: string; uf: string };
 export function ProfileForm({
   company,
   states,
+  areaOnly = false,
 }: {
   company: {
     name: string;
@@ -128,6 +151,7 @@ export function ProfileForm({
     ramo: string;
   };
   states: State[];
+  areaOnly?: boolean;
 }) {
   const { saving, saved, error, save } = useSave();
   const [servesRegion, setServesRegion] = useState(company.servesRegion);
@@ -136,21 +160,18 @@ export function ProfileForm({
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     await save({
-      name: form.get("name"),
-      description: form.get("description"),
-      openingHours: form.get("openingHours"),
-      stateId: form.get("stateId"),
-      cityName: form.get("cityName"),
-      servesRegion,
+      ...(areaOnly ? { stateId: form.get("stateId"), cityName: form.get("cityName"), servesRegion } : {
+        name: form.get("name"), description: form.get("description"), openingHours: form.get("openingHours"),
+      }),
     });
   }
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-3">
-      <Field label="Nome do negócio">
+      {!areaOnly && <><Field label="Nome do negócio">
         <input name="name" required defaultValue={company.name} className={inputClass} />
       </Field>
-      <Field label="O que você faz" hint={`Ramo: ${company.ramo}. Uma ou duas frases já bastam.`}>
+      <Field label="Descrição do negócio">
         <textarea
           name="description"
           rows={4}
@@ -160,7 +181,10 @@ export function ProfileForm({
           className={inputClass}
         />
       </Field>
-      <div className="grid grid-cols-[6.5rem_1fr] gap-3">
+      <Field label="Horário de atendimento">
+        <input name="openingHours" defaultValue={company.openingHours ?? ""} placeholder="Seg a sáb, 8h às 18h" className={inputClass} />
+      </Field></>}
+      {areaOnly && <><div className="grid grid-cols-[6.5rem_1fr] gap-3">
         <Field label="Estado">
           <select name="stateId" defaultValue={company.stateId} className={inputClass}>
             {states.map((state) => (
@@ -175,12 +199,10 @@ export function ProfileForm({
         </Field>
       </div>
       <Toggle label="Atendo cidades vizinhas" hint="Mostra “e região” na sua página." checked={servesRegion} onChange={setServesRegion} />
-      <Field label="Horário de atendimento">
-        <input name="openingHours" defaultValue={company.openingHours ?? ""} placeholder="Seg a sáb, 8h às 18h" className={inputClass} />
-      </Field>
+      </>}
       <Feedback saved={saved} error={error} />
       <button type="submit" disabled={saving} className={saveClass}>
-        {saving ? "Salvando…" : "Salvar perfil"}
+        {saving ? "Salvando…" : areaOnly ? "Salvar área de atendimento" : "Salvar informações"}
       </button>
     </form>
   );
@@ -190,6 +212,7 @@ export function ProfileForm({
 
 export function ContactForm({
   company,
+  fieldsOnly = false,
 }: {
   company: {
     whatsapp: string;
@@ -199,11 +222,16 @@ export function ContactForm({
     facebook: string | null;
     website: string | null;
   };
+  fieldsOnly?: boolean;
 }) {
   const { saving, saved, error, save } = useSave();
   const savedHandle = instagramHandle(company.instagram);
   const [instagram, setInstagram] = useState(company.instagram ?? "");
   const [confirmed, setConfirmed] = useState(company.instagramConfirmed && Boolean(savedHandle));
+  const [whatsapp,setWhatsapp]=useState(company.whatsapp);
+  const [samePhone,setSamePhone]=useState(company.phone.replace(/\D/g,"")===company.whatsapp.replace(/\D/g,""));
+  const [showFacebook,setShowFacebook]=useState(Boolean(company.facebook));
+  const [showWebsite,setShowWebsite]=useState(Boolean(company.website));
   const handle = instagramHandle(instagram);
 
   function onInstagramChange(value: string) {
@@ -224,15 +252,16 @@ export function ContactForm({
     });
   }
 
-  return (
-    <form onSubmit={onSubmit} className="flex flex-col gap-3">
-      <Field label="WhatsApp" hint="O botão verde da sua página chama esse número.">
-        <PhoneInput name="whatsapp" required defaultValue={company.whatsapp} placeholder="(49) 9 9999-0000" className={inputClass} />
+  const fields = (
+    <div className="flex flex-col gap-3">
+      <Field label="WhatsApp" hint={fieldsOnly ? undefined : "O botão verde da sua página chama esse número."}>
+        <PhoneInput name="whatsapp" required defaultValue={company.whatsapp} onValueChange={setWhatsapp} placeholder="(49) 9 9999-0000" className={inputClass} />
       </Field>
-      <Field label="Telefone (opcional)">
+      {fieldsOnly && <label className="flex min-h-9 items-center gap-2 text-sm"><input type="checkbox" checked={samePhone} onChange={event=>setSamePhone(event.target.checked)} className="h-4 w-4 accent-[#ffb020]"/>Este número também recebe ligações</label>}
+      {fieldsOnly && samePhone ? <input type="hidden" name="phone" value={whatsapp}/> : <Field label={fieldsOnly ? "Telefone para ligações" : "Telefone (opcional)"}>
         <PhoneInput name="phone" defaultValue={company.phone} placeholder="(49) 3333-0000" className={inputClass} />
-      </Field>
-      <Field label="Instagram" hint="O @ da conta. Não precisa ser igual ao nome da página.">
+      </Field>}
+      <Field label={fieldsOnly ? "Instagram (opcional)" : "Instagram"} hint={fieldsOnly ? undefined : "O @ da conta. Não precisa ser igual ao nome da página."}>
         <input
           name="instagram"
           value={instagram}
@@ -245,7 +274,7 @@ export function ContactForm({
         />
       </Field>
       {handle ? (
-        <label className="flex items-start gap-3 rounded-btn border border-line bg-paper px-3 py-3 text-sm leading-snug">
+        <label className={fieldsOnly ? "flex items-start gap-2 py-1 text-sm leading-snug" : "flex items-start gap-3 rounded-btn border border-line bg-paper px-3 py-3 text-sm leading-snug"}>
           <input
             type="checkbox"
             name="instagramConfirmed"
@@ -255,23 +284,53 @@ export function ContactForm({
             className="mt-0.5 h-4 w-4 shrink-0"
           />
           <span>
-            Confirmo que <strong>@{handle}</strong> é o Instagram da minha empresa.
+            {fieldsOnly ? "Este Instagram representa meu negócio" : <>Confirmo que <strong>@{handle}</strong> é o Instagram da minha empresa.</>}
           </span>
         </label>
       ) : null}
-      <Field label="Facebook">
+      {!fieldsOnly || showFacebook ? <Field label="Facebook (opcional)">
         <input name="facebook" defaultValue={company.facebook ?? ""} placeholder="facebook.com/seunegocio" className={inputClass} />
-      </Field>
-      <Field label="Site">
+      </Field> : <><input type="hidden" name="facebook" value=""/><button type="button" className="min-h-10 text-left text-sm font-medium text-gold-deep" onClick={()=>setShowFacebook(true)}>+ Adicionar Facebook</button></>}
+      {!fieldsOnly || showWebsite ? <Field label="Site (opcional)">
         <input name="website" inputMode="url" defaultValue={company.website ?? ""} placeholder="seunegocio.com.br" className={inputClass} />
-      </Field>
-      <p className="text-xs text-text-soft">Só aparece na página o que você preencher. E-mail e documento nunca aparecem.</p>
+      </Field> : <><input type="hidden" name="website" value=""/><button type="button" className="min-h-10 text-left text-sm font-medium text-gold-deep" onClick={()=>setShowWebsite(true)}>+ Adicionar site</button></>}
+      {!fieldsOnly && <><p className="text-xs text-text-soft">Só aparece na página o que você preencher. E-mail e documento nunca aparecem.</p>
       <Feedback saved={saved} error={error} />
       <button type="submit" disabled={saving} className={saveClass}>
         {saving ? "Salvando…" : "Salvar contato"}
-      </button>
-    </form>
+      </button></>}
+    </div>
   );
+  return fieldsOnly ? fields : <form onSubmit={onSubmit}>{fields}</form>;
+}
+
+export function BusinessInformationForm({company,states}:{company:{name:string;description:string|null;openingHours:string|null;stateId:number;cityName:string;servesRegion:boolean;serviceRadiusKm:number|null;serviceCities:ServiceCity[];whatsapp:string;phone:string;instagram:string|null;instagramConfirmed:boolean;facebook:string|null;website:string|null};states:State[]}) {
+  const {saving,saved,error,save}=useSave();
+  const [area,setArea]=useState(company.serviceRadiusKm ? "distance" : company.servesRegion ? "region" : "city");
+  const [baseCity,setBaseCity]=useState(company.cityName);
+  const [showHours,setShowHours]=useState(Boolean(company.openingHours));
+  const [specificCities,setSpecificCities]=useState(company.serviceCities.length>0);
+  const [cities,setCities]=useState(company.serviceCities);
+  async function onSubmit(event:FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form=new FormData(event.currentTarget);
+    await save({name:form.get("name"),description:form.get("description"),openingHours:showHours ? form.get("openingHours") : "",serviceCityIds:specificCities ? cities.map(city=>city.id) : [],stateId:form.get("stateId"),cityName:form.get("cityName"),servesRegion:area!=="city",serviceRadiusKm:area==="distance" ? form.get("serviceRadiusKm") : null,whatsapp:form.get("whatsapp"),phone:form.get("phone"),instagram:form.get("instagram"),instagramConfirmed:form.get("instagramConfirmed")==="true",facebook:form.get("facebook"),website:form.get("website")});
+  }
+  const heading="mb-3 border-t border-line pt-4 text-base font-semibold text-text";
+  return <form onSubmit={onSubmit} className="flex flex-col gap-3"><fieldset disabled={saving} className="contents">
+    <h3 className="text-base font-semibold text-text">Informações do negócio</h3>
+    <Field label="Nome do negócio"><input name="name" required maxLength={160} defaultValue={company.name} className={inputClass}/></Field>
+    <Field label="Descrição do negócio"><textarea name="description" rows={3} maxLength={600} defaultValue={company.description ?? ""} placeholder="Conte em poucas palavras o que você faz e seu diferencial." className={inputClass}/></Field>
+    <div><div className="flex items-center justify-between gap-2"><span className="text-sm font-medium">Horário de atendimento <span className="font-normal text-text-soft">(opcional)</span></span><select aria-label="Adicionar horário de atendimento" value={showHours ? "yes" : "no"} onChange={event=>setShowHours(event.target.value==="yes")} className="rounded-lg border border-line bg-card px-2 py-1.5 text-sm"><option value="no">Não informar</option><option value="yes">Adicionar</option></select></div>{showHours && <input aria-label="Horário de atendimento" name="openingHours" defaultValue={company.openingHours ?? ""} placeholder="Seg a sáb, 8h às 18h" className={`${inputClass} mt-2`}/>}</div>
+    <section className="mt-2"><h3 className={heading}>Área de atendimento</h3><BusinessLocationField cityName={company.cityName} stateId={company.stateId} states={states} onCityChange={setBaseCity} className={inputClass}/>
+      <div role="group" aria-label="Área de atendimento" className="mt-3 grid grid-cols-3 gap-2">{[["city","Minha cidade"],["region","Cidade e região"],["distance","Por distância"]].map(([value,label])=><button key={value} type="button" aria-pressed={area===value} onClick={()=>{setArea(value);if(value!=="city") setSpecificCities(false);}} className={`min-h-12 rounded-xl border px-2 py-2 text-sm leading-tight ${area===value ? "border-gold bg-gold-wash font-medium text-ink" : "border-line bg-card text-text-soft"}`}>{label}</button>)}</div>
+      {area==="distance" && <label className="mt-3 flex flex-wrap items-center gap-2 text-sm">Até<input aria-label="Raio de atendimento em km" name="serviceRadiusKm" type="number" required min={1} max={500} defaultValue={company.serviceRadiusKm ?? 40} className={`${inputClass} max-w-24`}/>km de {baseCity || "sua cidade"}</label>}
+      <button type="button" aria-expanded={specificCities} onClick={()=>{setSpecificCities(!specificCities);setArea("city");}} className="mt-2 min-h-9 text-sm font-medium text-gold-deep">{specificCities ? "− Ocultar cidades específicas" : "+ Adicionar cidades onde trabalho"}</button>
+      {specificCities && <ServiceCitiesPicker cities={cities} onChange={setCities} className={inputClass}/>}
+    </section>
+    <section className="mt-2"><h3 className={heading}>Contato</h3><ContactForm company={company} fieldsOnly/></section>
+    <Feedback saved={saved} error={error}/><button type="submit" disabled={saving} className={saveClass}>{saving ? "Salvando…" : "Salvar informações"}</button>
+  </fieldset></form>;
 }
 
 // ---------- aparência ----------
@@ -460,7 +519,7 @@ export function GalleryManager({ photos, limit }: { photos: Photo[]; limit: numb
             {uploading ? "Enviando foto…" : "+ Adicionar fotos"}
           </button>
           <p className="text-xs text-text-soft">
-            {photos.length} de {limit} fotos. A gente ajusta o tamanho para carregar rápido.
+            Adicione até {limit} fotos dos seus melhores trabalhos. Nós otimizamos as imagens automaticamente.
           </p>
         </>
       )}

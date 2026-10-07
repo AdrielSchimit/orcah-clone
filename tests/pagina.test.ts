@@ -186,6 +186,8 @@ describe("editor da página", () => {
     assert.equal(empty.missing[0].key, "servicos");
 
     const full = pageCompleteness({
+      coverPath: "capa",
+      cityId: 1,
       logoPath: "x",
       description: "Pinto casas",
       whatsapp: "16999990000",
@@ -194,10 +196,25 @@ describe("editor da página", () => {
       website: null,
       facebook: null,
       servicesCount: 3,
-      photosCount: 2,
+      photosCount: 3,
     });
     assert.equal(full.percent, 100);
     assert.equal(full.missing.length, 0);
+    const optional = pageCompleteness({logoPath:"logo",coverPath:"capa",cityId:1,description:"Pinto casas",whatsapp:"16999990000",openingHours:null,instagram:null,website:null,facebook:null,servicesCount:1,photosCount:3});
+    assert.equal(optional.percent,100);
+    const fewPhotos = pageCompleteness({logoPath:"logo",coverPath:"capa",cityId:1,description:"Pinto casas",whatsapp:"16999990000",openingHours:null,instagram:null,website:null,facebook:null,servicesCount:1,photosCount:2});
+    assert.deepEqual(fewPhotos.missing.map(item=>item.key),["fotos"]);
+  });
+  it("salva a distância de atendimento e recusa valores inválidos",()=>{
+    const radius=normalizeCompanyPagePatch({serviceRadiusKm:40});
+    assert.ok("data" in radius);
+    assert.equal(radius.data.serviceRadiusKm,40);
+    assert.equal(radius.data.servesRegion,true);
+    for(const value of [0,501,2.5,"abc"]) assert.ok("error" in normalizeCompanyPagePatch({serviceRadiusKm:value}));
+    const city=normalizeCompanyPagePatch({serviceRadiusKm:null,servesRegion:false});
+    assert.ok("data" in city);
+    assert.equal(city.data.serviceRadiusKm,null);
+    assert.equal(city.data.servesRegion,false);
   });
 });
 

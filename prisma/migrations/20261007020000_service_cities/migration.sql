@@ -1,0 +1,1 @@
+ALTER TABLE "companies" ADD COLUMN "service_city_ids" INTEGER[] NOT NULL DEFAULT ARRAY[]::INTEGER[];

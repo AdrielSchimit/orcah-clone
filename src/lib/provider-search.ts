@@ -133,7 +133,7 @@ export async function searchPublicProviders(db: SearchDb, input: SearchProviders
   }
 
   if (searchCity) {
-    where.stateId = searchCity.stateId;
+    where.AND = [{ OR: [{stateId:searchCity.stateId},{serviceCityIds:{has:searchCity.id}}] }];
   }
 
   const companies = await db.company.findMany({
@@ -146,6 +146,7 @@ export async function searchPublicProviders(db: SearchDb, input: SearchProviders
       logoPath: true,
       coverPath: true,
       servesRegion: true,
+      serviceCityIds: true,
       cityId: true,
       stateId: true,
       customRamoName: true,
@@ -223,6 +224,7 @@ export async function getPublicProviderBrief(db: SearchDb, slug: string, searchC
       tradeName: true,
       logoPath: true,
       servesRegion: true,
+      serviceCityIds: true,
       cityId: true,
       stateId: true,
       customRamoName: true,

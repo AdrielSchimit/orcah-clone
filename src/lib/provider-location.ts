@@ -122,11 +122,11 @@ export async function resolveCityFreeText(db: Pick<PrismaClient, "city" | "state
 }
 
 export function companyServesSearchCity(
-  company: { cityId: number | null; stateId: number; servesRegion: boolean },
+  company: { cityId: number | null; stateId: number; servesRegion: boolean; serviceCityIds?: number[] },
   searchCity: ResolvedSearchCity | null,
 ) {
   if (!searchCity) return true;
-  if (company.cityId === searchCity.id) return true;
+  if (company.cityId === searchCity.id || company.serviceCityIds?.includes(searchCity.id)) return true;
   if (company.servesRegion && company.stateId === searchCity.stateId) return true;
   return false;
 }
