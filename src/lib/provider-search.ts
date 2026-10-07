@@ -133,16 +133,18 @@ export async function searchPublicProviders(db: SearchDb, input: SearchProviders
   }
 
   if (searchCity) {
-    const locationFilters: Prisma.CompanyWhereInput[] = [
-      { servesRegion: true, stateId: searchCity.stateId },
-    ];
     if (searchCity.id > 0) {
-      locationFilters.push(
-        { cityId: searchCity.id },
-        { serviceCityIds: { has: searchCity.id } },
-      );
+      where.AND = [{
+        OR: [
+          { cityId: searchCity.id },
+          { serviceCityIds: { has: searchCity.id } },
+        ],
+      }];
+    } else {
+      // Município nacional válido, mas ainda não materializado no banco.
+      // Sem cityId não pode existir cidade principal nem serviceCityIds apontando para ele.
+      where.id = -1;
     }
-    where.AND = [{ OR: locationFilters }];
   }
 
   const companies = await db.company.findMany({
