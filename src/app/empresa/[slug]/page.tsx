@@ -12,6 +12,7 @@ import { formatBRL } from "@/lib/money";
 import { getPublicCompanyPage, readableTextColor } from "@/lib/public-page";
 import { appUrl } from "@/lib/urls";
 import { whatsappHref } from "@/lib/whatsapp";
+import { resolveServiceCoverTheme } from "@/lib/service-cover-themes";
 
 const loadPage = cache((slug: string) => getPublicCompanyPage(prisma, slug));
 
@@ -65,8 +66,10 @@ export default async function EmpresaPublicaPage({
   const insta = instagramUrl(page.instagram);
   const face = facebookUrl(page.facebook);
   const site = websiteUrl(page.website);
-  const heroBg = page.primaryColor ?? "#0b1120";
-  const heroText = readableTextColor(heroBg);
+  const heroBg = page.coverPath
+    ? page.primaryColor ?? "#151f38"
+    : resolveServiceCoverTheme(page.coverCategory).background;
+  const heroText = page.coverPath ? "#ffffff" : readableTextColor(heroBg);
   const accent = "#ffb020";
   const accentText = readableTextColor(accent);
   const categories = [...new Set(page.services.map((service) => service.category).filter(Boolean))];
@@ -75,17 +78,14 @@ export default async function EmpresaPublicaPage({
     <div className="public-company-page min-h-full w-full flex-1 bg-paper text-text">
       <PageViewTracker slug={page.slug} />
 
-      <header style={{ backgroundColor: heroBg, color: heroText }} className="relative overflow-hidden">
+      <header style={{ backgroundColor: heroBg, color: heroText }} className="provider-hero relative overflow-hidden">
         {page.coverPath ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={page.coverPath} alt="" className="h-48 w-full bg-[#151f38] object-contain sm:h-64" />
-        ) : <ServiceCoverPlaceholder category={page.coverCategory} />}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full opacity-25 blur-3xl"
-          style={{ backgroundColor: accent }}
-        />
-        <div className="relative mx-auto max-w-3xl px-5 pb-10 pt-12 sm:pt-16">
+          <img src={page.coverPath} alt="" className="provider-cover" />
+         ) : <div className="provider-cover"><ServiceCoverPlaceholder category={page.coverCategory} /></div>}
+        {page.coverPath ? <div className="provider-cover-shade" aria-hidden /> : null}
+        <div className="provider-profile">
+          <div className="provider-avatar">
           {page.logoPath ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -101,14 +101,18 @@ export default async function EmpresaPublicaPage({
               {page.name.slice(0, 1).toUpperCase()}
             </span>
           )}
+          </div>
+          <div className="provider-profile-copy">
+          <p className="provider-eyebrow">{page.ramo}</p>
           <h1 className="mt-5 text-3xl font-semibold leading-tight sm:text-4xl">{page.name}</h1>
           <p className="mt-2 text-sm font-medium opacity-80">
-            {page.ramo} · {page.areaLabel}
+            ⌖ {page.areaLabel}
           </p>
           {page.description ? (
             <p className="mt-4 max-w-xl text-base leading-relaxed opacity-90">{page.description}</p>
           ) : null}
-          <div className="mt-7 grid gap-3 sm:flex">
+          </div>
+          <div className="provider-actions">
             <TrackedLink
               slug={page.slug}
               event="quote"
@@ -133,20 +137,37 @@ export default async function EmpresaPublicaPage({
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl px-4 pb-16">
+      <nav className="provider-navigation" aria-label="Nesta página">
+        {page.photos.length > 0 ? <a href="#trabalhos">Trabalhos</a> : null}
+        {page.services.length > 0 ? <a href="#servicos">Serviços</a> : null}
+        <a href="#contato">Contato</a>
+        <a href="#pedir">Pedir orçamento <span aria-hidden>↗</span></a>
+      </nav>
+      <main className="provider-main">
+        {page.photos.length > 0 ? (
+          <section className="pt-10" aria-labelledby="trabalhos">
+            <h2 id="trabalhos" className="text-xl font-semibold">
+              Trabalhos
+            </h2>
+            <p className="provider-section-intro">Conheça de perto os trabalhos realizados.</p>
+            <CompanyGallery photos={page.photos} />
+          </section>
+        ) : null}
+
         {page.services.length > 0 ? (
           <section className="pt-10" aria-labelledby="servicos">
             <h2 id="servicos" className="text-xl font-semibold">
               Serviços
             </h2>
+            <p className="provider-section-intro">Veja como podemos ajudar no seu projeto.</p>
             {categories.length > 1 ? (
               <p className="mt-1 text-sm text-text-soft">{categories.join(" · ")}</p>
             ) : null}
-            <ul className="mt-4 grid items-start gap-3 sm:grid-cols-2">
+            <ul className="provider-service-grid">
               {page.services.map((service) => (
                 <li
                   key={service.name}
-                  className={`flex flex-col overflow-hidden rounded-box border bg-card ${service.featured ? "gold-edge" : "border-line"}`}
+                  className={`provider-service-card flex flex-col overflow-hidden rounded-box border bg-card ${service.featured ? "gold-edge" : "border-line"}`}
                 >
                   {service.imagePath ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -165,7 +186,7 @@ export default async function EmpresaPublicaPage({
                     {service.description ? (
                       <p className="mt-2 line-clamp-4 text-sm leading-relaxed text-text-soft">{service.description}</p>
                     ) : null}
-                    <div className="mt-auto flex items-end justify-between gap-3 pt-4">
+                    <div className="provider-service-bottom">
                       {service.price !== null ? (
                         <p className="text-sm">
                           <span className="font-semibold">{formatBRL(service.price)}</span>
@@ -190,20 +211,13 @@ export default async function EmpresaPublicaPage({
           </section>
         ) : null}
 
-        {page.photos.length > 0 ? (
-          <section className="pt-10" aria-labelledby="trabalhos">
-            <h2 id="trabalhos" className="mb-4 text-xl font-semibold">
-              Trabalhos
-            </h2>
-            <CompanyGallery photos={page.photos} />
-          </section>
-        ) : null}
-
+        <div className="provider-contact-grid">
         <section className="pt-10" aria-labelledby="contato">
           <h2 id="contato" className="text-xl font-semibold">
             Contato
           </h2>
-          <div className="mt-4 rounded-box border border-line bg-card p-4">
+          <p className="provider-section-intro">Fale diretamente com {page.name}.</p>
+          <div className="provider-contact-card mt-4 rounded-box border border-line bg-card p-4">
             <dl className="grid gap-3 text-sm">
               <div>
                 <dt className="text-xs font-medium uppercase tracking-[0.04em] text-text-soft">Atende em</dt>
@@ -269,6 +283,7 @@ export default async function EmpresaPublicaPage({
           />
         </section>
 
+        </div>
         <a href={appUrl("/")} className="mt-12 flex flex-col items-center gap-2 text-center text-xs text-text-soft">
           <OrcahLogo className="h-6 w-auto" />
           Página feita com Orçah

@@ -64,31 +64,43 @@ export function QuoteRequestForm({
 
   if (done) {
     return (
-      <p className="rounded-box bg-ok-wash p-4 text-center font-medium text-ok">
+      <p id="pedir" role="status" className="rounded-box bg-ok-wash p-4 text-center font-medium text-ok">
         Pedido enviado. A empresa entra em contato pelo WhatsApp.
       </p>
     );
   }
 
   return (
-    <form id="pedir" onSubmit={onSubmit} className="flex flex-col gap-3 rounded-box border border-line bg-card p-4">
+    <form id="pedir" onSubmit={onSubmit} className="provider-quote-form flex flex-col gap-3 rounded-box border border-line bg-card p-4">
       <h2 className="text-lg font-semibold">Precisa de um orçamento?</h2>
-      <p className="text-sm text-text-soft">Preencha e entraremos em contato.</p>
+      <p className="text-sm text-text-soft">Conte o que precisa. O prestador responde pelo seu WhatsApp.</p>
+      <div className="provider-form-fields">
+      <div className="provider-field">
+      <label htmlFor="quote-customerName">Seu nome *</label>
       <input
+        id="quote-customerName"
         name="customerName"
         required
         aria-label="Seu nome"
         placeholder="Seu nome"
         className="rounded-btn border border-line bg-card px-4 py-3"
       />
+      </div>
+      <div className="provider-field">
+      <label htmlFor="quote-customerPhone">WhatsApp *</label>
       <PhoneInput
+        id="quote-customerPhone"
         name="customerPhone"
         required
         ariaLabel="WhatsApp"
         placeholder="(49) 9 9999-0000"
         className="rounded-btn border border-line bg-card px-4 py-3"
       />
+      </div>
+      <div className="provider-field provider-field-wide">
+      <label htmlFor="quote-desiredService">Serviço desejado</label>
       <input
+        id="quote-desiredService"
         name="desiredService"
         aria-label="Serviço desejado"
         placeholder="Serviço desejado"
@@ -96,6 +108,7 @@ export function QuoteRequestForm({
         list={services.length > 0 ? "servicos-da-empresa" : undefined}
         className="rounded-btn border border-line bg-card px-4 py-3"
       />
+      </div>
       {services.length > 0 ? (
         <datalist id="servicos-da-empresa">
           {services.map((name) => (
@@ -103,14 +116,21 @@ export function QuoteRequestForm({
           ))}
         </datalist>
       ) : null}
+      <div className="provider-field provider-field-wide">
+      <label htmlFor="quote-description">Descreva o que precisa</label>
       <textarea
+        id="quote-description"
         name="description"
         rows={3}
         aria-label="Descreva o que precisa"
         placeholder="Descreva o que precisa"
         className="rounded-btn border border-line bg-card px-4 py-3"
       />
+      </div>
+      <div className="provider-field">
+      <label htmlFor="quote-state">Estado (opcional)</label>
       <select
+        id="quote-state"
         aria-label="Estado"
         value={stateId}
         onChange={(event) => setStateId(event.target.value)}
@@ -123,7 +143,11 @@ export function QuoteRequestForm({
           </option>
         ))}
       </select>
+      </div>
+      <div className="provider-field">
+      <label htmlFor="quote-city">Cidade (opcional)</label>
       <input
+        id="quote-city"
         value={cityName}
         onChange={(event) => setCityName(event.target.value)}
         onBlur={() => setCityName((current) => titleCaseName(current))}
@@ -132,19 +156,30 @@ export function QuoteRequestForm({
         placeholder={stateId ? "Cidade (opcional)" : "Escolha o estado para informar a cidade"}
         className="rounded-btn border border-line bg-card px-4 py-3 disabled:opacity-50"
       />
+      </div>
+      <div className="provider-field">
+      <label htmlFor="quote-neighborhood">Bairro (opcional)</label>
       <input
+        id="quote-neighborhood"
         name="neighborhood"
         aria-label="Bairro"
         placeholder="Bairro"
         className="rounded-btn border border-line bg-card px-4 py-3"
       />
+      </div>
+      <div className="provider-field">
+      <label htmlFor="quote-preferredTime">Melhor horário para contato (opcional)</label>
       <input
+        id="quote-preferredTime"
         name="preferredTime"
         aria-label="Melhor horário para contato"
         placeholder="Melhor horário para contato"
         className="rounded-btn border border-line bg-card px-4 py-3"
       />
-      {error ? <p className="text-sm text-no">{error}</p> : null}
+      </div>
+      </div>
+      <p className="text-xs text-text-soft">* Campos obrigatórios</p>
+      {error ? <p role="alert" className="text-sm text-no">{error}</p> : null}
       <button
         type="submit"
         disabled={loading}
