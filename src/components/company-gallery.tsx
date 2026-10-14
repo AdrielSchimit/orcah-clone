@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 type Photo = { path: string; title: string | null };
 
 /** Galeria leve da página pública: grade + foto ampliada. Sem slider. */
-export function CompanyGallery({ photos }: { photos: Photo[] }) {
+export function CompanyGallery({ photos, compact = false }: { photos: Photo[]; compact?: boolean }) {
   const [index, setIndex] = useState<number | null>(null);
   const open = index !== null ? photos[index] : null;
 
@@ -24,7 +24,7 @@ export function CompanyGallery({ photos }: { photos: Photo[] }) {
 
   return (
     <>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <div className={compact ? "provider-gallery" : "grid grid-cols-2 gap-2 sm:grid-cols-3"}>
         {photos.map((photo, photoIndex) => (
           <button
             key={photo.path}

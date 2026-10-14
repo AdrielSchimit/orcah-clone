@@ -103,7 +103,6 @@ export default async function PaginaPage() {
             <p className={styles.location}>⌖ {place}</p>
             {company.openingHours ? <p className={styles.location}>{company.openingHours}</p> : null}
           </div>
-          <p className={styles.reviews}>Ainda sem avaliações</p>
         </div>
         <EditorModal id="perfil" title="Editar informações" label="✎ Editar informações" className={styles.profileEdit}>
           <BusinessInformationForm company={profileInfo} />

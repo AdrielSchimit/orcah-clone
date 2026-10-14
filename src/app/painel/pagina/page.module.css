@@ -22,7 +22,6 @@
 .description { font-size:15px; line-height:1.6; white-space:pre-line; overflow-wrap:anywhere; }
 .location { font-size:13px; margin-top:8px; opacity:.8; }
 .profileEdit { position:absolute; right:18px; bottom:18px; z-index:3; border:1px solid #ffffff55; background:#ffffffed; color:#080f32; border-radius:12px; min-height:40px; padding:0 14px; font-size:12px; font-weight:600; }
-.reviews { font-size:12px; opacity:.7; padding-top:24px; }
 .progress { padding:18px 0; }
 .progress>div:first-child { display:flex; align-items:center; justify-content:space-between; gap:12px; font-size:13px; color:#536588; }
 .progress>div:first-child>span { color:#a76400; font-weight:650; }
@@ -108,7 +107,6 @@
   .avatar { width:76px; height:76px; margin-top:-26px; }
   .profileText { flex-basis:100%; padding-top:0; }
   .profile h2 { font-size:26px; }
-  .reviews { padding-top:0; }
   .workspace { padding:18px; border-radius:20px; }
   .sectionHeader { flex-wrap:wrap; }
   .action { padding-inline:12px; font-size:12px; }
@@ -123,15 +121,13 @@
 .profile { min-height:280px; align-items:center; padding:70px 28px 72px; }
 .avatar { margin-top:0; }
 .profileText { padding-top:0; }
-.reviews { align-self:flex-end; }
 @media(max-width:767px) {
  .cover { height:100%; }
  .profile { flex-wrap:nowrap; gap:16px; padding:76px 18px 28px; }
  .profileText { flex-basis:auto; }
  .profile h2 { font-size:24px; }
  .avatar { width:64px; height:64px; margin-top:0; align-self:center; }
- .reviews { position:absolute; bottom:18px; left:18px; font-size:10px; max-width:120px; }
- .profile { padding-bottom:80px; }
+ .profile { padding-bottom:68px; }
 }
 
 .identity[data-cover="false"] .cover:after { display:none; }

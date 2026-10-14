@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import { PhoneInput } from "@/components/phone-input";
 import { titleCaseName } from "@/lib/text";
+import { quoteRequestPayload, sendQuoteRequest } from "@/lib/quote-request";
 
 type State = { id: number; name: string; uf: string };
 
@@ -10,10 +11,14 @@ export function QuoteRequestForm({
   slug,
   defaultService = "",
   services = [],
+  submitClassName = "bg-gold hover:bg-gold-press",
+  inDialog = false,
 }: {
   slug: string;
   defaultService?: string;
   services?: string[];
+  submitClassName?: string;
+  inDialog?: boolean;
 }) {
   const [states, setStates] = useState<State[]>([]);
   const [stateId, setStateId] = useState("");
@@ -25,7 +30,8 @@ export function QuoteRequestForm({
   useEffect(() => {
     fetch("/api/localidades/estados")
       .then((response) => response.json())
-      .then(setStates);
+      .then((data: State[]) => setStates(Array.isArray(data) ? data : []))
+      .catch(() => setStates([]));
   }, []);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -35,28 +41,10 @@ export function QuoteRequestForm({
     const form = new FormData(event.currentTarget);
 
     try {
-      const response = await fetch(`/api/publico/empresas/${slug}/pedir`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerName: form.get("customerName"),
-          customerPhone: form.get("customerPhone"),
-          desiredService: form.get("desiredService"),
-          description: form.get("description"),
-          neighborhood: form.get("neighborhood"),
-          preferredTime: form.get("preferredTime"),
-          stateId: stateId || undefined,
-          cityName,
-        }),
-      });
-      const data = (await response.json()) as { error?: string };
-      if (!response.ok) {
-        setError(data.error ?? "Não foi possível enviar.");
-        return;
-      }
+      await sendQuoteRequest(slug, quoteRequestPayload(form, stateId, cityName));
       setDone(true);
-    } catch {
-      setError("Falha de conexão. Tente de novo.");
+    } catch (cause) {
+      setError(cause instanceof TypeError ? "Falha de conexão. Tente de novo." : cause instanceof Error ? cause.message : "Não foi possível enviar.");
     } finally {
       setLoading(false);
     }
@@ -71,122 +59,56 @@ export function QuoteRequestForm({
   }
 
   return (
-    <form id="pedir" onSubmit={onSubmit} className="provider-quote-form flex flex-col gap-3 rounded-box border border-line bg-card p-4">
-      <h2 className="text-lg font-semibold">Precisa de um orçamento?</h2>
-      <p className="text-sm text-text-soft">Conte o que precisa. O prestador responde pelo seu WhatsApp.</p>
+    <form onSubmit={onSubmit} className={`provider-quote-form ${inDialog ? "" : "rounded-box border border-line bg-card"}`}>
+      {!inDialog ? <h2 className="text-lg font-semibold">Solicitar orçamento</h2> : null}
+      <p className="provider-form-intro">Conte o que precisa. O prestador responde pelo seu WhatsApp.</p>
+      {defaultService ? <p className="provider-selected-service">Serviço: <strong>{defaultService}</strong></p> : null}
       <div className="provider-form-fields">
-      <div className="provider-field">
-      <label htmlFor="quote-customerName">Seu nome *</label>
-      <input
-        id="quote-customerName"
-        name="customerName"
-        required
-        aria-label="Seu nome"
-        placeholder="Seu nome"
-        className="rounded-btn border border-line bg-card px-4 py-3"
-      />
+        <div className="provider-field">
+          <label htmlFor="quote-customerName">Seu nome *</label>
+          <input id="quote-customerName" name="customerName" required minLength={2} maxLength={160} autoComplete="name" placeholder="Seu nome" />
+        </div>
+        <div className="provider-field">
+          <label htmlFor="quote-customerPhone">WhatsApp *</label>
+          <PhoneInput id="quote-customerPhone" name="customerPhone" required ariaLabel="WhatsApp" placeholder="(49) 9 9999-0000" />
+        </div>
+        <div className="provider-field provider-field-wide">
+          <label htmlFor="quote-description">O que você precisa?</label>
+          <textarea id="quote-description" name="description" rows={3} placeholder="Conte um pouco sobre o serviço que procura" />
+        </div>
       </div>
-      <div className="provider-field">
-      <label htmlFor="quote-customerPhone">WhatsApp *</label>
-      <PhoneInput
-        id="quote-customerPhone"
-        name="customerPhone"
-        required
-        ariaLabel="WhatsApp"
-        placeholder="(49) 9 9999-0000"
-        className="rounded-btn border border-line bg-card px-4 py-3"
-      />
-      </div>
-      <div className="provider-field provider-field-wide">
-      <label htmlFor="quote-desiredService">Serviço desejado</label>
-      <input
-        id="quote-desiredService"
-        name="desiredService"
-        aria-label="Serviço desejado"
-        placeholder="Serviço desejado"
-        defaultValue={defaultService}
-        list={services.length > 0 ? "servicos-da-empresa" : undefined}
-        className="rounded-btn border border-line bg-card px-4 py-3"
-      />
-      </div>
-      {services.length > 0 ? (
-        <datalist id="servicos-da-empresa">
-          {services.map((name) => (
-            <option key={name} value={name} />
-          ))}
-        </datalist>
-      ) : null}
-      <div className="provider-field provider-field-wide">
-      <label htmlFor="quote-description">Descreva o que precisa</label>
-      <textarea
-        id="quote-description"
-        name="description"
-        rows={3}
-        aria-label="Descreva o que precisa"
-        placeholder="Descreva o que precisa"
-        className="rounded-btn border border-line bg-card px-4 py-3"
-      />
-      </div>
-      <div className="provider-field">
-      <label htmlFor="quote-state">Estado (opcional)</label>
-      <select
-        id="quote-state"
-        aria-label="Estado"
-        value={stateId}
-        onChange={(event) => setStateId(event.target.value)}
-        className="rounded-btn border border-line bg-card px-4 py-3"
-      >
-        <option value="">Estado (opcional)</option>
-        {states.map((state) => (
-          <option key={state.id} value={state.id}>
-            {state.name} ({state.uf})
-          </option>
-        ))}
-      </select>
-      </div>
-      <div className="provider-field">
-      <label htmlFor="quote-city">Cidade (opcional)</label>
-      <input
-        id="quote-city"
-        value={cityName}
-        onChange={(event) => setCityName(event.target.value)}
-        onBlur={() => setCityName((current) => titleCaseName(current))}
-        disabled={!stateId}
-        aria-label="Cidade"
-        placeholder={stateId ? "Cidade (opcional)" : "Escolha o estado para informar a cidade"}
-        className="rounded-btn border border-line bg-card px-4 py-3 disabled:opacity-50"
-      />
-      </div>
-      <div className="provider-field">
-      <label htmlFor="quote-neighborhood">Bairro (opcional)</label>
-      <input
-        id="quote-neighborhood"
-        name="neighborhood"
-        aria-label="Bairro"
-        placeholder="Bairro"
-        className="rounded-btn border border-line bg-card px-4 py-3"
-      />
-      </div>
-      <div className="provider-field">
-      <label htmlFor="quote-preferredTime">Melhor horário para contato (opcional)</label>
-      <input
-        id="quote-preferredTime"
-        name="preferredTime"
-        aria-label="Melhor horário para contato"
-        placeholder="Melhor horário para contato"
-        className="rounded-btn border border-line bg-card px-4 py-3"
-      />
-      </div>
-      </div>
-      <p className="text-xs text-text-soft">* Campos obrigatórios</p>
+      <details className="provider-extra-details">
+        <summary>Adicionar mais detalhes</summary>
+        <div className="provider-form-fields">
+          <div className="provider-field provider-field-wide">
+            <label htmlFor="quote-desiredService">Serviço desejado (opcional)</label>
+            <input id="quote-desiredService" name="desiredService" defaultValue={defaultService} list={services.length ? "servicos-da-empresa" : undefined} placeholder="Escolha ou informe um serviço" />
+            {services.length ? <datalist id="servicos-da-empresa">{services.map((name) => <option key={name} value={name} />)}</datalist> : null}
+          </div>
+          <div className="provider-field">
+            <label htmlFor="quote-state">Estado (opcional)</label>
+            <select id="quote-state" value={stateId} onChange={(event) => { setStateId(event.target.value); setCityName(""); }}>
+              <option value="">Escolha o estado</option>
+              {states.map((state) => <option key={state.id} value={state.id}>{state.name} ({state.uf})</option>)}
+            </select>
+          </div>
+          <div className="provider-field">
+            <label htmlFor="quote-city">Cidade (opcional)</label>
+            <input id="quote-city" value={cityName} onChange={(event) => setCityName(event.target.value)} onBlur={() => setCityName((current) => titleCaseName(current))} disabled={!stateId} placeholder={stateId ? "Sua cidade" : "Escolha o estado primeiro"} />
+          </div>
+          <div className="provider-field">
+            <label htmlFor="quote-neighborhood">Bairro (opcional)</label>
+            <input id="quote-neighborhood" name="neighborhood" placeholder="Seu bairro" />
+          </div>
+          <div className="provider-field">
+            <label htmlFor="quote-preferredTime">Melhor horário (opcional)</label>
+            <input id="quote-preferredTime" name="preferredTime" placeholder="Quando podemos falar?" />
+          </div>
+        </div>
+      </details>
+      <p className="provider-required-note">* Campos obrigatórios</p>
       {error ? <p role="alert" className="text-sm text-no">{error}</p> : null}
-      <button
-        type="submit"
-        disabled={loading}
-        className="min-h-12 rounded-btn bg-gold px-4 font-semibold text-ink hover:bg-gold-press disabled:opacity-60"
-      >
-        {loading ? "Enviando…" : "Solicitar orçamento"}
-      </button>
+      <button type="submit" disabled={loading} className={"provider-button provider-submit " + submitClassName}>{loading ? "Enviando…" : "Solicitar orçamento"}</button>
     </form>
   );
 }

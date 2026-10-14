@@ -6,7 +6,7 @@ import { isInstagramOrigin } from "@/lib/page-stats";
 
 type PageEvent = "view" | "whatsapp" | "quote" | "instagram";
 
-function track(slug: string, tipo: PageEvent, origem?: "instagram") {
+export function trackPageEvent(slug: string, tipo: PageEvent, origem?: "instagram") {
   const url = `/api/publico/empresas/${encodeURIComponent(slug)}/metrica`;
   const body = JSON.stringify(origem ? { tipo, origem } : { tipo });
   try {
@@ -27,7 +27,7 @@ export function PageViewTracker({ slug }: { slug: string }) {
     const params = new URLSearchParams(window.location.search);
     if (params.has("servico")) return;
     const origem = isInstagramOrigin(document.referrer, params.get("utm_source")) ? "instagram" : undefined;
-    track(slug, "view", origem);
+    trackPageEvent(slug, "view", origem);
   }, [slug]);
   return null;
 }
@@ -54,7 +54,7 @@ export function TrackedLink({
       href={href}
       className={className}
       aria-label={ariaLabel}
-      onClick={() => track(slug, event)}
+      onClick={() => trackPageEvent(slug, event)}
       {...(external ? { target: "_blank", rel: "noreferrer" } : {})}
     >
       {children}

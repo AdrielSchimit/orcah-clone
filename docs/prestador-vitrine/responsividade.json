@@ -1,0 +1,116 @@
+[
+  {
+    "base": {
+      "forms": 0,
+      "nav": "none",
+      "scroll": 360,
+      "width": 375
+    },
+    "modal": {
+      "bottom": 812,
+      "focusInside": true,
+      "forms": 1,
+      "left": 0,
+      "locked": true,
+      "overflow": false,
+      "right": 375,
+      "viewport": 812,
+      "width": 375
+    }
+  },
+  {
+    "base": {
+      "forms": 0,
+      "nav": "none",
+      "scroll": 415,
+      "width": 430
+    },
+    "modal": {
+      "bottom": 932,
+      "focusInside": true,
+      "forms": 1,
+      "left": 0,
+      "locked": true,
+      "overflow": false,
+      "right": 430,
+      "viewport": 932,
+      "width": 430
+    }
+  },
+  {
+    "base": {
+      "forms": 0,
+      "nav": "flex",
+      "scroll": 753,
+      "width": 768
+    },
+    "modal": {
+      "bottom": 775.640625,
+      "focusInside": true,
+      "forms": 1,
+      "left": 114,
+      "locked": true,
+      "overflow": false,
+      "right": 654,
+      "viewport": 1024,
+      "width": 768
+    }
+  },
+  {
+    "base": {
+      "forms": 0,
+      "nav": "flex",
+      "scroll": 1009,
+      "width": 1024
+    },
+    "modal": {
+      "bottom": 713.640625,
+      "focusInside": true,
+      "forms": 1,
+      "left": 242,
+      "locked": true,
+      "overflow": false,
+      "right": 782,
+      "viewport": 900,
+      "width": 1024
+    }
+  },
+  {
+    "base": {
+      "forms": 0,
+      "nav": "flex",
+      "scroll": 1425,
+      "width": 1440
+    },
+    "modal": {
+      "bottom": 763.640625,
+      "focusInside": true,
+      "forms": 1,
+      "left": 450,
+      "locked": true,
+      "overflow": false,
+      "right": 990,
+      "viewport": 1000,
+      "width": 1440
+    }
+  },
+  {
+    "base": {
+      "forms": 0,
+      "nav": "none",
+      "scroll": 375,
+      "width": 390
+    },
+    "modal": {
+      "bottom": 700,
+      "focusInside": true,
+      "forms": 1,
+      "left": 0,
+      "locked": true,
+      "overflow": false,
+      "right": 390,
+      "viewport": 700,
+      "width": 390
+    }
+  }
+]
