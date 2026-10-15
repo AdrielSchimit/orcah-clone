@@ -33,24 +33,28 @@ export function SendWhatsAppButton({
 
   useEffect(() => {
     if (!notice) return;
-    try {
-      const raw = sessionStorage.getItem(waStorageKey(budgetId));
-      if (!raw) {
+    // Read sessionStorage after hydration, without a synchronous setState in an effect.
+    const timer = window.setTimeout(() => {
+      try {
+        const raw = sessionStorage.getItem(waStorageKey(budgetId));
+        if (!raw) {
+          if (notice === "falhou") {
+            setError("O orçamento foi salvo, mas o WhatsApp não abriu. Toque no botão pra tentar de novo.");
+          }
+          return;
+        }
+        const data = JSON.parse(raw) as Ready & { error?: string };
+        if (data.message && data.url) setReady({ message: data.message, url: data.url });
+        if (notice === "falhou") {
+          setError(data.error || "O orçamento foi salvo, mas o WhatsApp não abriu. Toque no botão pra tentar de novo.");
+        }
+      } catch {
         if (notice === "falhou") {
           setError("O orçamento foi salvo, mas o WhatsApp não abriu. Toque no botão pra tentar de novo.");
         }
-        return;
       }
-      const data = JSON.parse(raw) as Ready & { error?: string };
-      if (data.message && data.url) setReady({ message: data.message, url: data.url });
-      if (notice === "falhou") {
-        setError(data.error || "O orçamento foi salvo, mas o WhatsApp não abriu. Toque no botão pra tentar de novo.");
-      }
-    } catch {
-      if (notice === "falhou") {
-        setError("O orçamento foi salvo, mas o WhatsApp não abriu. Toque no botão pra tentar de novo.");
-      }
-    }
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [budgetId, notice]);
 
   async function send() {
