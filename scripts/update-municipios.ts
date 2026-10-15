@@ -1,6 +1,6 @@
 import { mkdir, rename, rm, writeFile } from "node:fs/promises";
 import { resolve, dirname } from "node:path";
-import { normalizeMunicipioSearch, type Municipio } from "../src/lib/municipios";
+import { normalizeMunicipioSearch, type Municipio } from "../src/lib/municipios.ts";
 
 async function main() {
   const target = resolve("public/data/municipios-br.json");
