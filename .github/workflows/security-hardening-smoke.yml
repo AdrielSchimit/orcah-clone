@@ -1,0 +1,44 @@
+name: Audit RLS hardening (disposable PostgreSQL)
+
+on:
+  pull_request:
+    paths:
+      - "docs/security/manual/**"
+      - "docs/security/test-fixtures/**"
+      - ".github/workflows/security-hardening-smoke.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-sql:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_PASSWORD: localonly-not-a-secret
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGPASSWORD: localonly-not-a-secret
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGDATABASE: postgres
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Install PostgreSQL client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Create disposable roles and tables
+        run: psql -X -v ON_ERROR_STOP=1 -f docs/security/test-fixtures/bootstrap.sql
+      - name: Execute hardening draft against disposable DB
+        run: psql -X -v ON_ERROR_STOP=1 -f docs/security/manual/2026-10-15-hardening-public-prisma.sql
+      - name: Check RLS, grants, policies and app role access
+        run: psql -X -v ON_ERROR_STOP=1 -f docs/security/test-fixtures/assert-hardening.sql
