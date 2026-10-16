@@ -18,13 +18,41 @@ type Props = {
   activeId: string;
   onPreviewSelect?: (id: string) => void;
   ariaLabel?: string;
+  accent?: string;
+  soundEnabled?: boolean;
 };
+
+let context: AudioContext | null = null;
+
+/** Gentle, user-gesture-only navigation feedback. Never autoplay. */
+function playNavigationSound(enabled: boolean) {
+  if (!enabled || typeof window === "undefined") return;
+  try {
+    context ??= new window.AudioContext();
+    if (context.state === "suspended") void context.resume();
+    const start = context.currentTime;
+    const oscillator = context.createOscillator();
+    const envelope = context.createGain();
+    oscillator.type = "sine";
+    oscillator.frequency.setValueAtTime(610, start);
+    oscillator.frequency.exponentialRampToValueAtTime(435, start + .075);
+    envelope.gain.setValueAtTime(.0001, start);
+    envelope.gain.exponentialRampToValueAtTime(.018, start + .012);
+    envelope.gain.exponentialRampToValueAtTime(.0001, start + .095);
+    oscillator.connect(envelope);
+    envelope.connect(context.destination);
+    oscillator.start(start);
+    oscillator.stop(start + .1);
+  } catch {
+    // Audio may be blocked on some browsers. Navigation must still work.
+  }
+}
 
 /**
  * Dock líquido reutilizável: a mesma peça aparece no painel mobile e na demo.
  * O destaque é uma única camada animada; as rotas continuam sendo links normais.
  */
-export function LiquidDock({ items, activeId, onPreviewSelect, ariaLabel = "Navegação principal" }: Props) {
+export function LiquidDock({ items, activeId, onPreviewSelect, ariaLabel = "Navegação principal", accent = "#ffb020", soundEnabled = true }: Props) {
   const router = useRouter();
   const trackRef = useRef<HTMLElement>(null);
   const pointerRef = useRef<{ id: number; index: number } | null>(null);
@@ -38,6 +66,7 @@ export function LiquidDock({ items, activeId, onPreviewSelect, ariaLabel = "Nave
   const cssVars = {
     "--dock-count": items.length,
     "--dock-index": visualIndex,
+    "--dock-accent": accent,
   } as CSSProperties;
 
   function indexAt(clientX: number) {
@@ -71,6 +100,7 @@ export function LiquidDock({ items, activeId, onPreviewSelect, ariaLabel = "Nave
     setDragIndex(null);
     const nextItem = items[gesture.index];
     if (!nextItem || nextItem.id === activeId) return;
+    playNavigationSound(soundEnabled);
     if (onPreviewSelect) onPreviewSelect(nextItem.id);
     else router.push(nextItem.href);
   }
@@ -108,7 +138,7 @@ export function LiquidDock({ items, activeId, onPreviewSelect, ariaLabel = "Nave
               {onPreviewSelect ? (
                 <button
                   type="button"
-                  onClick={() => onPreviewSelect(item.id)}
+                  onClick={() => { playNavigationSound(soundEnabled); onPreviewSelect(item.id); }}
                   className={styles.link}
                   data-active={active}
                   aria-current={active ? "page" : undefined}
@@ -121,6 +151,7 @@ export function LiquidDock({ items, activeId, onPreviewSelect, ariaLabel = "Nave
               ) : (
                 <Link
                   href={item.href}
+                  onClick={() => playNavigationSound(soundEnabled)}
                   className={styles.link}
                   data-active={active}
                   aria-current={active ? "page" : undefined}
