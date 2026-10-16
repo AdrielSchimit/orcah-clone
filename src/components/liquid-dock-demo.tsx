@@ -3,90 +3,201 @@
 import { useState } from "react";
 import { LiquidDock, type LiquidDockItem } from "@/components/liquid-dock";
 import { Icon } from "@/components/painel-nav";
-import { OrcahIcon } from "@/components/orcah-logo";
+import { OrcahIcon, OrcahLogo } from "@/components/orcah-logo";
 
-const sections = {
-  home: { title: "Seu negócio, em um só lugar.", subtitle: "Tudo o que importa para seu dia de trabalho.", tag: "INÍCIO", number: "04", unit: "orçamentos esta semana", hint: "Seu painel, do seu jeito" },
-  clientes: { title: "Clientes sempre por perto.", subtitle: "Histórico e contatos sem complicação.", tag: "CLIENTES", number: "28", unit: "contatos organizados", hint: "Menos procura, mais resultado" },
-  orcamentos: { title: "Orçamentos em segundos.", subtitle: "Apresente seu trabalho com profissionalismo.", tag: "ORÇAMENTOS", number: "R$ 2,4 mil", unit: "em propostas enviadas", hint: "Seu próximo trabalho começa aqui" },
-  pagina: { title: "Seu site, sua vitrine.", subtitle: "Um único link para compartilhar em qualquer lugar.", tag: "SUA PÁGINA", number: "326", unit: "visualizações recentes", hint: "Seu cartão de visitas online" },
-  mais: { title: "Tudo sob controle.", subtitle: "Serviços, relatórios e configurações.", tag: "MAIS", number: "05", unit: "recursos à disposição", hint: "Tudo em um só toque" },
-};
-
-type Section = keyof typeof sections;
+type Section = "home" | "clientes" | "orcamentos" | "pagina" | "mais";
 const previewItems: LiquidDockItem[] = [
-  { id: "home", label: "Início", href: "#inicio", icon: <Icon id="home" /> },
-  { id: "clientes", label: "Clientes", href: "#clientes", icon: <Icon id="clientes" /> },
-  { id: "orcamentos", label: "Orçamento", href: "#orcamentos", icon: <OrcahIcon className="h-6 w-6" /> },
-  { id: "pagina", label: "Página", href: "#pagina", icon: <Icon id="pagina" /> },
-  { id: "mais", label: "Mais", href: "#mais", icon: <Icon id="mais" />, badge: 2 },
+  { id: "home", label: "Início", href: "/painel", icon: <Icon id="home" /> },
+  { id: "clientes", label: "Clientes", href: "/painel/clientes", icon: <Icon id="clientes" /> },
+  { id: "orcamentos", label: "Orçamento", href: "/painel/orcamentos/novo", icon: <OrcahIcon className="h-6 w-6" /> },
+  { id: "pagina", label: "Página", href: "/painel/pagina", icon: <Icon id="pagina" /> },
+  { id: "mais", label: "Mais", href: "/painel/mais", icon: <Icon id="mais" />, badge: 2 },
 ];
+
+const customers = [
+  { name: "Cliente exemplo A", initial: "A", detail: "Último contato há 2 dias", tone: "bg-amber-100 text-amber-800" },
+  { name: "Cliente exemplo B", initial: "B", detail: "1 orçamento aprovado", tone: "bg-blue-100 text-blue-800" },
+  { name: "Cliente exemplo C", initial: "C", detail: "Aguardando retorno", tone: "bg-violet-100 text-violet-800" },
+];
+
+function Chevron() {
+  return <svg aria-hidden="true" viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="m9 5 7 7-7 7" /></svg>;
+}
+
+function Metric({ name, value, note }: { name: string; value: string; note: string }) {
+  return <div className="rounded-[18px] border border-[#e3e8ef] bg-white p-3.5 shadow-[0_2px_8px_rgba(20,30,50,.035)]">
+    <p className="text-[10px] font-semibold uppercase tracking-[.04em] text-[#65738d]">{name}</p>
+    <p className="mt-1 text-[25px] font-bold tracking-[-.045em] text-[#151f38]">{value}</p>
+    <p className="mt-0.5 text-[10px] text-[#77849d]">{note}</p>
+  </div>;
+}
+
+function SectionHeading({ title, detail }: { title: string; detail: string }) {
+  return <div className="mb-4">
+    <h1 className="text-[23px] font-bold tracking-[-.035em] text-[#151f38]">{title}</h1>
+    <p className="mt-0.5 text-[12px] text-[#67758e]">{detail}</p>
+  </div>;
+}
+
+function CardLink({ label, subtitle, icon, onClick }: { label: string; subtitle: string; icon: React.ReactNode; onClick: () => void }) {
+  return <button type="button" onClick={onClick} className="flex min-h-[104px] flex-col items-start rounded-[18px] border border-[#e4e9f0] bg-white p-3.5 text-left shadow-[0_2px_9px_rgba(10,20,30,.035)] transition-colors hover:border-[#ffb020] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#ffb020]">
+    <span className="grid h-8 w-8 place-items-center rounded-[11px] bg-[#fff4df] text-[#9c670a]">{icon}</span>
+    <span className="mt-2 text-[12px] font-bold text-[#17213b]">{label}</span>
+    <span className="mt-0.5 text-[10px] text-[#768299]">{subtitle}</span>
+  </button>;
+}
 
 export function LiquidDockDemo() {
   const [active, setActive] = useState<Section>("home");
-  const section = sections[active];
+  const [search, setSearch] = useState("");
+  const [previewForm, setPreviewForm] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [selectedBudget, setSelectedBudget] = useState("Proposta exemplo #002");
+
+  function navigate(id: Section) {
+    setNotice("");
+    setActive(id);
+  }
+  function showDemoNotice(message: string) {
+    setNotice(message);
+  }
 
   return (
-    <main className="min-h-screen bg-[#090c14] px-4 pb-12 pt-7 text-[#f5f7ff] sm:pt-12">
-      <div className="mx-auto max-w-6xl">
-        <header className="mb-8 flex items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span className="grid h-10 w-10 place-items-center rounded-2xl bg-[#ffb020] text-[#131722]">
-              <OrcahIcon className="h-7 w-7" />
-            </span>
-            <div>
-              <p className="text-sm font-extrabold tracking-wide">ORÇAH <span className="font-light text-[#8e9cb6]">/ LAB</span></p>
-              <p className="text-[11px] text-[#8190ad]">Experimentos de interface</p>
+    <main className="grid min-h-dvh place-items-center bg-[#dfe5ed] p-0 sm:p-5">
+      <div className="flex h-dvh w-full max-w-[440px] flex-col overflow-hidden bg-[#f5f7fa] shadow-[0_18px_75px_rgba(16,24,40,.16)] sm:h-[min(830px,calc(100dvh-40px))] sm:rounded-[35px] sm:border-[7px] sm:border-[#172036]">
+        {/* Simula o app autenticado sem expor ou alterar dados reais. */}
+        <header className="shrink-0 border-b border-[#e4e9f1] bg-white px-4 pb-3 pt-[max(.8rem,env(safe-area-inset-top))]">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex min-w-0 items-center gap-3">
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-[13px] border border-[#f1d9a7] bg-[#fff4df] text-[20px] font-bold text-[#8b5a09]">M</span>
+              <div className="min-w-0">
+                <p className="text-[11px] font-medium text-[#7c889d]">Olá, Adriel 👋</p>
+                <p className="truncate text-[14px] font-bold text-[#17213b]">Minha empresa</p>
+                <p className="truncate text-[10px] text-[#7b869c]">Painel do prestador</p>
+              </div>
             </div>
+            <OrcahLogo className="h-7 w-[90px] object-contain" />
           </div>
-          <span className="rounded-full border border-[#ffb020]/35 bg-[#ffb020]/10 px-3 py-1.5 text-xs font-semibold text-[#ffd37c]">PREVIEW · NÃO PUBLICADO</span>
         </header>
 
-        <div className="grid items-center gap-10 lg:grid-cols-[1fr_470px]">
-          <div className="mx-auto max-w-xl text-center lg:mx-0 lg:text-left">
-            <p className="mb-4 text-xs font-bold uppercase tracking-[.3em] text-[#ffbf45]">Liquid dock / conceito 01</p>
-            <h1 className="text-4xl font-bold leading-[1.12] tracking-[-.055em] sm:text-6xl">
-              Navegação com <span className="text-[#ffbf45]">vida própria.</span>
-            </h1>
-            <p className="mt-5 max-w-lg text-base leading-relaxed text-[#a1aec6]">
-              A bolha dourada acompanha a aba, se estica durante o movimento e parece derreter dentro da barra.
-              Toque em um ícone ou arraste a esfera para experimentar.
-            </p>
-            <div className="mt-7 flex flex-wrap justify-center gap-2 text-xs lg:justify-start">
-              <span className="rounded-full border border-white/10 px-3 py-2 text-[#cfdbef]">Animação elástica</span>
-              <span className="rounded-full border border-white/10 px-3 py-2 text-[#cfdbef]">Arrastar e soltar</span>
-              <span className="rounded-full border border-white/10 px-3 py-2 text-[#cfdbef]">Identidade ORÇAH</span>
-            </div>
-            <p className="mt-7 text-xs leading-relaxed text-[#65718b]">
-              Nesta página, as abas simulam um painel. Na branch de teste, o mesmo componente também substitui a navegação inferior real do ORÇAH no celular.
-            </p>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-7 pt-4">
+          <div className="mb-4 flex items-center justify-between rounded-[13px] border border-[#f3ddae] bg-[#fff9ec] px-3 py-2">
+            <span className="text-[10px] font-semibold text-[#9a670b]">Prévia do painel · dados ilustrativos</span>
+            <span className="rounded-full bg-[#ffe7af] px-2 py-1 text-[9px] font-bold text-[#805005]">MODO TESTE</span>
           </div>
 
-          <div className="relative mx-auto w-full max-w-[440px] overflow-visible rounded-[36px] border border-[#34324a] bg-[#161525] p-[10px] shadow-[0_35px_90px_rgba(0,0,0,.52)]">
-            <div className="relative isolate flex min-h-[590px] flex-col overflow-hidden rounded-[28px] bg-[radial-gradient(ellipse_at_50%_37%,#36223c_0%,#1e172b_45%,#10131f_86%)] px-5">
-              <div className="pointer-events-none absolute left-1/2 top-[180px] -z-10 h-[280px] w-[280px] -translate-x-1/2 rounded-full bg-[#ffb020]/10 blur-[90px]" />
-              <div className="flex items-center justify-between pb-5 pt-6">
-                <span className="text-sm font-semibold tracking-[-.02em] text-white/90">ORÇAH <span className="font-normal text-[#ffb020]">/ APP</span></span>
-                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] text-white/50">PROTÓTIPO</span>
+          {active === "home" ? <>
+            <SectionHeading title="Boa tarde, Adriel 👋" detail="Veja como seu negócio está indo." />
+            <button type="button" onClick={() => navigate("mais")} className="mb-4 flex w-full items-center justify-between rounded-[16px] border border-[#f5d791] bg-[#fff9ec] px-3.5 py-3.5 text-left">
+              <div>
+                <p className="text-[13px] font-bold text-[#1c2740]">2 novos pedidos recebidos</p>
+                <p className="mt-0.5 text-[11px] text-[#6d7589]">Responda rápido e não perca oportunidades.</p>
               </div>
-              <div className="my-auto pb-9 text-center" aria-live="polite">
-                <div className="mb-5 flex items-center justify-center gap-2 text-[10px] font-bold tracking-[.3em] text-white/50">
-                  <span className="h-2 w-2 rounded-full bg-[#ffb020] shadow-[0_0_14px_#ffb020]" />
-                  {section.tag}
-                </div>
-                <h2 className="mx-auto max-w-[330px] text-[36px] font-bold leading-[1.08] tracking-[-.055em] text-[#f7f6fa]">{section.title}</h2>
-                <p className="mt-4 text-xs text-[#ac9fb5]">{section.subtitle}</p>
-                <div className="mx-auto mt-9 max-w-[260px] rounded-[22px] border border-white/10 bg-white/[.04] px-6 py-5 shadow-[0_8px_40px_rgba(0,0,0,.08)]">
-                  <p className="text-3xl font-semibold tracking-tight text-[#ffd074]">{section.number}</p>
-                  <p className="mt-1 text-xs text-[#a69dac]">{section.unit}</p>
-                </div>
+              <span className="text-[#aa7007]"><Chevron /></span>
+            </button>
+            <div className="grid grid-cols-2 gap-2.5">
+              <Metric name="Acessos à página" value="326" note="últimos 7 dias" />
+              <Metric name="Pedidos recebidos" value="12" note="últimos 30 dias" />
+              <Metric name="Orçamentos" value="04" note="este mês" />
+              <Metric name="Aprovados" value="02" note="R$ 2.480,00" />
+            </div>
+            <button type="button" onClick={() => navigate("orcamentos")} className="mt-4 flex w-full items-center justify-between rounded-[19px] bg-[#152039] px-4 py-4 text-left text-white shadow-[0_6px_15px_rgba(17,32,55,.15)]">
+              <div>
+                <p className="text-[15px] font-bold">Criar novo orçamento</p>
+                <p className="mt-0.5 text-[11px] text-[#b7c2d7]">Profissional, rápido e personalizado</p>
               </div>
-              <div className="mb-2 text-center text-[11px] text-[#95879b]">{section.hint}</div>
-              <div className="pb-7 pt-3">
-                <LiquidDock items={previewItems} activeId={active} onPreviewSelect={(id) => setActive(id as Section)} ariaLabel="Demo do menu líquido" />
+              <span className="grid h-10 w-10 place-items-center rounded-[13px] bg-[#ffb020]"><OrcahIcon className="h-7 w-7" /></span>
+            </button>
+            <p className="mb-2.5 mt-5 text-[11px] font-bold uppercase tracking-[.06em] text-[#65738d]">Atalhos</p>
+            <div className="grid grid-cols-2 gap-2.5">
+              <CardLink label="Editar página" subtitle="Fotos, contato e cores" icon={<Icon id="pagina" />} onClick={() => navigate("pagina")} />
+              <CardLink label="Cadastrar serviço" subtitle="Serviços do seu negócio" icon={<Icon id="servicos" />} onClick={() => navigate("mais")} />
+              <CardLink label="Ver relatórios" subtitle="Acessos e aprovações" icon={<Icon id="relatorios" />} onClick={() => navigate("mais")} />
+              <CardLink label="Ver clientes" subtitle="Contatos organizados" icon={<Icon id="clientes" />} onClick={() => navigate("clientes")} />
+            </div>
+            <p className="mb-2.5 mt-5 text-[11px] font-bold uppercase tracking-[.06em] text-[#65738d]">Últimos orçamentos</p>
+            <div className="rounded-[17px] border border-[#e4e9f0] bg-white p-3.5">
+              <div className="flex items-start justify-between">
+                <div><p className="text-[13px] font-semibold text-[#17213b]">Cliente exemplo A</p><p className="text-[11px] text-[#7e899c]">ORC-0002</p></div>
+                <div className="text-right"><p className="text-[14px] font-bold text-[#17213b]">R$ 1.200,00</p><span className="text-[10px] text-[#9d680d]">Aguardando</span></div>
               </div>
             </div>
-          </div>
+          </> : null}
+
+          {active === "clientes" ? <>
+            <SectionHeading title="Clientes" detail="Todos os contatos da sua empresa." />
+            <label className="mb-4 block">
+              <span className="sr-only">Buscar cliente de demonstração</span>
+              <input className="w-full rounded-[14px] border border-[#e3e8f0] bg-white px-4 py-3 text-[13px] text-[#15203a] outline-[#ffb020]" placeholder="Buscar cliente..." value={search} onChange={e => setSearch(e.target.value)} />
+            </label>
+            <div className="space-y-2.5">
+              {customers.filter(c => c.name.toLowerCase().includes(search.toLowerCase())).map(c => <div key={c.name} className="flex items-center gap-3 rounded-[16px] border border-[#e4e9f0] bg-white p-3.5">
+                <span className={"grid h-10 w-10 shrink-0 place-items-center rounded-full text-[14px] font-bold " + c.tone}>{c.initial}</span>
+                <div className="min-w-0 flex-1"><p className="text-[13px] font-semibold text-[#19243f]">{c.name}</p><p className="mt-0.5 text-[10px] text-[#79859b]">{c.detail}</p></div>
+                <Chevron />
+              </div>)}
+              {!customers.some(c => c.name.toLowerCase().includes(search.toLowerCase())) ? <p className="py-10 text-center text-[12px] text-[#65738d]">Nenhum cliente da demonstração encontrado.</p> : null}
+            </div>
+          </> : null}
+
+          {active === "orcamentos" ? <>
+            <SectionHeading title="Orçamentos" detail="Crie propostas e acompanhe cada etapa." />
+            <button type="button" onClick={() => setPreviewForm(value => !value)} className="flex w-full items-center justify-between rounded-[16px] bg-[#ffb020] px-4 py-3.5 text-left text-[13px] font-bold text-[#17213b]">
+              {previewForm ? "Fechar exemplo de orçamento" : "+ Novo orçamento"} <Chevron />
+            </button>
+            {previewForm ? <div className="mt-3 rounded-[17px] border border-[#e4e9f0] bg-white p-4">
+              <p className="mb-3 text-[13px] font-bold">Criar orçamento · demonstração</p>
+              <label className="block text-[11px] text-[#65738d]">Cliente<input className="mt-1.5 w-full rounded-xl border border-[#dbe1e9] px-3 py-2.5 text-[13px]" value="Cliente exemplo A" readOnly /></label>
+              <label className="mt-3 block text-[11px] text-[#65738d]">Serviço<input className="mt-1.5 w-full rounded-xl border border-[#dbe1e9] px-3 py-2.5 text-[13px]" value="Pintura de ambiente" readOnly /></label>
+              <button type="button" onClick={() => showDemoNotice("Exemplo visual: nenhum orçamento foi criado no sistema.")} className="mt-3 w-full rounded-xl bg-[#17213b] px-3 py-3 text-[12px] font-semibold text-white">Simular criação</button>
+            </div> : null}
+            <p className="mb-2.5 mt-5 text-[11px] font-bold uppercase tracking-[.06em] text-[#65738d]">Propostas recentes</p>
+            {["Proposta exemplo #002", "Proposta exemplo #001"].map((item, i) => <button key={item} type="button" onClick={() => { setSelectedBudget(item); showDemoNotice(item + " selecionada (demonstração)."); }} className={"mb-2.5 flex w-full items-center justify-between rounded-[17px] border bg-white p-3.5 text-left " + (selectedBudget === item ? "border-[#f5cc78]" : "border-[#e4e9f0]")}>
+              <div><p className="text-[13px] font-semibold text-[#17213b]">{item}</p><p className="mt-0.5 text-[10px] text-[#7a879f]">Cliente exemplo {i === 0 ? "A" : "B"} · {i === 0 ? "Aguardando" : "Aprovado"}</p></div>
+              <div className="text-right"><p className="text-[13px] font-bold text-[#17213b]">{i === 0 ? "R$ 1.200" : "R$ 1.280"}</p><Chevron /></div>
+            </button>)}
+          </> : null}
+
+          {active === "pagina" ? <>
+            <SectionHeading title="Minha página" detail="Seu site profissional para compartilhar." />
+            <div className="overflow-hidden rounded-[20px] border border-[#e3e8f0] bg-white">
+              <div className="flex h-32 items-center justify-center bg-[linear-gradient(140deg,#14213a,#424f69)]">
+                <div className="text-center text-white"><p className="text-2xl font-bold tracking-tight">Minha empresa</p><p className="mt-1 text-xs text-white/70">Seu serviço merece uma vitrine profissional</p></div>
+              </div>
+              <div className="p-4"><p className="text-[12px] font-bold text-[#17213b]">Sua vitrine está pronta para personalizar</p><p className="mt-1 text-[11px] text-[#68768e]">Adicione fotos, logo, serviços e WhatsApp.</p></div>
+            </div>
+            <div className="mt-4 grid grid-cols-2 gap-2.5">
+              <CardLink label="Identidade visual" subtitle="Logo, capa e cores" icon={<Icon id="pagina" />} onClick={() => showDemoNotice("Editor visual de exemplo: nenhuma alteração foi salva.")} />
+              <CardLink label="Serviços" subtitle="Exibição e preços" icon={<Icon id="servicos" />} onClick={() => showDemoNotice("A vitrine exibida usa dados ilustrativos.")} />
+            </div>
+            <div className="mt-4 rounded-[15px] border border-[#f2dfb9] bg-[#fff9ee] p-3.5"><p className="text-[12px] font-semibold text-[#805607]">Um link para Instagram e WhatsApp</p><p className="mt-1 text-[11px] text-[#987a48]">Mostre seus serviços e receba pedidos de orçamento.</p></div>
+          </> : null}
+
+          {active === "mais" ? <>
+            <SectionHeading title="Mais opções" detail="Gerencie todos os recursos do seu negócio." />
+            <div className="space-y-2.5">
+              {[
+                { name: "Pedidos recebidos", detail: "2 novos aguardando", icon: "pedidos" as const },
+                { name: "Meus serviços", detail: "Cadastro e valores", icon: "servicos" as const },
+                { name: "Relatórios", detail: "Acessos e resultados", icon: "relatorios" as const },
+                { name: "Conta e plano", detail: "Preferências e assinatura", icon: "mais" as const },
+              ].map(item => <button key={item.name} type="button" onClick={() => showDemoNotice(item.name + " — seção ilustrativa deste protótipo.")} className="flex w-full items-center gap-3 rounded-[16px] border border-[#e3e8ef] bg-white p-3.5 text-left">
+                <span className="grid h-10 w-10 place-items-center rounded-xl bg-[#fff3df] text-[#99650b]"><Icon id={item.icon} /></span>
+                <span className="flex-1"><span className="block text-[13px] font-semibold text-[#18243f]">{item.name}</span><span className="text-[10px] text-[#738099]">{item.detail}</span></span><Chevron />
+              </button>)}
+            </div>
+          </> : null}
+
+          {notice ? <div role="status" className="mt-4 rounded-[13px] border border-[#edd093] bg-[#fff9e9] p-3 text-[11px] text-[#805605]">{notice}</div> : null}
+        </div>
+
+        <div className="relative z-10 shrink-0 border-t border-[#e3e8f0]/30 bg-[#f5f7fa] px-3 pb-[max(.5rem,env(safe-area-inset-bottom))] pt-1">
+          <LiquidDock
+            items={previewItems}
+            activeId={active}
+            onPreviewSelect={(id) => navigate(id as Section)}
+            ariaLabel="Menu móvel do painel ORÇAH — demonstração"
+          />
         </div>
       </div>
     </main>
