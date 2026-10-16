@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { LiquidDock, type LiquidDockItem } from "@/components/liquid-dock";
 import { Icon } from "@/components/painel-nav";
 import { OrcahIcon, OrcahLogo } from "@/components/orcah-logo";
@@ -13,6 +13,13 @@ const previewItems: LiquidDockItem[] = [
   { id: "pagina", label: "Página", href: "/painel/pagina", icon: <Icon id="pagina" /> },
   { id: "mais", label: "Mais", href: "/painel/mais", icon: <Icon id="mais" />, badge: 2 },
 ];
+
+const palettes = [
+  { id: "gold", name: "Ouro ORÇAH", accent: "#ffb020" },
+  { id: "blue", name: "Azul elétrico", accent: "#4f9cf9" },
+  { id: "mint", name: "Verde menta", accent: "#37c9a0" },
+  { id: "coral", name: "Coral", accent: "#ff8759" },
+] as const;
 
 const customers = [
   { name: "Cliente exemplo A", initial: "A", detail: "Último contato há 2 dias", tone: "bg-amber-100 text-amber-800" },
@@ -53,6 +60,9 @@ export function LiquidDockDemo() {
   const [previewForm, setPreviewForm] = useState(false);
   const [notice, setNotice] = useState("");
   const [selectedBudget, setSelectedBudget] = useState("Proposta exemplo #002");
+  const [palette, setPalette] = useState<(typeof palettes)[number]["id"]>("gold");
+  const [soundOn, setSoundOn] = useState(true);
+  const chosen = palettes.find((item) => item.id === palette) ?? palettes[0];
 
   function navigate(id: Section) {
     setNotice("");
@@ -63,7 +73,7 @@ export function LiquidDockDemo() {
   }
 
   return (
-    <main className="grid min-h-dvh place-items-center bg-[#dfe5ed] p-0 sm:p-5">
+    <main className="grid min-h-dvh place-items-center bg-[#dfe5ed] p-0 sm:p-5" style={{ "--demo-accent": chosen.accent } as CSSProperties}>
       <div className="flex h-dvh w-full max-w-[440px] flex-col overflow-hidden bg-[#f5f7fa] shadow-[0_18px_75px_rgba(16,24,40,.16)] sm:h-[min(830px,calc(100dvh-40px))] sm:rounded-[35px] sm:border-[7px] sm:border-[#172036]">
         {/* Simula o app autenticado sem expor ou alterar dados reais. */}
         <header className="shrink-0 border-b border-[#e4e9f1] bg-white px-4 pb-3 pt-[max(.8rem,env(safe-area-inset-top))]">
@@ -81,9 +91,41 @@ export function LiquidDockDemo() {
         </header>
 
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-7 pt-4">
-          <div className="mb-4 flex items-center justify-between rounded-[13px] border border-[#f3ddae] bg-[#fff9ec] px-3 py-2">
-            <span className="text-[10px] font-semibold text-[#9a670b]">Prévia do painel · dados ilustrativos</span>
-            <span className="rounded-full bg-[#ffe7af] px-2 py-1 text-[9px] font-bold text-[#805005]">MODO TESTE</span>
+          <div className="mb-4 flex items-center justify-between gap-2">
+            <span className="text-[10px] font-medium text-[#8290a4]">Prévia · dados simulados</span>
+            <div className="flex items-center gap-1.5" role="group" aria-label="Personalização de cores da preview">
+              {palettes.map((option) => (
+                <button
+                  type="button"
+                  key={option.id}
+                  aria-label={option.name}
+                  aria-pressed={palette === option.id}
+                  title={option.name}
+                  onClick={() => setPalette(option.id)}
+                  className="grid h-7 w-7 place-items-center rounded-full border border-[#dce2ed] bg-white transition-transform hover:scale-105 focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#17213b]"
+                >
+                  <span
+                    className="h-4 w-4 rounded-full"
+                    style={{ backgroundColor: option.accent, boxShadow: palette === option.id ? "0 0 0 2px #fff, 0 0 0 3.5px #263451" : undefined }}
+                  />
+                </button>
+              ))}
+              <span className="mx-1 h-5 w-px bg-[#e0e6ee]" />
+              <button
+                type="button"
+                aria-label={soundOn ? "Desligar som do menu" : "Ligar som do menu"}
+                aria-pressed={soundOn}
+                title={soundOn ? "Som ligado" : "Som desligado"}
+                onClick={() => setSoundOn(!soundOn)}
+                className="grid h-8 w-8 place-items-center rounded-full border border-[#e0e6ef] bg-white text-[#33415d] focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[#17213b]"
+              >
+                {soundOn ? (
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4zM15 9a4 4 0 0 1 0 6m3-9a8 8 0 0 1 0 12"/></svg>
+                ) : (
+                  <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4zM16 9l5 6m0-6-5 6"/></svg>
+                )}
+              </button>
+            </div>
           </div>
 
           {active === "home" ? <>
@@ -106,7 +148,7 @@ export function LiquidDockDemo() {
                 <p className="text-[15px] font-bold">Criar novo orçamento</p>
                 <p className="mt-0.5 text-[11px] text-[#b7c2d7]">Profissional, rápido e personalizado</p>
               </div>
-              <span className="grid h-10 w-10 place-items-center rounded-[13px] bg-[#ffb020]"><OrcahIcon className="h-7 w-7" /></span>
+              <span className="grid h-10 w-10 place-items-center rounded-[13px] bg-[var(--demo-accent)]"><OrcahIcon className="h-7 w-7" /></span>
             </button>
             <p className="mb-2.5 mt-5 text-[11px] font-bold uppercase tracking-[.06em] text-[#65738d]">Atalhos</p>
             <div className="grid grid-cols-2 gap-2.5">
@@ -142,7 +184,7 @@ export function LiquidDockDemo() {
 
           {active === "orcamentos" ? <>
             <SectionHeading title="Orçamentos" detail="Crie propostas e acompanhe cada etapa." />
-            <button type="button" onClick={() => setPreviewForm(value => !value)} className="flex w-full items-center justify-between rounded-[16px] bg-[#ffb020] px-4 py-3.5 text-left text-[13px] font-bold text-[#17213b]">
+            <button type="button" onClick={() => setPreviewForm(value => !value)} className="flex w-full items-center justify-between rounded-[16px] bg-[var(--demo-accent)] px-4 py-3.5 text-left text-[13px] font-bold text-[#17213b]">
               {previewForm ? "Fechar exemplo de orçamento" : "+ Novo orçamento"} <Chevron />
             </button>
             {previewForm ? <div className="mt-3 rounded-[17px] border border-[#e4e9f0] bg-white p-4">
@@ -195,6 +237,8 @@ export function LiquidDockDemo() {
           <LiquidDock
             items={previewItems}
             activeId={active}
+            accent={chosen.accent}
+            soundEnabled={soundOn}
             onPreviewSelect={(id) => navigate(id as Section)}
             ariaLabel="Menu móvel do painel ORÇAH — demonstração"
           />
