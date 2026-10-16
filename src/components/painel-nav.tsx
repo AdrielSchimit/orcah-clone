@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { OrcahIcon, OrcahLogo } from "@/components/orcah-logo";
+import { LiquidDock } from "@/components/liquid-dock";
 
 type NavId = "home" | "clientes" | "orcamentos" | "pagina" | "mais" | "pedidos" | "servicos" | "relatorios";
 
@@ -36,7 +37,7 @@ function isActive(pathname: string, id: NavId, desktop = false) {
   return routes.some((route) => pathname.startsWith(route));
 }
 
-function Icon({ id }: { id: NavId }) {
+export function Icon({ id }: { id: NavId }) {
   const common = {
     fill: "none",
     stroke: "currentColor",
@@ -101,89 +102,29 @@ function Badge({ count }: { count: number }) {
   );
 }
 
-// celular: Início · Clientes · [ORÇAMENTO] · Página · Mais
-const mobileLeft = primary.filter((item) => item.id === "home" || item.id === "clientes");
-const mobileRight = primary.filter((item) => item.id === "pagina" || item.id === "mais");
-
-function MobileItem({ item, active, badge }: { item: (typeof primary)[number]; active: boolean; badge?: number }) {
-  return (
-    <li className="min-w-0 flex-1">
-      <Link
-        href={item.href}
-        aria-current={active ? "page" : undefined}
-        className={`relative flex h-14 flex-col items-center justify-center gap-0.5 rounded-btn px-1 text-[11px] font-medium ${
-          active ? "text-text" : "text-text-soft"
-        }`}
-      >
-        {active ? <span className="absolute inset-x-5 top-0 h-0.5 rounded-full bg-gold" /> : null}
-        <span className="relative">
-          <Icon id={item.id} />
-          {badge ? <Badge count={badge} /> : null}
-        </span>
-        <span className="max-w-full truncate">{item.label}</span>
-      </Link>
-    </li>
-  );
-}
-
-/** Ação principal do app: botão central (preto, borda e brilho dourados, ícone oficial). */
-function BudgetButton({ active, raised }: { active: boolean; raised: boolean }) {
-  return (
-    <li className="flex w-[4.75rem] shrink-0 justify-center">
-      <Link
-        href="/painel/orcamentos/novo"
-        aria-label="Novo orçamento"
-        aria-current={active ? "page" : undefined}
-        className={`relative flex h-14 w-full flex-col items-center justify-center gap-0.5 text-[11px] font-semibold ${
-          active ? "text-text" : "text-text-soft"
-        }`}
-      >
-        {/* o círculo ocupa o lugar de um ícone (h-5): o rótulo fica na mesma linha dos outros itens */}
-        <span aria-hidden className="h-5 w-5" />
-        <span
-          className={`absolute left-1/2 flex -translate-x-1/2 items-center justify-center rounded-full border bg-ink transition-shadow ${
-            raised ? "top-[-1.875rem] h-[3.75rem] w-[3.75rem]" : "top-[-0.5rem] h-9 w-9"
-          } ${
-            active
-              ? "border-gold shadow-[0_0_0_3px_rgb(255_176_32/0.22),0_10px_26px_-6px_rgb(255_176_32/0.75)]"
-              : "border-gold/70 shadow-[0_0_0_2px_rgb(255_176_32/0.12),0_8px_22px_-8px_rgb(255_176_32/0.6)]"
-          }`}
-        >
-          <OrcahIcon className={raised ? "h-8 w-8" : "h-5 w-5"} />
-        </span>
-        <span>Orçamento</span>
-      </Link>
-    </li>
-  );
-}
+// Nesta branch de preview, a navegação mobile usa um dock líquido compartilhado
+// com a página pública de demonstração /preview/liquid-dock.
 
 export function PainelNav({ pedidosNovos }: { pedidosNovos: number }) {
   const pathname = usePathname();
-  const inBudgets = pathname.startsWith("/painel/orcamentos");
-  // no formulário de orçamento a barra de Total fica logo acima: o botão não sobe para não cobri-la
-  const raised = !(pathname.startsWith("/painel/orcamentos/") && pathname !== "/painel/orcamentos/");
+  const activeId = primary.find((item) => isActive(pathname, item.id))?.id ?? "home";
+  const mobileItems = primary.map((item) => ({
+    id: item.id,
+    href: item.id === "orcamentos" ? "/painel/orcamentos/novo" : item.href,
+    label: item.id === "orcamentos" ? "Orçamento" : item.label,
+    icon: item.id === "orcamentos"
+      ? <OrcahIcon className="h-6 w-6" />
+      : <Icon id={item.id} />,
+    badge: item.id === "mais" ? pedidosNovos : undefined,
+  }));
 
   return (
     <>
-      <nav
-        aria-label="Menu do painel"
-        className="fixed inset-x-0 bottom-0 z-30 border-t border-line bg-card pb-[env(safe-area-inset-bottom)] text-text-soft shadow-[0_-12px_32px_rgba(21,31,56,0.08)] md:hidden"
-      >
-        <ul className="mx-auto flex h-[4.25rem] max-w-lg items-center px-1">
-          {mobileLeft.map((item) => (
-            <MobileItem key={item.href} item={item} active={isActive(pathname, item.id)} />
-          ))}
-          <BudgetButton active={inBudgets} raised={raised} />
-          {mobileRight.map((item) => (
-            <MobileItem
-              key={item.href}
-              item={item}
-              active={isActive(pathname, item.id)}
-              badge={item.id === "mais" ? pedidosNovos : undefined}
-            />
-          ))}
-        </ul>
-      </nav>
+      <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 px-3 pb-[max(0.65rem,env(safe-area-inset-bottom))] md:hidden">
+        <div className="pointer-events-auto mx-auto max-w-[420px]">
+          <LiquidDock items={mobileItems} activeId={activeId} ariaLabel="Menu do painel" />
+        </div>
+      </div>
 
       <nav
         aria-label="Menu do painel"
