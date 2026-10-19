@@ -7,7 +7,7 @@ import styles from "./page.module.css";
 import homeButtons from "@/components/home/home-buttons.module.css";
 import { EditorModal, CoverPicker } from "@/components/visual-page-editor";
 import { readableTextColor } from "@/lib/public-page";
-import { isLegacyLocalAsset } from "@/lib/asset-recovery";
+import { isUnavailableLegacyAsset } from "@/lib/asset-recovery";
 import { rememberCover } from "@/lib/cover-history";
 import { ServiceCoverPlaceholder } from "@/components/service-cover-placeholder";
 import { resolveServiceCoverTheme } from "@/lib/service-cover-themes";
@@ -73,13 +73,13 @@ export default async function PaginaPage() {
   });
   const primary = company.primaryColor ?? "#0b1120";
 
-  const appearance = { name: company.name, logoPath: isLegacyLocalAsset(company.logoPath) ? null : company.logoPath, primaryColor: company.primaryColor, secondaryColor: company.secondaryColor };
+  const appearance = { name: company.name, logoPath: isUnavailableLegacyAsset(company.logoPath) ? null : company.logoPath, primaryColor: company.primaryColor, secondaryColor: company.secondaryColor };
   const next = progress.missing[0];
   const cover = company.coverPath;
-  const legacyGalleryCount = photos.filter((photo) => isLegacyLocalAsset(photo.path)).length;
-  const legacyServiceCount = services.filter((service) => isLegacyLocalAsset(service.imagePath)).length;
-  const legacyCover = isLegacyLocalAsset(cover);
-  const legacyLogo = isLegacyLocalAsset(company.logoPath);
+  const legacyGalleryCount = photos.filter((photo) => isUnavailableLegacyAsset(photo.path)).length;
+  const legacyServiceCount = services.filter((service) => isUnavailableLegacyAsset(service.imagePath)).length;
+  const legacyCover = isUnavailableLegacyAsset(cover);
+  const legacyLogo = isUnavailableLegacyAsset(company.logoPath);
   const needsRecovery = legacyGalleryCount > 0 || legacyServiceCount > 0 || legacyCover || legacyLogo;
   const coverCategory = ramoLabel(company);
   const defaultCoverTheme = resolveServiceCoverTheme(coverCategory);
@@ -107,7 +107,7 @@ export default async function PaginaPage() {
         <div className={styles.cover}>
           {cover && !legacyCover ? <img src={cover} alt="Capa da sua página" /> : <ServiceCoverPlaceholder category={coverCategory} className={styles.coverWash} />}
           <EditorModal id="capa" title="Fundo da sua página" label={cover && !legacyCover ? "✎ Alterar capa" : "+ Adicionar capa"} className={styles.coverEdit}>
-            <CoverPicker photos={photos.filter(photo=>!isLegacyLocalAsset(photo.path))} services={services.filter(service=>service.active).map(service=>({id:service.id,name:service.name,imagePath:isLegacyLocalAsset(service.imagePath) ? null : service.imagePath}))} history={rememberCover(company.coverHistory,cover).filter(path=>!isLegacyLocalAsset(path)).slice(0,8)} currentCover={legacyCover ? null : cover} color={primary} hasCover={Boolean(cover && !legacyCover)} category={ramoLabel(company)} />
+            <CoverPicker photos={photos.filter(photo=>!isUnavailableLegacyAsset(photo.path))} services={services.filter(service=>service.active).map(service=>({id:service.id,name:service.name,imagePath:isUnavailableLegacyAsset(service.imagePath) ? null : service.imagePath}))} history={rememberCover(company.coverHistory,cover).filter(path=>!isUnavailableLegacyAsset(path)).slice(0,8)} currentCover={legacyCover ? null : cover} color={primary} hasCover={Boolean(cover && !legacyCover)} category={ramoLabel(company)} />
           </EditorModal>
         </div>
         <div className={styles.profile}>
