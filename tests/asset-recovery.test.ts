@@ -9,7 +9,7 @@ describe("fotos antigas do provedor", () => {
     assert.equal(isLegacyLocalAsset("/uploads/companies/2/cover/foto.webp"), true);
     assert.equal(isLegacyLocalAsset("https://project.supabase.co/storage/v1/object/public/company-assets/companies/2/gallery/foto.webp"), false);
     assert.equal(isLegacyLocalAsset(null), false);
-    assert.equal(publicAssetOrNull("/uploads/companies/2/logo/a.webp"), null);
+    assert.equal(publicAssetOrNull("/uploads/companies/2/logo/a.webp", true), null);
     assert.equal(publicAssetOrNull("https://project.supabase.co/storage/v1/object/public/company-assets/companies/2/logo/a.webp"),
       "https://project.supabase.co/storage/v1/object/public/company-assets/companies/2/logo/a.webp");
   });
@@ -34,7 +34,7 @@ describe("fotos antigas do provedor", () => {
       ],
     };
     const db = { company: { findUnique: async () => company } } as unknown as PublicPageDb;
-    const result = await getPublicCompanyPage(db, "pintada");
+    const result = await getPublicCompanyPage(db, "pintada", { production: true });
     assert.ok(result);
     assert.equal(result.logoPath, null);
     assert.equal(result.coverPath, null);
