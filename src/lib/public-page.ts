@@ -31,7 +31,7 @@ export function readableTextColor(background: string) {
   return luminance > 0.45 ? "#151f38" : "#ffffff";
 }
 
-export async function getPublicCompanyPage(db: PublicPageDb, slug: string) {
+export async function getPublicCompanyPage(db: PublicPageDb, slug: string, { production = process.env.NODE_ENV === "production" }: { production?: boolean } = {}) {
   if (!slug || slug.length > 160) return null;
   const company = await db.company.findUnique({
     where: { slug },
@@ -96,15 +96,15 @@ export async function getPublicCompanyPage(db: PublicPageDb, slug: string) {
     facebook: company.facebook || null,
     website: company.website || null,
     openingHours: company.openingHours || null,
-    logoPath: publicAssetOrNull(company.logoPath),
-    coverPath: publicAssetOrNull(company.coverPath),
+    logoPath: publicAssetOrNull(company.logoPath, production),
+    coverPath: publicAssetOrNull(company.coverPath, production),
     primaryColor: normalizeHexColor(company.primaryColor),
     secondaryColor: normalizeHexColor(company.secondaryColor),
     // Old local /uploads files are not deployed with Vercel functions.
     // Hide broken images from the public gallery until they are reuploaded.
     // The original company_photos rows stay untouched and recoverable in the panel.
     photos: company.photos
-      .filter((photo) => publicAssetOrNull(photo.path) !== null)
+      .filter((photo) => publicAssetOrNull(photo.path, production) !== null)
       .map((photo) => ({ path: photo.path, title: photo.title })),
     services: company.services.map((service) => {
       const price = Number(service.defaultPrice);
@@ -112,7 +112,7 @@ export async function getPublicCompanyPage(db: PublicPageDb, slug: string) {
         name: service.name,
         description: service.description,
         category: service.category,
-        imagePath: publicAssetOrNull(service.imagePath),
+        imagePath: publicAssetOrNull(service.imagePath, production),
         featured: service.featured,
         unit: service.unit,
         // preço só sai do servidor se o prestador escolheu mostrar
