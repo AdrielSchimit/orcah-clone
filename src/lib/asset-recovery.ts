@@ -1,16 +1,20 @@
 /**
- * Legacy images saved in /public/uploads on temporary application instances.
- * Those files are not durable on Vercel. Keep database references intact so a
- * provider can replace an image without losing its title/order or cover history.
- *
- * IMPORTANT: this is a prefix classification, not a network existence check.
- * A public Supabase URL can also break; use storage inventory for deeper audits.
+ * Older images were saved in /public/uploads on transient Vercel instances.
+ * Keep old database records intact so the provider can reupload a replacement.
  */
 export function isLegacyLocalAsset(value: string | null | undefined): boolean {
   return typeof value === "string" && value.startsWith("/uploads/");
 }
 
-export function publicAssetOrNull(value: string | null | undefined): string | null {
-  if (!value || isLegacyLocalAsset(value)) return null;
+/**
+ * Local development can legitimately serve /public/uploads. A deployed,
+ * immutable production build cannot rely on runtime writes to that folder.
+ */
+export function isUnavailableLegacyAsset(value: string | null | undefined, production = process.env.NODE_ENV === "production") {
+  return production && isLegacyLocalAsset(value);
+}
+
+export function publicAssetOrNull(value: string | null | undefined, production = process.env.NODE_ENV === "production"): string | null {
+  if (!value || isUnavailableLegacyAsset(value, production)) return null;
   return value;
 }
