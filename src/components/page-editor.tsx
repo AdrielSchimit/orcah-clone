@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { PhoneInput } from "@/components/phone-input";
 import { Toggle } from "@/components/toggle";
 import { uploadImage } from "@/lib/client-image";
+import { isUnavailableLegacyAsset } from "@/lib/asset-recovery";
 import { instagramHandle } from "@/lib/instagram";
 import { LogoCropper } from "@/components/logo-cropper";
 import buttonStyles from "@/components/home/home-buttons.module.css";
@@ -467,6 +468,26 @@ export function GalleryManager({ photos, limit }: { photos: Photo[]; limit: numb
     }
   }
 
+  async function replacePhoto(id: number, file: File | undefined) {
+    if (!file) return;
+    setError("");
+    setUploading(true);
+    try {
+      // Reuse image compression and server-side upload validation.
+      // Updating the same row preserves caption, position and gallery quota.
+      const result = await uploadImage(`/api/empresa/fotos/${id}`, file);
+      if (!result.ok) {
+        setError(result.error);
+        return;
+      }
+      router.refresh();
+    } catch {
+      setError("Não foi possível reenviar a foto. Tente novamente.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function remove(id: number) {
     if (!window.confirm("Remover esta foto da página?")) return;
     const response = await fetch(`/api/empresa/fotos/${id}`, { method: "DELETE" }).catch(() => null);
@@ -483,8 +504,29 @@ export function GalleryManager({ photos, limit }: { photos: Photo[]; limit: numb
         <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {photos.map((photo) => (
             <li key={photo.id} className="overflow-hidden rounded-xl border border-line bg-card">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={photo.path} alt={photo.title || ""} loading="lazy" className="aspect-square w-full object-cover" />
+              {isUnavailableLegacyAsset(photo.path) ? (
+                <div className="flex aspect-square flex-col items-center justify-center gap-2 bg-gold-wash p-3 text-center">
+                  <span className="text-2xl" aria-hidden="true">▧</span>
+                  <p className="text-xs font-semibold text-text">Foto antiga indisponível</p>
+                  <label className="cursor-pointer rounded-btn border border-gold px-3 py-2 text-xs font-semibold text-text">
+                    {uploading ? "Enviando…" : "Reenviar foto"}
+                    <input
+                      className="sr-only"
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      disabled={uploading}
+                      aria-label={`Reenviar ${photo.title || "foto antiga"}`}
+                      onChange={(event) => {
+                        void replacePhoto(photo.id, event.currentTarget.files?.[0]);
+                        event.currentTarget.value = "";
+                      }}
+                    />
+                  </label>
+                </div>
+              ) : (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={photo.path} alt={photo.title || ""} loading="lazy" className="aspect-square w-full object-cover" />
+              )}
               <div className="flex items-center justify-between gap-2 px-2 py-1">
                 <span className="truncate text-xs text-text-soft">{photo.title || "Sem título"}</span>
                 <button type="button" onClick={() => void remove(photo.id)} className="min-h-10 px-1 text-xs font-medium text-no">

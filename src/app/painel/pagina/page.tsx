@@ -7,6 +7,7 @@ import styles from "./page.module.css";
 import homeButtons from "@/components/home/home-buttons.module.css";
 import { EditorModal, CoverPicker } from "@/components/visual-page-editor";
 import { readableTextColor } from "@/lib/public-page";
+import { isUnavailableLegacyAsset } from "@/lib/asset-recovery";
 import { rememberCover } from "@/lib/cover-history";
 import { ServiceCoverPlaceholder } from "@/components/service-cover-placeholder";
 import { resolveServiceCoverTheme } from "@/lib/service-cover-themes";
@@ -72,9 +73,14 @@ export default async function PaginaPage() {
   });
   const primary = company.primaryColor ?? "#0b1120";
 
-  const appearance = { name: company.name, logoPath: company.logoPath, primaryColor: company.primaryColor, secondaryColor: company.secondaryColor };
+  const appearance = { name: company.name, logoPath: isUnavailableLegacyAsset(company.logoPath) ? null : company.logoPath, primaryColor: company.primaryColor, secondaryColor: company.secondaryColor };
   const next = progress.missing[0];
   const cover = company.coverPath;
+  const legacyGalleryCount = photos.filter((photo) => isUnavailableLegacyAsset(photo.path)).length;
+  const legacyServiceCount = services.filter((service) => isUnavailableLegacyAsset(service.imagePath)).length;
+  const legacyCover = isUnavailableLegacyAsset(cover);
+  const legacyLogo = isUnavailableLegacyAsset(company.logoPath);
+  const needsRecovery = legacyGalleryCount > 0 || legacyServiceCount > 0 || legacyCover || legacyLogo;
   const coverCategory = ramoLabel(company);
   const defaultCoverTheme = resolveServiceCoverTheme(coverCategory);
   const municipio = resolveSavedMunicipio(await readMunicipios(), company.city, company.state.uf);
@@ -85,15 +91,27 @@ export default async function PaginaPage() {
         <div className={styles.toolbarIdentity}><div className={styles.toolbarTitle}><h1>Sua página</h1><span className={styles.live}>● Publicada</span></div><a href={url} target="_blank" rel="noreferrer" className={styles.pageUrl}>{url.replace(/^https?:\/\//,"").replace(/\/$/,"")}</a></div>
         <ShareBar url={url} name={company.name} />
       </header>
+      {needsRecovery ? (
+        <section role="status" className="rounded-box border border-amber-300 bg-amber-50 p-4 text-amber-950">
+          <h2 className="font-semibold">Algumas imagens antigas precisam ser reenviadas</h2>
+          <p className="mt-1 text-sm">Elas foram cadastradas antes do armazenamento permanente. O cadastro e as legendas continuam salvos, mas o arquivo pode não aparecer no site público.</p>
+          <ul className="mt-2 list-inside list-disc text-sm">
+            {legacyGalleryCount > 0 ? <li>{legacyGalleryCount} foto(s) da galeria: <a className="underline" href="#fotos">reenviar abaixo, sem perder a legenda</a></li> : null}
+            {legacyServiceCount > 0 ? <li>{legacyServiceCount} foto(s) de serviço: substituir na edição dos serviços</li> : null}
+            {legacyCover ? <li>Capa: escolher outra imagem em “Alterar capa”</li> : null}
+            {legacyLogo ? <li>Logo: reenviar em “Foto de perfil”</li> : null}
+          </ul>
+        </section>
+      ) : null}
       <section className={styles.identity} data-cover={Boolean(cover)} style={{ backgroundColor: cover ? primary : defaultCoverTheme.background, color: cover ? "#ffffff" : readableTextColor(defaultCoverTheme.background) }} aria-label="Identidade da sua página">
         <div className={styles.cover}>
-          {cover ? <img src={cover} alt="Capa da sua página" /> : <ServiceCoverPlaceholder category={coverCategory} className={styles.coverWash} />}
-          <EditorModal id="capa" title="Fundo da sua página" label={cover ? "✎ Alterar capa" : "+ Adicionar capa"} className={styles.coverEdit}>
-            <CoverPicker photos={photos} services={services.filter(service=>service.active).map(service=>({id:service.id,name:service.name,imagePath:service.imagePath}))} history={rememberCover(company.coverHistory,cover).slice(0,8)} currentCover={cover} color={primary} hasCover={Boolean(cover)} category={ramoLabel(company)} />
+          {cover && !legacyCover ? <img src={cover} alt="Capa da sua página" /> : <ServiceCoverPlaceholder category={coverCategory} className={styles.coverWash} />}
+          <EditorModal id="capa" title="Fundo da sua página" label={cover && !legacyCover ? "✎ Alterar capa" : "+ Adicionar capa"} className={styles.coverEdit}>
+            <CoverPicker photos={photos.filter(photo=>!isUnavailableLegacyAsset(photo.path))} services={services.filter(service=>service.active).map(service=>({id:service.id,name:service.name,imagePath:isUnavailableLegacyAsset(service.imagePath) ? null : service.imagePath}))} history={rememberCover(company.coverHistory,cover).filter(path=>!isUnavailableLegacyAsset(path)).slice(0,8)} currentCover={legacyCover ? null : cover} color={primary} hasCover={Boolean(cover && !legacyCover)} category={ramoLabel(company)} />
           </EditorModal>
         </div>
         <div className={styles.profile}>
-          <EditorModal id="logo" title="Foto de perfil" label={<>{company.logoPath ? <img src={company.logoPath} alt="Trocar foto de perfil" /> : <span>{company.name.slice(0,1)}</span>}<span className={styles.avatarEdit}>✎</span></>} className={styles.avatar}>
+          <EditorModal id="logo" title="Foto de perfil" label={<>{company.logoPath && !legacyLogo ? <img src={company.logoPath} alt="Trocar foto de perfil" /> : <span>{company.name.slice(0,1)}</span>}<span className={styles.avatarEdit}>✎</span></>} className={styles.avatar}>
             <AppearanceForm company={appearance} />
           </EditorModal>
           <div className={styles.profileText}>
