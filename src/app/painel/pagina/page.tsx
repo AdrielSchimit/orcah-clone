@@ -73,7 +73,7 @@ export default async function PaginaPage() {
   });
   const primary = company.primaryColor ?? "#0b1120";
 
-  const appearance = { name: company.name, logoPath: company.logoPath, primaryColor: company.primaryColor, secondaryColor: company.secondaryColor };
+  const appearance = { name: company.name, logoPath: isLegacyLocalAsset(company.logoPath) ? null : company.logoPath, primaryColor: company.primaryColor, secondaryColor: company.secondaryColor };
   const next = progress.missing[0];
   const cover = company.coverPath;
   const legacyGalleryCount = photos.filter((photo) => isLegacyLocalAsset(photo.path)).length;
