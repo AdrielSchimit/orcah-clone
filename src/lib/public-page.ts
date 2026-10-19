@@ -1,5 +1,6 @@
 import type { PrismaClient } from "@prisma/client";
 import { ramoLabel } from "@/lib/company-display";
+import { publicAssetOrNull } from "@/lib/asset-recovery";
 
 /**
  * Dados da página pública por slug. Sai daqui só o que pode aparecer para qualquer
@@ -95,18 +96,23 @@ export async function getPublicCompanyPage(db: PublicPageDb, slug: string) {
     facebook: company.facebook || null,
     website: company.website || null,
     openingHours: company.openingHours || null,
-    logoPath: company.logoPath || null,
-    coverPath: company.coverPath || null,
+    logoPath: publicAssetOrNull(company.logoPath),
+    coverPath: publicAssetOrNull(company.coverPath),
     primaryColor: normalizeHexColor(company.primaryColor),
     secondaryColor: normalizeHexColor(company.secondaryColor),
-    photos: company.photos.map((photo) => ({ path: photo.path, title: photo.title })),
+    // Old local /uploads files are not deployed with Vercel functions.
+    // Hide broken images from the public gallery until they are reuploaded.
+    // The original company_photos rows stay untouched and recoverable in the panel.
+    photos: company.photos
+      .filter((photo) => publicAssetOrNull(photo.path) !== null)
+      .map((photo) => ({ path: photo.path, title: photo.title })),
     services: company.services.map((service) => {
       const price = Number(service.defaultPrice);
       return {
         name: service.name,
         description: service.description,
         category: service.category,
-        imagePath: service.imagePath,
+        imagePath: publicAssetOrNull(service.imagePath),
         featured: service.featured,
         unit: service.unit,
         // preço só sai do servidor se o prestador escolheu mostrar
