@@ -5,7 +5,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { PhoneInput } from "@/components/phone-input";
 import { Toggle } from "@/components/toggle";
 import { uploadImage } from "@/lib/client-image";
-import { isLegacyLocalAsset } from "@/lib/asset-recovery";
+import { isUnavailableLegacyAsset } from "@/lib/asset-recovery";
 import { instagramHandle } from "@/lib/instagram";
 import { LogoCropper } from "@/components/logo-cropper";
 import buttonStyles from "@/components/home/home-buttons.module.css";
@@ -504,7 +504,7 @@ export function GalleryManager({ photos, limit }: { photos: Photo[]; limit: numb
         <ul className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {photos.map((photo) => (
             <li key={photo.id} className="overflow-hidden rounded-xl border border-line bg-card">
-              {isLegacyLocalAsset(photo.path) ? (
+              {isUnavailableLegacyAsset(photo.path) ? (
                 <div className="flex aspect-square flex-col items-center justify-center gap-2 bg-gold-wash p-3 text-center">
                   <span className="text-2xl" aria-hidden="true">▧</span>
                   <p className="text-xs font-semibold text-text">Foto antiga indisponível</p>
