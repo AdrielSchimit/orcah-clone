@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin";
+import { existingAsaasCheckoutMethod } from "@/lib/asaas-checkout";
 import {
   asaasConfigured,
   createPixSubscription,
@@ -29,6 +30,13 @@ export async function POST(request: Request) {
   }
 
   await ensureSubscription(auth.company.id);
+  const current = await prisma.subscription.findUnique({ where: { companyId: auth.company.id } });
+  if (existingAsaasCheckoutMethod(current) === "CREDIT_CARD") {
+    return NextResponse.json(
+      { error: "O pagamento com cartão está aguardando confirmação. Evite gerar outra cobrança." },
+      { status: 409 },
+    );
+  }
   await prisma.company.update({
     where: { id: auth.company.id },
     data: { document },
@@ -74,8 +82,10 @@ export async function POST(request: Request) {
       image: qr.encodedImage ? `data:image/png;base64,${qr.encodedImage}` : "",
       expirationDate: qr.expirationDate ?? null,
     });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Falha ao gerar o Pix.";
-    return NextResponse.json({ error: message }, { status: 400 });
+  } catch {
+    return NextResponse.json(
+      { error: "Não foi possível gerar o Pix agora. Confira o status antes de tentar novamente." },
+      { status: 502 },
+    );
   }
 }

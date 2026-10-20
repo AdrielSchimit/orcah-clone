@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin";
 import { asaasConfigured, clientIp, createCardSubscription, findOrCreateAsaasCustomer } from "@/lib/asaas";
-import { markPaid } from "@/lib/asaas-billing";
+import { cardCheckoutAlreadyStarted, existingAsaasCheckoutMethod } from "@/lib/asaas-checkout";
 import { requireCompany } from "@/lib/company";
 import { prisma } from "@/lib/db";
 import { digitsOnly, isCpfCnpj } from "@/lib/document";
@@ -54,6 +54,18 @@ export async function POST(request: Request) {
   }
 
   await ensureSubscription(auth.company.id);
+  // Avoid another recurring charge after a timeout, refresh or repeated click.
+  const current = await prisma.subscription.findUnique({ where: { companyId: auth.company.id } });
+  if (existingAsaasCheckoutMethod(current) === "PIX") {
+    return NextResponse.json(
+      { error: "Há uma cobrança Pix em andamento. Consulte o suporte para alterar o pagamento." },
+      { status: 409 },
+    );
+  }
+  if (cardCheckoutAlreadyStarted(current)) {
+    return NextResponse.json({ ok: true, paid: false, pending: true });
+  }
+
   await prisma.company.update({
     where: { id: auth.company.id },
     data: { document, zipCode: postalCode },
@@ -89,16 +101,24 @@ export async function POST(request: Request) {
       },
     });
 
-    await markPaid({
-      companyId: auth.company.id,
-      providerCustomerId: customer.id,
-      providerSubscriptionId: created.id,
-      billingType: "CREDIT_CARD",
+    // Creating a subscription is NOT payment confirmation.
+    // Preserve the existing trial/expired state until a verified webhook arrives.
+    await prisma.subscription.update({
+      where: { companyId: auth.company.id },
+      data: {
+        provider: "asaas",
+        providerCustomerId: customer.id,
+        providerSubscriptionId: created.id,
+        providerPaymentId: null,
+        billingType: "CREDIT_CARD",
+      },
     });
 
-    return NextResponse.json({ ok: true });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Não autorizou o cartão.";
-    return NextResponse.json({ error: message }, { status: 400 });
+    return NextResponse.json({ ok: true, paid: false, pending: true });
+  } catch {
+    return NextResponse.json(
+      { error: "Não foi possível concluir a solicitação. Verifique o status antes de tentar novamente." },
+      { status: 502 },
+    );
   }
 }
