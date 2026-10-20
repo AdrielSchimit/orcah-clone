@@ -1,0 +1,168 @@
+AUDIT_FULL_FILE_READSET main/src/app/api/orcamentos/[id]/enviar/route.ts
+main/src/app/api/orcamentos/[id]/route.ts
+main/src/app/api/orcamentos/route.ts
+main/src/app/api/plano/cartao/route.ts
+main/src/app/api/plano/pix/route.ts
+main/src/app/api/plano/status/route.ts
+main/src/app/api/webhooks/asaas/route.ts
+main/src/lib/asaas-billing.ts
+main/src/lib/asaas.ts
+main/src/lib/company.ts
+main/src/lib/document.ts
+main/src/lib/plan-constants.ts
+main/src/lib/plan.ts
+pr11/src/app/api/orcamentos/[id]/enviar/route.ts
+pr11/src/app/api/orcamentos/[id]/route.ts
+pr11/src/app/api/orcamentos/route.ts
+pr11/src/app/api/plano/cartao/route.ts
+pr11/src/app/api/plano/pix/route.ts
+pr11/src/app/api/plano/status/route.ts
+pr11/src/app/api/webhooks/asaas/route.ts
+pr11/src/lib/asaas-billing.ts
+pr11/src/lib/asaas-checkout.ts
+pr11/src/lib/asaas.ts
+pr11/src/lib/company.ts
+pr11/src/lib/document.ts
+pr11/src/lib/plan-constants.ts
+pr11/src/lib/plan.ts
+AUDIT_ROOT
+▶ audit main vs PR11: checkout witnesses
+  ✔ BUG main activates card subscription without any confirmed payment; PR11 preserves expired paywall (399.8769ms)
+  ✔ BUG main: concurrent card submissions create two recurring subscriptions (71.9498ms)
+  ✔ BUG main: remote accepted card but response timeout leaves no local guard and retry creates again (78.5296ms)
+  ✔ BUG main: simultaneous Pix/card checkouts both create subscriptions before method guard (54.3987ms)
+  ✔ BUG main: Pix payment/QR unavailable after remote creation leaves orphan and retry creates another (56.601ms)
+  ✔ BUG PR11: concurrent card submissions create two recurring subscriptions (79.1417ms)
+  ✔ BUG PR11: remote accepted card but response timeout leaves no local guard and retry creates again (76.5376ms)
+  ✔ BUG PR11: simultaneous Pix/card checkouts both create subscriptions before method guard (91.2214ms)
+  ✔ BUG PR11: Pix payment/QR unavailable after remote creation leaves orphan and retry creates another (58.6604ms)
+  ✔ PR11 sequential card retry and method switch are blocked only after identifiers are saved (59.1181ms)
+  ✔ BUG PR11 denied/past_due card is indefinitely pending and cannot retry or switch to Pix (63.4226ms)
+  ✔ PR11 canceled card may start fresh checkout, preserving canceled paywall until real confirmation (63.0372ms)
+  ✔ Pix CREATED/PENDING QR never grants access, and an existing Pix subscription is reused (79.7085ms)
+  ✔ BUG expired Pix QR error offers no fresh invoice path and keeps using same first payment (54.1428ms)
+✔ audit main vs PR11: checkout witnesses (1288.9938ms)
+▶ audit main: billing/webhook state
+  ✔ counterevidence: paid confirmation grants access, pending does not, unpaid statuses revoke it (40.5658ms)
+  ✔ BUG event.id is ignored: duplicate confirmation writes again; without dueDate it extends entitlement (46.7725ms)
+  ✔ counterevidence: a duplicate with the same dueDate does not extend endsAt (45.4918ms)
+  ✔ BUG old overdue/deleted/refunded invoice downgrades a successfully renewed subscription (128.8926ms)
+  ✔ BUG old paid invoice shrinks renewal and paid replay resurrects canceled/refunded subscription (44.8499ms)
+  ✔ BUG a late confirmed invoice with dueDate over 35 days ago stays blocked despite payment (52.6369ms)
+  ✔ BUG webhook before local subscription ID is saved is acknowledged and lost (38.1014ms)
+  ✔ BUG status fallback cannot recover pending card with no providerPaymentId (44.1714ms)
+  ✔ BUG chargeback statuses leave previously active access untouched (161.7252ms)
+  ✔ BUG current active-but-expired row skips provider reconciliation in status endpoint (42.1535ms)
+  ✔ BUG confirmed payment trusts value/customer and credits full plan for a mismatched 0.01 fixture (40.1177ms)
+  ✔ webhook rejects absent/wrong token and returns 200 only for matching fixture token (41.2268ms)
+  ✔ billing-exempt internal user is unaffected by payment webhook (37.866ms)
+  ✔ required plan returns 402 for expired unpaid account and allows confirmed plan (51.8821ms)
+  ✔ counterevidence: requireCompany permits authenticated expired account but budget mutations enforce 402 (85.3599ms)
+  ✔ BUG API adapter installs no request deadline or idempotency key (40.6166ms)
+✔ audit main: billing/webhook state (943.539ms)
+▶ audit PR11: billing/webhook state
+  ✔ counterevidence: paid confirmation grants access, pending does not, unpaid statuses revoke it (50.3659ms)
+  ✔ BUG event.id is ignored: duplicate confirmation writes again; without dueDate it extends entitlement (51.7088ms)
+  ✔ counterevidence: a duplicate with the same dueDate does not extend endsAt (75.4178ms)
+  ✔ BUG old overdue/deleted/refunded invoice downgrades a successfully renewed subscription (144.936ms)
+  ✔ BUG old paid invoice shrinks renewal and paid replay resurrects canceled/refunded subscription (45.4859ms)
+  ✔ BUG a late confirmed invoice with dueDate over 35 days ago stays blocked despite payment (64.2ms)
+  ✔ BUG webhook before local subscription ID is saved is acknowledged and lost (56.9975ms)
+  ✔ BUG status fallback cannot recover pending card with no providerPaymentId (45.1029ms)
+  ✔ BUG chargeback statuses leave previously active access untouched (148.4316ms)
+  ✔ BUG current active-but-expired row skips provider reconciliation in status endpoint (42.553ms)
+  ✔ BUG confirmed payment trusts value/customer and credits full plan for a mismatched 0.01 fixture (43.4285ms)
+  ✔ webhook rejects absent/wrong token and returns 200 only for matching fixture token (44.1669ms)
+  ✔ billing-exempt internal user is unaffected by payment webhook (43.1066ms)
+  ✔ required plan returns 402 for expired unpaid account and allows confirmed plan (67.334ms)
+  ✔ counterevidence: requireCompany permits authenticated expired account but budget mutations enforce 402 (113.9253ms)
+  ✔ BUG API adapter installs no request deadline or idempotency key (47.1323ms)
+✔ audit PR11: billing/webhook state (1085.3061ms)
+✔ Kanban access gate accepts forged localStorage identity without checking an access code (4.1176ms)
+✔ Kanban online event starts publishable-key shared-document reads without any access session (3.8975ms)
+✔ Kanban whole-document upserts lose concurrent changes and trust global author attribution (5.8059ms)
+✔ UX synchronized state injects frame/block IDs and mobileWidth into HTML sinks (5.5708ms)
+✔ PR10 gallery replacement preserves row, caption, description, ordering and 12-photo quota (178.9958ms)
+✔ PR10 denies unauthenticated and cross-tenant replacement before upload (50.3492ms)
+✔ PR10 invalid multipart file is rejected before upload (16.3406ms)
+✔ PR10 race compare-and-swap cleans new object without overwriting current row (20.8708ms)
+✔ PR10 deleted compare-and-swap cleans new object without overwriting current row (16.5959ms)
+[galeria] falha ao substituir imagem
+✔ PR10 database error cleans new object and preserves old photo (14.7412ms)
+✔ PR10 asset recovery hides local production URLs and retains dev/remote URLs (6.6303ms)
+✔ main baseline has no single-photo replacement method; PR10 adds it (0.6703ms)
+✔ Control public health route invokes configured privileged pings without a session (18.957ms)
+✔ PR9 mount has no audio autoplay, native labelled links remain, drag navigates and cancellation does not (37.4978ms)
+✔ PR9 sound disabled keeps gesture navigation silent (20.6751ms)
+▶ public lead/city boundaries
+  ✔ BUG anonymous lead modifies canonical shared city, stores 2MiB text and evicts older lead from latest-50 listing (286.1208ms)
+  ✔ counterevidence: unavailable company/state reject before lead write (11.6889ms)
+✔ public lead/city boundaries (299.4683ms)
+▶ public budget transition races
+  ✔ BUG simultaneous approve then revision overwrites terminal approval and records contradictory events (48.2196ms)
+  ✔ BUG simultaneous approve then reject overwrites terminal approval and records contradictory events (31.3247ms)
+  ✔ BUG simultaneous approve then view overwrites terminal approval and records contradictory events (38.3135ms)
+  ✔ counterevidence: sequential response after approval is rejected and sequential view keeps approval (32.6644ms)
+✔ public budget transition races (150.9626ms)
+▶ login form content/origin boundary
+  ✔ BUG cross-site text/plain HTML-form-compatible JSON authenticates and issues a session (389.0085ms)
+AUDIT_PUBLIC_BOUNDARIES_FULL_FILE_READSET src/app/api/auth/login/route.ts
+src/app/api/pedidos/route.ts
+src/app/api/publico/empresas/[slug]/pedir/route.ts
+src/app/api/publico/orcamentos/[token]/responder/route.ts
+src/app/api/publico/orcamentos/[token]/visualizar/route.ts
+src/lib/auth-login.ts
+src/lib/auth-security.ts
+src/lib/budget-cycle.ts
+src/lib/city.ts
+src/lib/http.ts
+src/lib/password-reset.ts
+src/lib/password-rules.ts
+src/lib/password.ts
+src/lib/public-budget.ts
+src/lib/session-token.ts
+src/lib/session.ts
+src/lib/text.ts
+src/lib/urls.ts
+tests/helpers/fake-db.ts
+  ✔ counterevidence: same-origin valid login works and wrong password does not issue a cookie (412.1265ms)
+✔ login form content/origin boundary (801.7713ms)
+▶ security audit: pre-registration credentials
+  ✔ BUG verification after victim re-registers preserves attacker password and creates victim session (856.2913ms)
+  ✔ counterevidence: an already verified email rejects another registration and retains its credentials (341.207ms)
+✔ security audit: pre-registration credentials (1199.4909ms)
+▶ security audit: service worker cache
+  ✔ BUG authenticated no-store HTML /painel survives logout and is served offline (119.8325ms)
+  ✔ BUG authenticated no-store HTML /painel/orcamentos/7 survives logout and is served offline (128.0219ms)
+  ✔ BUG authenticated no-store RSC /painel?_rsc=fixture survives logout and is served offline (110.8945ms)
+  ✔ counterevidence: API, non-GET and cross-origin requests are not intercepted (2.2481ms)
+  ✔ actual PwaRegister registers root worker without checking authentication or environment (5.9607ms)
+✔ security audit: service worker cache (367.7441ms)
+▶ security audit: session boundaries
+  ✔ BUG old JWT issued in password-change second remains accepted by actual getSessionUser (110.7244ms)
+AUDIT_SECURITY_FULL_FILE_READSET public/sw.js
+src/app/api/auth/logout/route.ts
+src/app/api/auth/verificar-email/route.ts
+src/app/layout.tsx
+src/components/pwa-register.tsx
+src/lib/auth-login.ts
+src/lib/auth-security.ts
+src/lib/email-verification.ts
+src/lib/password-reset.ts
+src/lib/password-rules.ts
+src/lib/password.ts
+src/lib/registration.ts
+src/lib/session-token.ts
+src/lib/session.ts
+src/lib/urls.ts
+tests/helpers/fake-db.ts
+  ✔ purpose confusion: actual session decoder accepts handoff token; actual JWT expiry still caps lifetime to two minutes (94.5565ms)
+✔ security audit: session boundaries (205.8104ms)
+ℹ tests 78
+ℹ suites 9
+ℹ pass 78
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 4378.5474

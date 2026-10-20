@@ -1,0 +1,88 @@
+AUDIT_FULL_FILE_READSET main/src/app/api/orcamentos/[id]/enviar/route.ts
+main/src/app/api/orcamentos/[id]/route.ts
+main/src/app/api/orcamentos/route.ts
+main/src/app/api/plano/cartao/route.ts
+main/src/app/api/plano/pix/route.ts
+main/src/app/api/plano/status/route.ts
+main/src/app/api/webhooks/asaas/route.ts
+main/src/lib/asaas-billing.ts
+main/src/lib/asaas.ts
+main/src/lib/company.ts
+main/src/lib/document.ts
+main/src/lib/plan-constants.ts
+main/src/lib/plan.ts
+pr11/src/app/api/orcamentos/[id]/enviar/route.ts
+pr11/src/app/api/orcamentos/[id]/route.ts
+pr11/src/app/api/orcamentos/route.ts
+pr11/src/app/api/plano/cartao/route.ts
+pr11/src/app/api/plano/pix/route.ts
+pr11/src/app/api/plano/status/route.ts
+pr11/src/app/api/webhooks/asaas/route.ts
+pr11/src/lib/asaas-billing.ts
+pr11/src/lib/asaas-checkout.ts
+pr11/src/lib/asaas.ts
+pr11/src/lib/company.ts
+pr11/src/lib/document.ts
+pr11/src/lib/plan-constants.ts
+pr11/src/lib/plan.ts
+AUDIT_ROOT
+▶ audit main vs PR11: checkout witnesses
+  ✔ BUG main activates card subscription without any confirmed payment; PR11 preserves expired paywall (387.8647ms)
+  ✔ BUG main: concurrent card submissions create two recurring subscriptions (73.272ms)
+  ✔ BUG main: remote accepted card but response timeout leaves no local guard and retry creates again (65.7286ms)
+  ✔ BUG main: simultaneous Pix/card checkouts both create subscriptions before method guard (59.254ms)
+  ✔ BUG main: Pix payment/QR unavailable after remote creation leaves orphan and retry creates another (60.2634ms)
+  ✔ BUG PR11: concurrent card submissions create two recurring subscriptions (77.2586ms)
+  ✔ BUG PR11: remote accepted card but response timeout leaves no local guard and retry creates again (66.5177ms)
+  ✔ BUG PR11: simultaneous Pix/card checkouts both create subscriptions before method guard (80.3688ms)
+  ✔ BUG PR11: Pix payment/QR unavailable after remote creation leaves orphan and retry creates another (53.0087ms)
+  ✔ PR11 sequential card retry and method switch are blocked only after identifiers are saved (54.0515ms)
+  ✔ BUG PR11 denied/past_due card is indefinitely pending and cannot retry or switch to Pix (52.8475ms)
+  ✔ PR11 canceled card may start fresh checkout, preserving canceled paywall until real confirmation (51.5613ms)
+  ✔ Pix CREATED/PENDING QR never grants access, and an existing Pix subscription is reused (51.6769ms)
+  ✔ BUG expired Pix QR error offers no fresh invoice path and keeps using same first payment (54.4488ms)
+✔ audit main vs PR11: checkout witnesses (1190.6212ms)
+▶ audit main: billing/webhook state
+  ✔ counterevidence: paid confirmation grants access, pending does not, unpaid statuses revoke it (46.4726ms)
+  ✔ BUG event.id is ignored: duplicate confirmation writes again; without dueDate it extends entitlement (60.798ms)
+  ✔ counterevidence: a duplicate with the same dueDate does not extend endsAt (52.5636ms)
+  ✔ BUG old overdue/deleted/refunded invoice downgrades a successfully renewed subscription (174.3353ms)
+  ✔ BUG old paid invoice shrinks renewal and paid replay resurrects canceled/refunded subscription (46.7577ms)
+  ✔ BUG a late confirmed invoice with dueDate over 35 days ago stays blocked despite payment (45.0301ms)
+  ✔ BUG webhook before local subscription ID is saved is acknowledged and lost (44.4524ms)
+  ✔ BUG status fallback cannot recover pending card with no providerPaymentId (41.8495ms)
+  ✔ BUG chargeback statuses leave previously active access untouched (151.6043ms)
+  ✔ BUG current active-but-expired row skips provider reconciliation in status endpoint (40.255ms)
+  ✔ BUG confirmed payment trusts value/customer and credits full plan for a mismatched 0.01 fixture (43.0677ms)
+  ✔ webhook rejects absent/wrong token and returns 200 only for matching fixture token (42.9992ms)
+  ✔ billing-exempt internal user is unaffected by payment webhook (40.8643ms)
+  ✔ required plan returns 402 for expired unpaid account and allows confirmed plan (63.5708ms)
+  ✔ counterevidence: requireCompany permits authenticated expired account but budget mutations enforce 402 (88.6057ms)
+  ✔ BUG API adapter installs no request deadline or idempotency key (53.9723ms)
+✔ audit main: billing/webhook state (1038.3792ms)
+▶ audit PR11: billing/webhook state
+  ✔ counterevidence: paid confirmation grants access, pending does not, unpaid statuses revoke it (58.2888ms)
+  ✔ BUG event.id is ignored: duplicate confirmation writes again; without dueDate it extends entitlement (46.9628ms)
+  ✔ counterevidence: a duplicate with the same dueDate does not extend endsAt (74.1235ms)
+  ✔ BUG old overdue/deleted/refunded invoice downgrades a successfully renewed subscription (152.9914ms)
+  ✔ BUG old paid invoice shrinks renewal and paid replay resurrects canceled/refunded subscription (60.7471ms)
+  ✔ BUG a late confirmed invoice with dueDate over 35 days ago stays blocked despite payment (80.1056ms)
+  ✔ BUG webhook before local subscription ID is saved is acknowledged and lost (85.1213ms)
+  ✔ BUG status fallback cannot recover pending card with no providerPaymentId (57.4421ms)
+  ✔ BUG chargeback statuses leave previously active access untouched (192.512ms)
+  ✔ BUG current active-but-expired row skips provider reconciliation in status endpoint (42.9416ms)
+  ✔ BUG confirmed payment trusts value/customer and credits full plan for a mismatched 0.01 fixture (43.8939ms)
+  ✔ webhook rejects absent/wrong token and returns 200 only for matching fixture token (96.2079ms)
+  ✔ billing-exempt internal user is unaffected by payment webhook (142.0515ms)
+  ✔ required plan returns 402 for expired unpaid account and allows confirmed plan (137.3685ms)
+  ✔ counterevidence: requireCompany permits authenticated expired account but budget mutations enforce 402 (360.0929ms)
+  ✔ BUG API adapter installs no request deadline or idempotency key (99.7505ms)
+✔ audit PR11: billing/webhook state (1732.0177ms)
+ℹ tests 46
+ℹ suites 3
+ℹ pass 46
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5119.0716

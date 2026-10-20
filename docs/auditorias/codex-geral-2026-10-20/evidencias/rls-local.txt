@@ -1,0 +1,13 @@
+PASS 1: Synthetic pre-hardening anon read reaches fake user row
+PASS 2: Unchanged PR7 SQL and CI assertions execute on PostgreSQL17 synthetic schema
+PASS 3: anon/authenticated actual reads denied after hardening
+PASS 4: Both non-BYPASSRLS server roles perform real SELECT/INSERT/UPDATE/DELETE
+PASS 5: PR7 SQL rerun preserves policy and remains executable
+PASS 6: Full current main migration chain applies on a fresh disposable PostgreSQL17 database
+PASS 7: Main real schema reproduces anonymous access using only a fake account
+PASS 8: Eight real-schema browser-role CRUD operations denied
+PASS 9: Actual Prisma connections for both app roles retain CRUD on real User schema
+PASS 10: Standard migration rerun has no pending migrations
+PASS 11: BUG witness: PR7 leaves unsafe creator default grants on a later table
+PASS 12: All 23 main tables protected after hardening, including existing support tables
+SUMMARY: 12 audit assertions passed; no production database contacted

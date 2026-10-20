@@ -1,0 +1,18 @@
+{
+  "database": "loopback:55449/orcah_audit_test",
+  "app": "http://127.0.0.1:3200",
+  "build": "dac0418",
+  "assertions": 25,
+  "passed": 25,
+  "failed": 0,
+  "storage": "HTTP mock loopback:3202; Sharp real",
+  "slug": "empresa-ficticia-auditoria",
+  "pdfBytes": 53983,
+  "network": "No production services invoked",
+  "limitations": [
+    "No physical mobile browser",
+    "No real Storage/SaaS integration",
+    "No real billing",
+    "API integration is not browser E2E"
+  ]
+}

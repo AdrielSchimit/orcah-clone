@@ -1,0 +1,26 @@
+PASS 1: Cadastro telefônico cria sessão e direciona onboarding
+PASS 2: Empresa criada sob RLS com role NONBYPASSRLS
+PASS 3: Novo prestador inicia em trial; não está isento por ID interno
+PASS 4: Vitrine pública responde com nome fictício
+PASS 5: Cliente persiste
+PASS 6: Serviço persiste
+PASS 7: Upload processa Sharp real e grava referência (Storage HTTP simulado)
+PASS 8: Objeto WebP pode ser lido após upload
+PASS 9: Foto continua no GET após nova requisição
+PASS 10: Solicitação pública aceita dados fictícios
+PASS 11: Prestador recebe solicitação
+PASS 12: Proposta calcula R$ 200 corretamente
+PASS 13: Pedido convertido na mesma transação
+PASS 14: Proposta persiste após novo GET
+PASS 15: PDF real gerado com assinatura %PDF e conteúdo não vazio
+PASS 16: Compartilhamento prepara wa.me e marca enviado sem transmitir mensagem
+PASS 17: Cliente abre proposta pública
+PASS 18: Acompanhamento registra visualização
+PASS 19: Cliente aprova proposta
+PASS 20: Resposta sequencial após aprovação é recusada
+PASS 21: API privada sem sessão nega acesso
+PASS 22: Novo login recupera sessão
+PASS 23: Trial consultado sem chamar Asaas
+PASS 24: Plano vencido bloqueia nova proposta
+PASS 25: BUG testemunha: SVG declarado PNG alcança e passa pelo parser Sharp
+RESULTADO: 25 assertions passed; 0 failed.
