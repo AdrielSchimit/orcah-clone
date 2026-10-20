@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin";
+import { existingAsaasCheckoutMethod } from "@/lib/asaas-checkout";
 import {
   asaasConfigured,
   createPixSubscription,
@@ -29,6 +30,13 @@ export async function POST(request: Request) {
   }
 
   await ensureSubscription(auth.company.id);
+  const current = await prisma.subscription.findUnique({ where: { companyId: auth.company.id } });
+  if (existingAsaasCheckoutMethod(current) === "CREDIT_CARD") {
+    return NextResponse.json(
+      { error: "O pagamento com cartão está aguardando confirmação. Evite gerar outra cobrança." },
+      { status: 409 },
+    );
+  }
   await prisma.company.update({
     where: { id: auth.company.id },
     data: { document },

@@ -14,7 +14,7 @@ export function PlanCheckout({
   cardAwaitingConfirmation?: boolean;
 }) {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>("pix");
+  const [tab, setTab] = useState<Tab>(cardAwaitingConfirmation ? "card" : "pix");
   const [cpf, setCpf] = useState(document ?? "");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -114,6 +114,7 @@ export function PlanCheckout({
         <button
           type="button"
           onClick={() => setTab("pix")}
+          disabled={cardPending}
           className={`min-h-12 rounded-btn px-4 text-sm font-semibold ${
             tab === "pix" ? "bg-gold text-ink" : "border border-line bg-card"
           }`}

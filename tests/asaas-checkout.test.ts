@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { cardCheckoutAlreadyStarted } from "../src/lib/asaas-checkout";
+import { cardCheckoutAlreadyStarted, existingAsaasCheckoutMethod } from "../src/lib/asaas-checkout";
 
 describe("Asaas: impedir cobrança duplicada no cartão", () => {
   it("não considera uma conta sem assinatura como pagamento criado", () => {
@@ -15,8 +15,12 @@ describe("Asaas: impedir cobrança duplicada no cartão", () => {
       }), true);
     }
   });
-  it("não confunde Pix e não reutiliza assinaturas canceladas", () => {
-    assert.equal(cardCheckoutAlreadyStarted({ provider: "asaas", billingType: "PIX", providerSubscriptionId: "sub_pix", status: "trialing" }), false);
-    assert.equal(cardCheckoutAlreadyStarted({ provider: "asaas", billingType: "CREDIT_CARD", providerSubscriptionId: "sub_old", status: "canceled" }), false);
+  it("distingue métodos e não reutiliza assinaturas canceladas", () => {
+    const pix = { provider: "asaas", billingType: "PIX", providerSubscriptionId: "sub_pix", status: "trialing" };
+    assert.equal(existingAsaasCheckoutMethod(pix), "PIX");
+    assert.equal(cardCheckoutAlreadyStarted(pix), false);
+    assert.equal(existingAsaasCheckoutMethod({ ...pix, billingType: "CREDIT_CARD" }), "CREDIT_CARD");
+    assert.equal(existingAsaasCheckoutMethod({ ...pix, status: "canceled" }), null);
+    assert.equal(cardCheckoutAlreadyStarted({ ...pix, billingType: "CREDIT_CARD", status: "canceled" }), false);
   });
 });

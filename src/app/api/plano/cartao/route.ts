@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin";
 import { asaasConfigured, clientIp, createCardSubscription, findOrCreateAsaasCustomer } from "@/lib/asaas";
-import { cardCheckoutAlreadyStarted } from "@/lib/asaas-checkout";
+import { cardCheckoutAlreadyStarted, existingAsaasCheckoutMethod } from "@/lib/asaas-checkout";
 import { requireCompany } from "@/lib/company";
 import { prisma } from "@/lib/db";
 import { digitsOnly, isCpfCnpj } from "@/lib/document";
@@ -56,6 +56,12 @@ export async function POST(request: Request) {
   await ensureSubscription(auth.company.id);
   // Avoid another recurring charge after a timeout, refresh or repeated click.
   const current = await prisma.subscription.findUnique({ where: { companyId: auth.company.id } });
+  if (existingAsaasCheckoutMethod(current) === "PIX") {
+    return NextResponse.json(
+      { error: "Há uma cobrança Pix em andamento. Consulte o suporte para alterar o pagamento." },
+      { status: 409 },
+    );
+  }
   if (cardCheckoutAlreadyStarted(current)) {
     return NextResponse.json({ ok: true, paid: false, pending: true });
   }
