@@ -74,8 +74,10 @@ export async function POST(request: Request) {
       image: qr.encodedImage ? `data:image/png;base64,${qr.encodedImage}` : "",
       expirationDate: qr.expirationDate ?? null,
     });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Falha ao gerar o Pix.";
-    return NextResponse.json({ error: message }, { status: 400 });
+  } catch {
+    return NextResponse.json(
+      { error: "Não foi possível gerar o Pix agora. Confira o status antes de tentar novamente." },
+      { status: 502 },
+    );
   }
 }

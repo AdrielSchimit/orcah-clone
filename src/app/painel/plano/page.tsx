@@ -70,7 +70,15 @@ export default async function PlanoPage() {
         {plan.kind === "active" ? (
           <p className="mt-5 text-sm text-ok">Plano ativo. Obrigado.</p>
         ) : asaasConfigured() ? (
-          <PlanCheckout document={user.company.document} />
+          <PlanCheckout
+            document={user.company.document}
+            cardAwaitingConfirmation={
+              subscription.provider === "asaas" &&
+              subscription.billingType === "CREDIT_CARD" &&
+              Boolean(subscription.providerSubscriptionId) &&
+              subscription.status !== "canceled"
+            }
+          />
         ) : (
           <p className="mt-5 text-sm text-text-soft">
             Falta a chave do Asaas no servidor para cobrar de verdade.

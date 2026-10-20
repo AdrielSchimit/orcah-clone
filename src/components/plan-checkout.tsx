@@ -6,7 +6,13 @@ import { PLAN_PRICE_LABEL } from "@/lib/plan-constants";
 
 type Tab = "pix" | "card";
 
-export function PlanCheckout({ document }: { document?: string | null }) {
+export function PlanCheckout({
+  document,
+  cardAwaitingConfirmation = false,
+}: {
+  document?: string | null;
+  cardAwaitingConfirmation?: boolean;
+}) {
   const router = useRouter();
   const [tab, setTab] = useState<Tab>("pix");
   const [cpf, setCpf] = useState(document ?? "");
@@ -15,18 +21,26 @@ export function PlanCheckout({ document }: { document?: string | null }) {
   const [payload, setPayload] = useState("");
   const [image, setImage] = useState("");
   const [copied, setCopied] = useState(false);
+  const [cardPending, setCardPending] = useState(cardAwaitingConfirmation);
 
   useEffect(() => {
-    if (!payload) return;
+    if (!payload && !cardPending) return;
+    let active = true;
     const timer = setInterval(async () => {
-      const response = await fetch("/api/plano/status");
-      const data = (await response.json()) as { paid?: boolean };
-      if (data.paid) {
-        router.refresh();
+      try {
+        const response = await fetch("/api/plano/status");
+        if (!response.ok) return;
+        const data = (await response.json()) as { paid?: boolean };
+        if (active && data.paid) {
+          setCardPending(false);
+          router.refresh();
+        }
+      } catch {
+        // Network errors must never be interpreted as payment approval.
       }
-    }, 4000);
-    return () => clearInterval(timer);
-  }, [payload, router]);
+    }, 10000);
+    return () => { active = false; clearInterval(timer); };
+  }, [payload, cardPending, router]);
 
   async function createPix(event: FormEvent) {
     event.preventDefault();
@@ -71,12 +85,16 @@ export function PlanCheckout({ document }: { document?: string | null }) {
           addressNumber: form.get("addressNumber"),
         }),
       });
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json()) as { error?: string; paid?: boolean; pending?: boolean };
       if (!response.ok) {
-        setError(data.error ?? "Cartão não autorizado.");
+        setError(data.error ?? "Não foi possível processar o cartão.");
         return;
       }
-      router.refresh();
+      if (data.paid) {
+        router.refresh();
+      } else {
+        setCardPending(true);
+      }
     } catch {
       setError("Falha de conexão.");
     } finally {
@@ -195,11 +213,17 @@ export function PlanCheckout({ document }: { document?: string | null }) {
           </div>
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || cardPending}
             className="min-h-12 rounded-btn bg-gold px-4 text-base font-semibold text-ink hover:bg-gold-press disabled:opacity-60"
           >
-            {loading ? "Autorizando…" : `Pagar ${PLAN_PRICE_LABEL} no cartão`}
+            {loading ? "Enviando…" : cardPending ? "Aguardando confirmação do Asaas" : `Pagar ${PLAN_PRICE_LABEL} no cartão`}
           </button>
+          {cardPending ? (
+            <p role="status" className="text-sm text-text-soft">
+              Sua assinatura foi solicitada, mas o pagamento ainda não foi confirmado. Não repita a cobrança.
+              Se não houver confirmação, fale com o suporte.
+            </p>
+          ) : null}
           <p className="text-xs text-text-soft">O número vai direto ao Asaas. A gente não guarda cartão.</p>
         </form>
       )}
