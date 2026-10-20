@@ -1,0 +1,65 @@
+
+> orcah-control@0.1.0 test
+> tsx --test tests/**/*.test.ts
+
+▶ control auth
+  ✔ authorizes e-mail present in CONTROL_ADMIN_EMAILS style list (1.817ms)
+  ✔ rejects user outside allowlist (0.3825ms)
+  ✔ treats missing session as unauthenticated (0.4706ms)
+  ✔ uses httpOnly session cookie with lax sameSite (0.3801ms)
+✔ control auth (5.4536ms)
+✔ support fails before fetch when the destination or secret is unsafe (34.3614ms)
+✔ support uses the explicit origin, authenticated body and a redirect-blocking fetch (84.4608ms)
+✔ support permits loopback HTTP for local fixtures and counts UTF-8 secret bytes (17.9252ms)
+✔ monitoring retains its existing fallback without accepting redirects (7.2086ms)
+✔ support preserves domain errors and propagates rejected redirects (10.0313ms)
+▶ health público
+  ✔ banco ok: devolve só ok e latência (4.3222ms)
+  ✔ banco com erro: não vaza mensagem, URL nem detalhes do Prisma (0.8926ms)
+  ✔ Asaas com falha: só configured e ok=false, sem mensagem (0.5133ms)
+✔ health público (8.2309ms)
+▶ metrics
+  ✔ buckets rows by recent day (82.6652ms)
+✔ metrics (85.3423ms)
+▶ privacy helpers
+  ✔ masks CPF and CNPJ (2.4177ms)
+  ✔ masks long external ids (0.3649ms)
+  ✔ detects sandbox and production Asaas environments (0.6234ms)
+  ✔ crosses externalReference to company id only when numeric (0.5058ms)
+✔ privacy helpers (6.9621ms)
+▶ polling cancelável
+  ✔ cancela o refresh ativo ao parar e não agenda outro tick (24.8523ms)
+  ✔ hidden/offline cancelam a requisição e pausam sem timer; resume usa sinal novo (9.9968ms)
+  ✔ aplica backoff limitado e resume reinicia intervalo normal (18.2248ms)
+  ✔ não instala timer nem faz refresh quando inicia hidden ou offline (15.94ms)
+  ✔ resume durante cleanup de refresh abortado inicia novo tick sem incrementar backoff (7.165ms)
+  ✔ supportFetch combina sinal do caller com timeout de 15s e aborta fetch pendente (4.102ms)
+✔ polling cancelável (85.0591ms)
+▶ histórico e deltas de polling
+  ✔ delta preserva página antiga e substitui leitura sem duplicar mensagem (60.7299ms)
+  ✔ resposta atrasada não reverte status humano ou perde histórico/delta mais recente (1.0103ms)
+✔ histórico e deltas de polling (62.241ms)
+▶ reconciliação do transporte
+  ✔ troca mensagem otimista pela persistida sem duplicar (4.2878ms)
+  ✔ mantém mensagens históricas e rejeita estado atrasado de polling (36.2157ms)
+  ✔ preserva página histórica com header atrasado sem reverter o atendimento recente (0.4807ms)
+  ✔ readAt nunca regride quando um poll antigo ou mensagem duplicada chega depois (0.3628ms)
+  ✔ delta incremental conserva olderCursor e histórico, inclusive quando vem vazio (0.5719ms)
+  ✔ mutação atualiza header sem trocar histórico/cursor nem remover pending antes do poll (0.8006ms)
+✔ reconciliação do transporte (49.8696ms)
+▶ Control → gateway autenticado
+  ✔ rejeita ação sem sessão sem chamar gateway (60.0346ms)
+  ✔ rejeita leitura sem sessão e operador não autorizado (1.4982ms)
+  ✔ browser não escolhe remetente nem identidade do operador (7.2442ms)
+  ✔ preserva conflitos, limite e erro de domínio sem expor segredos (11.5ms)
+  ✔ bloqueia escrita cross-site e corpo excessivo (3.1313ms)
+  ✔ nega rota e método inválidos (1.1385ms)
+✔ Control → gateway autenticado (87.685ms)
+ℹ tests 37
+ℹ suites 8
+ℹ pass 37
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 5454.8039

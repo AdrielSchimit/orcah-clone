@@ -1,0 +1,116 @@
+
+> orcah@0.1.0 build
+> prisma generate && next build
+
+warn The configuration property `package.json#prisma` is deprecated and will be removed in Prisma 7. Please migrate to a Prisma config file (e.g., `prisma.config.ts`).
+For more information, see: https://pris.ly/prisma-config
+
+Prisma schema loaded from prisma\schema.prisma
+
+✔ Generated Prisma Client (v6.19.0) to .\node_modules\@prisma\client in 474ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+
+▲ Next.js 16.3.5 (Turbopack)
+✓ Running next.config.ts took 168ms
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 12.0s
+  Running TypeScript ...
+  Finished TypeScript in 8.2s ...
+  Collecting page data using 27 workers ...
+  Generating static pages using 27 workers (0/56) ...
+  Generating static pages using 27 workers (14/56)
+  Generating static pages using 27 workers (28/56)
+  Generating static pages using 27 workers (42/56)
+✓ Generating static pages using 27 workers (56/56) in 594ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ƒ /
+├ ○ /_not-found
+├ ƒ /api/admin/ramo
+├ ƒ /api/auth/handoff
+├ ƒ /api/auth/login
+├ ƒ /api/auth/logout
+├ ƒ /api/auth/password-reset/confirm
+├ ƒ /api/auth/password-reset/request
+├ ƒ /api/auth/register
+├ ƒ /api/auth/verificar-email
+├ ƒ /api/auth/verificar-email/reenviar
+├ ƒ /api/clientes
+├ ƒ /api/clientes/[id]
+├ ƒ /api/empresa
+├ ƒ /api/empresa/capa
+├ ƒ /api/empresa/fotos
+├ ƒ /api/empresa/fotos/[id]
+├ ƒ /api/empresa/logo
+├ ƒ /api/internal/control
+├ ƒ /api/localidades/cidades
+├ ƒ /api/localidades/cidades/buscar
+├ ƒ /api/localidades/estados
+├ ƒ /api/onboarding
+├ ƒ /api/orcamentos
+├ ƒ /api/orcamentos/[id]
+├ ƒ /api/orcamentos/[id]/enviar
+├ ƒ /api/orcamentos/[id]/fotos
+├ ƒ /api/orcamentos/[id]/fotos/[photoId]
+├ ƒ /api/orcamentos/[id]/pdf
+├ ƒ /api/pedidos
+├ ƒ /api/plano/ativar
+├ ƒ /api/plano/cartao
+├ ƒ /api/plano/pix
+├ ƒ /api/plano/status
+├ ƒ /api/publico/empresas/[slug]/metrica
+├ ƒ /api/publico/empresas/[slug]/pedir
+├ ƒ /api/publico/localizacao/reverse
+├ ƒ /api/publico/orcamentos/[token]/pdf
+├ ƒ /api/publico/orcamentos/[token]/responder
+├ ƒ /api/publico/orcamentos/[token]/visualizar
+├ ƒ /api/publico/prestadores
+├ ƒ /api/publico/prestadores/[slug]
+├ ƒ /api/ramos
+├ ƒ /api/servicos
+├ ƒ /api/servicos/[id]
+├ ƒ /api/servicos/[id]/foto
+├ ƒ /api/servicos/ordem
+├ ƒ /api/setup-assistido
+├ ƒ /api/support/[action]
+├ ƒ /api/webhooks/asaas
+├ ○ /cadastro
+├ ƒ /empresa/[slug]
+├ ƒ /empresa/[slug]/opengraph-image
+├ ƒ /entrando
+├ ○ /login
+├ ○ /manifest.webmanifest
+├ ƒ /onboarding
+├ ƒ /orcamento/[token]
+├ ƒ /orcamento/[token]/opengraph-image
+├ ƒ /painel
+├ ƒ /painel/clientes
+├ ƒ /painel/clientes/[id]
+├ ƒ /painel/conta
+├ ƒ /painel/empresa
+├ ƒ /painel/mais
+├ ƒ /painel/orcamentos
+├ ƒ /painel/orcamentos/[id]
+├ ƒ /painel/orcamentos/novo
+├ ƒ /painel/pagina
+├ ƒ /painel/pedidos
+├ ƒ /painel/plano
+├ ƒ /painel/relatorios
+├ ƒ /painel/servicos
+├ ƒ /painel/servicos/[id]
+├ ƒ /painel/servicos/novo
+├ ○ /prestadores
+├ ○ /recuperar-senha
+├ ƒ /redefinir-senha
+└ ƒ /verificar-email
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand

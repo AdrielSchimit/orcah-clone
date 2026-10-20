@@ -1,0 +1,19 @@
+
+> orcah@0.1.0 test:support:integration
+> tsx scripts/support-integration.ts
+
+PASS: dois servidores locais prontos; Control sem credenciais de banco
+PASS: autorização HTTP entre contas, remetente, sessão Control e segredo interno
+PASS: resposta local RAG, persistência, idempotência e fila no Control
+PASS: claim, resposta humana, não lidas, prioridade, resolução e retorno ao mascote
+PASS: idempotência concorrente, dois operadores disputam claim, proprietário e limites HTTP
+PASS: paginação de histórico real sem perda ou duplicação
+PASS: polling incremental after vazio sem replay; apenas 2 mensagens novas; before/after mutuamente exclusivos
+PASS: 20 threads x 50 históricos + 50 envios/50 polls HTTP, 5 clientes simultâneos; p50=217ms p95=362ms; inbox 100 fixtures=60+40 sem duplicação
+PASS: effective PUBLIC/anon/authenticated grants denied; 24 real CRUD attempts denied; RLS active
+PASS: non-superuser table owner CRUD allowed; nonowner with explicit CRUD grants sees zero rows and INSERT denied by RLS
+PASS: persisted HUMAN/assignment pair and message length CHECK constraints reject invalid SQL state
+PASS: 6 impossible cycle timestamp states rejected (installed CHECK)
+PASS: all 3 support FKs are ON DELETE CASCADE; independent Company/User deletes leave no orphan thread/messages (rolled back)
+PASS: actual supportInbox SQL query count: 1 item=6; 60 items=6; no per-item SQL growth
+PASS: EXPLAIN ANALYZE actual history path=Limit -> Sort -> Bitmap Heap Scan -> Bitmap Index Scan(support_messages_thread_id_sender_type_client_id_key); queue path=Limit -> Sort -> Seq Scan; declared supporting indexes exist

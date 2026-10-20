@@ -1,0 +1,6 @@
+PASS: local Prisma migrate deploy
+PASS: local Prisma migrate deploy
+PASS: local Prisma validate
+PASS: local Prisma migrate diff
+PASS: support schema has no Prisma drift; 4 pre-existing baseline-only extra indexes retained without applying diff SQL
+PASS: full migration chain and no-op rerun on disposable loopback PostgreSQL only
