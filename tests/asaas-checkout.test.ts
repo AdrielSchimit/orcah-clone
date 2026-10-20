@@ -21,6 +21,7 @@ describe("Asaas: impedir cobrança duplicada no cartão", () => {
     assert.equal(cardCheckoutAlreadyStarted(pix), false);
     assert.equal(existingAsaasCheckoutMethod({ ...pix, billingType: "CREDIT_CARD" }), "CREDIT_CARD");
     assert.equal(existingAsaasCheckoutMethod({ ...pix, status: "canceled" }), null);
+    assert.equal(existingAsaasCheckoutMethod({ ...pix, providerSubscriptionId: null }), null);
     assert.equal(cardCheckoutAlreadyStarted({ ...pix, billingType: "CREDIT_CARD", status: "canceled" }), false);
   });
 });
