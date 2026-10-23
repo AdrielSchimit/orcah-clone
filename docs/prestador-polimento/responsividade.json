@@ -1,0 +1,380 @@
+[
+  {
+    "scenario": "Pintada",
+    "width": 375,
+    "scroll": 375,
+    "height": 1228,
+    "photos": 1,
+    "services": 1
+  },
+  {
+    "scenario": "Pintada",
+    "width": 390,
+    "scroll": 390,
+    "height": 1247,
+    "photos": 1,
+    "services": 1
+  },
+  {
+    "scenario": "Pintada",
+    "width": 430,
+    "scroll": 430,
+    "height": 1297,
+    "photos": 1,
+    "services": 1
+  },
+  {
+    "scenario": "Pintada",
+    "width": 768,
+    "scroll": 768,
+    "height": 1539,
+    "photos": 1,
+    "services": 1
+  },
+  {
+    "scenario": "Pintada",
+    "width": 1024,
+    "scroll": 1024,
+    "height": 1115,
+    "photos": 1,
+    "services": 1
+  },
+  {
+    "scenario": "Pintada",
+    "width": 1440,
+    "scroll": 1440,
+    "height": 1115,
+    "photos": 1,
+    "services": 1
+  },
+  {
+    "scenario": "read-only fixture 1",
+    "width": 375,
+    "scroll": 375,
+    "photoWidth": 347,
+    "serviceWidth": 347,
+    "galleryColumns": "minmax(0px, 1fr)",
+    "serviceColumns": "347px",
+    "snap": "x mandatory"
+  },
+  {
+    "scenario": "read-only fixture 1",
+    "width": 390,
+    "scroll": 390,
+    "photoWidth": 362,
+    "serviceWidth": 362,
+    "galleryColumns": "minmax(0px, 1fr)",
+    "serviceColumns": "362px",
+    "snap": "x mandatory"
+  },
+  {
+    "scenario": "read-only fixture 1",
+    "width": 430,
+    "scroll": 430,
+    "photoWidth": 402,
+    "serviceWidth": 402,
+    "galleryColumns": "minmax(0px, 1fr)",
+    "serviceColumns": "402px",
+    "snap": "x mandatory"
+  },
+  {
+    "scenario": "read-only fixture 1",
+    "width": 768,
+    "scroll": 768,
+    "photoWidth": 440,
+    "serviceWidth": 420,
+    "galleryColumns": "440px",
+    "serviceColumns": "420px",
+    "snap": "none"
+  },
+  {
+    "scenario": "read-only fixture 1",
+    "width": 1024,
+    "scroll": 1024,
+    "photoWidth": 440,
+    "serviceWidth": 420,
+    "galleryColumns": "440px",
+    "serviceColumns": "420px",
+    "snap": "none"
+  },
+  {
+    "scenario": "read-only fixture 1",
+    "width": 1440,
+    "scroll": 1440,
+    "photoWidth": 440,
+    "serviceWidth": 420,
+    "galleryColumns": "440px",
+    "serviceColumns": "420px",
+    "snap": "none"
+  },
+  {
+    "scenario": "read-only fixture 2",
+    "width": 375,
+    "scroll": 375,
+    "photoWidth": 291.46875,
+    "serviceWidth": 347,
+    "galleryColumns": "repeat(2, minmax(0px, 1fr))",
+    "serviceColumns": "347px",
+    "snap": "x mandatory"
+  },
+  {
+    "scenario": "read-only fixture 2",
+    "width": 390,
+    "scroll": 390,
+    "photoWidth": 304.078125,
+    "serviceWidth": 362,
+    "galleryColumns": "repeat(2, minmax(0px, 1fr))",
+    "serviceColumns": "362px",
+    "snap": "x mandatory"
+  },
+  {
+    "scenario": "read-only fixture 2",
+    "width": 430,
+    "scroll": 430,
+    "photoWidth": 337.671875,
+    "serviceWidth": 402,
+    "galleryColumns": "repeat(2, minmax(0px, 1fr))",
+    "serviceColumns": "402px",
+    "snap": "x mandatory"
+  },
+  {
+    "scenario": "read-only fixture 2",
+    "width": 768,
+    "scroll": 768,
+    "photoWidth": 352,
+    "serviceWidth": 349,
+    "galleryColumns": "352px 352px",
+    "serviceColumns": "349px 349px",
+    "snap": "none"
+  },
+  {
+    "scenario": "read-only fixture 2",
+    "width": 1024,
+    "scroll": 1024,
+    "photoWidth": 440,
+    "serviceWidth": 421,
+    "galleryColumns": "440px 440px",
+    "serviceColumns": "421px 421px",
+    "snap": "none"
+  },
+  {
+    "scenario": "read-only fixture 2",
+    "width": 1440,
+    "scroll": 1440,
+    "photoWidth": 440,
+    "serviceWidth": 421,
+    "galleryColumns": "440px 440px",
+    "serviceColumns": "421px 421px",
+    "snap": "none"
+  },
+  {
+    "scenario": "read-only fixture 3",
+    "width": 375,
+    "scroll": 375,
+    "photoWidth": 291.46875,
+    "serviceWidth": 347,
+    "galleryColumns": "repeat(3, minmax(0px, 1fr))",
+    "serviceColumns": "347px",
+    "snap": "x mandatory"
+  },
+  {
+    "scenario": "read-only fixture 3",
+    "width": 390,
+    "scroll": 390,
+    "photoWidth": 304.078125,
+    "serviceWidth": 362,
+    "galleryColumns": "repeat(3, minmax(0px, 1fr))",
+    "serviceColumns": "362px",
+    "snap": "x mandatory"
+  },
+  {
+    "scenario": "read-only fixture 3",
+    "width": 430,
+    "scroll": 430,
+    "photoWidth": 337.671875,
+    "serviceWidth": 402,
+    "galleryColumns": "repeat(3, minmax(0px, 1fr))",
+    "serviceColumns": "402px",
+    "snap": "x mandatory"
+  },
+  {
+    "scenario": "read-only fixture 3",
+    "width": 768,
+    "scroll": 768,
+    "photoWidth": 229.328125,
+    "serviceWidth": 225.328125,
+    "galleryColumns": "229.328px 229.328px 229.328px",
+    "serviceColumns": "225.328px 225.328px 225.328px",
+    "snap": "none"
+  },
+  {
+    "scenario": "read-only fixture 3",
+    "width": 1024,
+    "scroll": 1024,
+    "photoWidth": 314.65625,
+    "serviceWidth": 310.65625,
+    "galleryColumns": "314.656px 314.672px 314.656px",
+    "serviceColumns": "310.656px 310.672px 310.656px",
+    "snap": "none"
+  },
+  {
+    "scenario": "read-only fixture 3",
+    "width": 1440,
+    "scroll": 1440,
+    "photoWidth": 336,
+    "serviceWidth": 332,
+    "galleryColumns": "336px 336px 336px",
+    "serviceColumns": "332px 332px 332px",
+    "snap": "none"
+  },
+  {
+    "scenario": "read-only fixture 6",
+    "width": 375,
+    "scroll": 375,
+    "photoWidth": 291.46875,
+    "serviceWidth": 347,
+    "galleryColumns": "repeat(3, minmax(0px, 1fr))",
+    "serviceColumns": "347px",
+    "snap": "x mandatory"
+  },
+  {
+    "scenario": "read-only fixture 6",
+    "width": 390,
+    "scroll": 390,
+    "photoWidth": 304.078125,
+    "serviceWidth": 362,
+    "galleryColumns": "repeat(3, minmax(0px, 1fr))",
+    "serviceColumns": "362px",
+    "snap": "x mandatory"
+  },
+  {
+    "scenario": "read-only fixture 6",
+    "width": 430,
+    "scroll": 430,
+    "photoWidth": 337.671875,
+    "serviceWidth": 402,
+    "galleryColumns": "repeat(3, minmax(0px, 1fr))",
+    "serviceColumns": "402px",
+    "snap": "x mandatory"
+  },
+  {
+    "scenario": "read-only fixture 6",
+    "width": 768,
+    "scroll": 768,
+    "photoWidth": 229.328125,
+    "serviceWidth": 225.328125,
+    "galleryColumns": "229.328px 229.328px 229.328px",
+    "serviceColumns": "225.328px 225.328px 225.328px",
+    "snap": "none"
+  },
+  {
+    "scenario": "read-only fixture 6",
+    "width": 1024,
+    "scroll": 1024,
+    "photoWidth": 232,
+    "serviceWidth": 310.65625,
+    "galleryColumns": "232px 232px 232px 232px",
+    "serviceColumns": "310.656px 310.672px 310.656px",
+    "snap": "none"
+  },
+  {
+    "scenario": "read-only fixture 6",
+    "width": 1440,
+    "scroll": 1440,
+    "photoWidth": 248,
+    "serviceWidth": 332,
+    "galleryColumns": "248px 248px 248px 248px",
+    "serviceColumns": "332px 332px 332px",
+    "snap": "none"
+  },
+  {
+    "scenario": "read-only fixture sem-conteudo",
+    "width": 375,
+    "scroll": 375
+  },
+  {
+    "scenario": "read-only fixture sem-conteudo",
+    "width": 390,
+    "scroll": 390
+  },
+  {
+    "scenario": "read-only fixture sem-conteudo",
+    "width": 430,
+    "scroll": 430
+  },
+  {
+    "scenario": "read-only fixture sem-conteudo",
+    "width": 768,
+    "scroll": 768
+  },
+  {
+    "scenario": "read-only fixture sem-conteudo",
+    "width": 1024,
+    "scroll": 1024
+  },
+  {
+    "scenario": "read-only fixture sem-conteudo",
+    "width": 1440,
+    "scroll": 1440
+  },
+  {
+    "scenario": "read-only fixture somente-whatsapp",
+    "width": 375,
+    "scroll": 375
+  },
+  {
+    "scenario": "read-only fixture somente-whatsapp",
+    "width": 390,
+    "scroll": 390
+  },
+  {
+    "scenario": "read-only fixture somente-whatsapp",
+    "width": 430,
+    "scroll": 430
+  },
+  {
+    "scenario": "read-only fixture somente-whatsapp",
+    "width": 768,
+    "scroll": 768
+  },
+  {
+    "scenario": "read-only fixture somente-whatsapp",
+    "width": 1024,
+    "scroll": 1024
+  },
+  {
+    "scenario": "read-only fixture somente-whatsapp",
+    "width": 1440,
+    "scroll": 1440
+  },
+  {
+    "scenario": "read-only fixture textos-longos",
+    "width": 375,
+    "scroll": 375
+  },
+  {
+    "scenario": "read-only fixture textos-longos",
+    "width": 390,
+    "scroll": 390
+  },
+  {
+    "scenario": "read-only fixture textos-longos",
+    "width": 430,
+    "scroll": 430
+  },
+  {
+    "scenario": "read-only fixture textos-longos",
+    "width": 768,
+    "scroll": 768
+  },
+  {
+    "scenario": "read-only fixture textos-longos",
+    "width": 1024,
+    "scroll": 1024
+  },
+  {
+    "scenario": "read-only fixture textos-longos",
+    "width": 1440,
+    "scroll": 1440
+  }
+]

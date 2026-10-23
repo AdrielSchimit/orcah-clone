@@ -78,13 +78,21 @@ export function ProviderShowcase({page, chosenService = "", buttonStyles}: {
           </div>
           <div className="provider-profile-copy">
           <p className="provider-eyebrow">{page.ramo}</p>
-          <h1 className="mt-5 text-3xl font-semibold leading-tight sm:text-4xl">{page.name}</h1>
-          <p className="mt-2 text-sm font-medium opacity-80">
+          <h1 title={page.name}>{page.name}</h1>
+          <p className="provider-location">
             ⌖ {page.areaLabel}
           </p>
-          {page.description ? (
-            <p className="provider-description">{page.description}</p>
-          ) : null}
+          {/* Avaliações reais: resumo secundário após a localização, quando disponível. */}
+          {page.description ? page.description.length > 120 ? (
+            <details className="provider-description-details">
+              <summary>
+                <span className="provider-description">{page.description}</span>
+                <span className="provider-description-more provider-description-more-closed">Ler descrição completa</span>
+                <span className="provider-description-more provider-description-more-open">Ler menos</span>
+              </summary>
+              <p className="provider-description-full" tabIndex={0}>{page.description}</p>
+            </details>
+          ) : <p className="provider-description">{page.description}</p> : null}
           </div>
           <div className="provider-actions">
             <QuoteRequestButton className={buttonStyles.gold} />
@@ -104,32 +112,25 @@ export function ProviderShowcase({page, chosenService = "", buttonStyles}: {
         </div>
       </header>
 
-      <nav className="provider-navigation" aria-label="Nesta página">
-        {page.photos.length > 0 ? <a href="#trabalhos">Trabalhos</a> : null}
-        {page.services.length > 0 ? <a href="#servicos">Serviços</a> : null}
-        <a href="#contato">Contato</a>
-      </nav>
-      <main className="provider-main">
+      <main className="provider-main" data-paired-content={page.photos.length === 1 && page.services.length === 1}>
         {page.photos.length > 0 ? (
           <section className="provider-section" aria-labelledby="trabalhos">
             <h2 id="trabalhos" className="text-xl font-semibold">
               Trabalhos
             </h2>
-            <p className="provider-section-intro">Conheça de perto os trabalhos realizados.</p>
             <CompanyGallery photos={page.photos} compact />
           </section>
         ) : null}
 
         {page.services.length > 0 ? (
-          <section className="pt-10" aria-labelledby="servicos">
+          <section className="provider-section" aria-labelledby="servicos">
             <h2 id="servicos" className="text-xl font-semibold">
               Serviços
             </h2>
-            <p className="provider-section-intro">Veja como podemos ajudar no seu projeto.</p>
             {categories.length > 1 ? (
               <p className="mt-1 text-sm text-text-soft">{categories.join(" · ")}</p>
             ) : null}
-            <ul className="provider-service-grid">
+            <ul className="provider-service-grid" data-count={page.services.length}>
               {page.services.map((service) => (
                 <li
                   key={service.name}
@@ -170,26 +171,20 @@ export function ProviderShowcase({page, chosenService = "", buttonStyles}: {
           </section>
         ) : null}
 
-        <section className="pt-10" aria-labelledby="contato">
+        {/* Avaliações reais: futura seção entre serviços e contato, sem conteúdo vazio. */}
+        <section className="provider-section provider-contact-section" aria-labelledby="contato">
           <h2 id="contato" className="text-xl font-semibold">
             Contato
           </h2>
-          <p className="provider-section-intro">Fale diretamente com {page.name}.</p>
-          {page.description && page.description.length > 160 ? (
-            <details className="provider-about">
-              <summary>Sobre {page.name}</summary>
-              <p>{page.description}</p>
-            </details>
-          ) : null}
           <div className="provider-contact">
-            <dl className="grid gap-3 text-sm">
+            <dl className="provider-contact-info">
               <div>
-                <dt className="text-xs font-medium uppercase tracking-[0.04em] text-text-soft">Atende em</dt>
+                <dt className="sr-only">Atende em</dt>
                 <dd className="mt-0.5 font-medium">{page.areaLabel}</dd>
               </div>
               {page.openingHours ? (
                 <div>
-                  <dt className="text-xs font-medium uppercase tracking-[0.04em] text-text-soft">Horário</dt>
+                  <dt className="sr-only">Horário</dt>
                   <dd className="mt-0.5 font-medium">{page.openingHours}</dd>
                 </div>
               ) : null}

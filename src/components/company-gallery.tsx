@@ -24,7 +24,7 @@ export function CompanyGallery({ photos, compact = false }: { photos: Photo[]; c
 
   return (
     <>
-      <div className={compact ? "provider-gallery" : "grid grid-cols-2 gap-2 sm:grid-cols-3"}>
+      <div className={compact ? "provider-gallery" : "grid grid-cols-2 gap-2 sm:grid-cols-3"} data-count={compact ? photos.length : undefined}>
         {photos.map((photo, photoIndex) => (
           <button
             key={photo.path}

@@ -3,6 +3,7 @@ import { describe, it } from "node:test";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { ProviderShowcase } from "../src/components/provider-showcase";
+import { CompanyGallery } from "../src/components/company-gallery";
 import { QuoteRequestForm } from "../src/components/quote-request-form";
 import { trackPageEvent } from "../src/components/page-tracking";
 import type { PublicCompanyPage } from "../src/lib/public-page";
@@ -29,8 +30,10 @@ describe("vitrine do prestador", () => {
     assert.ok(html.indexOf('id="servicos"') < html.indexOf('id="contato"'));
     assert.ok(!html.includes("<form"));
     assert.ok(!html.includes("<dialog"));
-    const navigation = html.match(/<nav[\s\S]*?<\/nav>/)?.[0] ?? "";
-    assert.ok(!navigation.includes("Pedir orçamento"));
+    assert.ok(!html.includes("<nav"));
+    assert.ok(!html.includes("Conheça de perto os trabalhos realizados."));
+    assert.ok(!html.includes("Veja como podemos ajudar no seu projeto."));
+    assert.ok(!html.includes("Fale diretamente com"));
     assert.ok(!html.includes("Ainda sem avaliações"));
   });
 
@@ -71,6 +74,38 @@ describe("vitrine do prestador", () => {
     assert.ok(!html.includes("R$"));
     assert.ok(!html.includes("<script>"));
     assert.ok(html.includes("&lt;script&gt;"));
+  });
+
+  it("permite ler a descrição longa no próprio hero, sem criar seção Sobre", () => {
+    const description = "Descrição do trabalho realizado. ".repeat(15);
+    const html = render({ description });
+    assert.ok(html.includes("provider-description-details"));
+    assert.ok(html.includes("Ler descrição completa"));
+    assert.ok(html.includes(description));
+    assert.ok(!html.includes("provider-about"));
+    assert.ok(!html.includes('id="avaliacoes"'));
+    assert.ok(!render().includes("Ler descrição completa"));
+  });
+
+  it("adapta os grupos de fotos e serviços por quantidade, preservando ordem", () => {
+    for (const count of [1, 2, 3, 4, 8]) {
+      const photos = Array.from({ length: count }, (_, index) => ({ path: `/photo-${index}.webp`, title: `Trabalho ${index}` }));
+      const services = Array.from({ length: count }, (_, index) => ({ ...page.services[0], name: `Serviço ${index}` }));
+      const html = render({ photos, services });
+      assert.ok(html.includes(`class="provider-gallery" data-count="${count}"`));
+      assert.ok(html.includes(`class="provider-service-grid" data-count="${count}"`));
+      assert.equal((html.match(/class="provider-service-card"/g) ?? []).length, count);
+      assert.equal((html.match(/aria-label="Ampliar: Trabalho/g) ?? []).length, count);
+      assert.ok(html.indexOf('id="trabalhos"') < html.indexOf('id="servicos"'));
+      assert.ok(html.includes(`data-paired-content="${count === 1}"`));
+    }
+  });
+
+  it("mantém a grade anterior para outros consumidores da galeria", () => {
+    const html = renderToStaticMarkup(createElement(CompanyGallery, { photos: page.photos }));
+    assert.ok(html.includes("sm:grid-cols-3"));
+    assert.ok(!html.includes("provider-gallery"));
+    assert.ok(!html.includes("data-count"));
   });
 
   it("primeira etapa contém apenas nome, WhatsApp e descrição; detalhes são opcionais", () => {
