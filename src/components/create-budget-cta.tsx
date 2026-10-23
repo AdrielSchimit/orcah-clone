@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { AdminRamoSwitcher } from "@/components/admin-ramo-switcher";
 import { OrcahIcon } from "@/components/orcah-logo";
+import homeButtons from "@/components/home/home-buttons.module.css";
 
 /** Card escuro premium: dourado só no brilho, no ícone e no botão. */
 export function CreateBudgetCta({
@@ -17,7 +18,7 @@ export function CreateBudgetCta({
 }) {
   const [open, setOpen] = useState(false);
   const buttonClass =
-    "gold-glow flex min-h-12 w-full items-center justify-center rounded-btn bg-gold px-5 text-base font-semibold text-ink hover:bg-gold-press sm:w-auto";
+    `${homeButtons.gold} flex min-h-12 w-full items-center justify-center rounded-btn bg-gold px-5 text-base font-semibold text-ink sm:w-auto`;
 
   return (
     <section className="gold-edge relative overflow-hidden rounded-box border bg-ink p-5 text-ink-text">
