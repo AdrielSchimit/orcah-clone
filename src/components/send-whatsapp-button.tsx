@@ -30,6 +30,7 @@ export function SendWhatsAppButton({
   const [error, setError] = useState("");
   const [ready, setReady] = useState<Ready | null>(null);
   const [copied, setCopied] = useState<"mensagem" | "link" | "">("");
+  const [sentAuto, setSentAuto] = useState(false);
 
   useEffect(() => {
     if (!notice) return;
@@ -63,7 +64,13 @@ export function SendWhatsAppButton({
         href?: string;
         url?: string;
         message?: string;
+        sent?: boolean;
       };
+      if (response.ok && data.sent) {
+        setSentAuto(true);
+        router.refresh();
+        return;
+      }
       if (data.message && data.url) {
         const pack = { message: data.message, url: data.url };
         setReady(pack);
@@ -111,6 +118,11 @@ export function SendWhatsAppButton({
         {loading ? "Abrindo…" : cta.label}
       </button>
       <p className="text-center text-xs text-text-soft">{hint}</p>
+      {sentAuto ? (
+        <p role="status" className="text-center text-sm font-medium text-ok">
+          Enviado pelo WhatsApp automático.
+        </p>
+      ) : null}
       {error ? <p className="text-sm text-no">{error}</p> : null}
       {ready ? (
         <div className="rounded-box border border-line bg-card p-3">

@@ -29,6 +29,7 @@ export default async function MaisPage() {
       title: "Serviços",
       detail: servicos === 0 ? "Cadastre o que você faz" : `${servicos} ${servicos === 1 ? "serviço ativo" : "serviços ativos"}`,
     },
+    { href: "/painel/cotacoes", title: "Cotações", detail: "Peça preço de material aos vendedores" },
     { href: "/painel/relatorios", title: "Relatórios", detail: "Acessos, pedidos e aprovações" },
     { href: companyPublicUrl(user.company.slug), title: "Ver minha página", detail: "Como o cliente vê você", external: true },
   ];

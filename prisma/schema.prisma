@@ -177,6 +177,9 @@ model Company {
   coverPath          String?  @map("cover_path") @db.VarChar(255)
   logoPath           String?  @map("logo_path") @db.VarChar(255)
   slug               String   @unique @db.VarChar(160)
+  // WhatsApp automático (Evolution API): conectado pelo QR Code em Conta
+  whatsappRobot        Boolean @default(false) @map("whatsapp_robot")
+  whatsappPromptHidden Boolean @default(false) @map("whatsapp_prompt_hidden")
   createdAt          DateTime @default(now()) @map("created_at")
   updatedAt          DateTime @updatedAt @map("updated_at")
 
@@ -193,6 +196,8 @@ model Company {
   pageDailyStats   CompanyPageDailyStat[]
   assistedSetups   AssistedSetupRequest[]
   supportThreads   SupportThread[]
+  suppliers        Supplier[]
+  productQuotes    ProductQuote[]
 
   @@index([cityId])
   @@index([stateId])
@@ -563,4 +568,89 @@ model SupportMessage {
   @@index([threadId, createdAt, id])
   @@index([threadId, senderType, readAt])
   @@map("support_messages")
+}
+
+// Cotação de produtos: o prestador pede preço aos vendedores/lojas
+enum ProductQuoteStatus {
+  open
+  reserved
+}
+
+model Supplier {
+  id        Int      @id @default(autoincrement())
+  companyId Int      @map("company_id")
+  name      String   @db.VarChar(120)
+  store     String?  @db.VarChar(120)
+  whatsapp  String   @db.VarChar(20)
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  company Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  quotes  ProductQuoteSupplier[]
+
+  @@index([companyId])
+  @@map("suppliers")
+}
+
+model ProductQuote {
+  id         Int                @id @default(autoincrement())
+  companyId  Int                @map("company_id")
+  status     ProductQuoteStatus @default(open)
+  reservedAt DateTime?          @map("reserved_at")
+  createdAt  DateTime           @default(now()) @map("created_at")
+
+  company   Company                @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  items     ProductQuoteItem[]
+  suppliers ProductQuoteSupplier[]
+
+  @@index([companyId, createdAt])
+  @@map("product_quotes")
+}
+
+model ProductQuoteItem {
+  id          Int     @id @default(autoincrement())
+  quoteId     Int     @map("quote_id")
+  description String  @db.VarChar(160)
+  quantity    Decimal @db.Decimal(10, 2)
+  position    Int     @default(0)
+
+  quote  ProductQuote        @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  offers ProductQuoteOffer[]
+
+  @@index([quoteId])
+  @@map("product_quote_items")
+}
+
+model ProductQuoteSupplier {
+  id          Int       @id @default(autoincrement())
+  quoteId     Int       @map("quote_id")
+  supplierId  Int       @map("supplier_id")
+  publicToken String    @unique @map("public_token") @db.VarChar(24)
+  sentAt      DateTime? @map("sent_at")
+  respondedAt DateTime? @map("responded_at")
+
+  quote    ProductQuote        @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  supplier Supplier            @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  offers   ProductQuoteOffer[]
+
+  @@unique([quoteId, supplierId])
+  @@index([supplierId])
+  @@map("product_quote_suppliers")
+}
+
+model ProductQuoteOffer {
+  id              Int      @id @default(autoincrement())
+  quoteSupplierId Int      @map("quote_supplier_id")
+  itemId          Int      @map("item_id")
+  brand           String?  @db.VarChar(80)
+  unitPrice       Decimal? @map("unit_price") @db.Decimal(12, 2)
+  selected        Boolean  @default(false)
+
+  quoteSupplier ProductQuoteSupplier @relation(fields: [quoteSupplierId], references: [id], onDelete: Cascade)
+  item          ProductQuoteItem     @relation(fields: [itemId], references: [id], onDelete: Cascade)
+
+  @@unique([quoteSupplierId, itemId])
+  @@index([itemId])
+  @@map("product_quote_offers")
 }

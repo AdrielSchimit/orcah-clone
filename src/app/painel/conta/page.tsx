@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { LogoutButton } from "@/components/logout-button";
+import { WhatsAppRobotCard } from "@/components/whatsapp-robot";
+import { evolutionEnabled } from "@/lib/evolution";
 import { isAdmin } from "@/lib/admin";
 import { ramoLabel, serviceAreaLabel } from "@/lib/company-display";
 import { ensureSubscription, isBillingExempt, planView } from "@/lib/plan";
@@ -57,6 +59,14 @@ export default async function ContaPage() {
             </Link>
           )}
         </Card>
+
+        {evolutionEnabled() ? (
+          <div id="whatsapp" className="scroll-mt-4">
+            <Card title="WhatsApp automático">
+              <WhatsAppRobotCard />
+            </Card>
+          </div>
+        ) : null}
 
         <Card title="Segurança">
           <p className="text-sm text-text-soft">Para trocar a senha, peça um link de redefinição.</p>

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { OrcahIcon, OrcahLogo } from "@/components/orcah-logo";
 
-type NavId = "home" | "clientes" | "orcamentos" | "pagina" | "mais" | "pedidos" | "servicos" | "relatorios";
+type NavId = "home" | "clientes" | "orcamentos" | "pagina" | "mais" | "pedidos" | "servicos" | "cotacoes" | "relatorios";
 
 // celular: 5 destinos. Pedidos, Serviços e Relatórios moram em "Mais" (e na lateral do desktop).
 const primary: { href: string; label: string; id: NavId }[] = [
@@ -18,10 +18,11 @@ const primary: { href: string; label: string; id: NavId }[] = [
 const secondary: { href: string; label: string; id: NavId }[] = [
   { href: "/painel/pedidos", label: "Pedidos", id: "pedidos" },
   { href: "/painel/servicos", label: "Serviços", id: "servicos" },
+  { href: "/painel/cotacoes", label: "Cotações", id: "cotacoes" },
   { href: "/painel/relatorios", label: "Relatórios", id: "relatorios" },
 ];
 
-const moreRoutes = ["/painel/mais", "/painel/plano", "/painel/conta", "/painel/pedidos", "/painel/servicos", "/painel/relatorios"];
+const moreRoutes = ["/painel/mais", "/painel/plano", "/painel/conta", "/painel/pedidos", "/painel/servicos", "/painel/cotacoes", "/painel/relatorios"];
 
 function isActive(pathname: string, id: NavId, desktop = false) {
   if (id === "home") return pathname === "/painel";
@@ -30,6 +31,7 @@ function isActive(pathname: string, id: NavId, desktop = false) {
   if (id === "pagina") return pathname.startsWith("/painel/pagina") || pathname.startsWith("/painel/empresa");
   if (id === "pedidos") return pathname.startsWith("/painel/pedidos");
   if (id === "servicos") return pathname.startsWith("/painel/servicos");
+  if (id === "cotacoes") return pathname.startsWith("/painel/cotacoes");
   if (id === "relatorios") return pathname.startsWith("/painel/relatorios");
   // no desktop os itens de "Mais" têm entrada própria na lateral
   const routes = desktop ? ["/painel/mais", "/painel/plano", "/painel/conta"] : moreRoutes;
@@ -76,6 +78,7 @@ function Icon({ id }: { id: NavId }) {
     servicos: (
       <path {...common} d="M14.7 6.3a4 4 0 0 0-5.4 5.2l-5 5a1.7 1.7 0 0 0 2.4 2.4l5-5a4 4 0 0 0 5.2-5.4l-2.4 2.4-2.1-.6-.6-2.1z" />
     ),
+    cotacoes: <path {...common} d="M3 5h2l2.2 10.5a1 1 0 0 0 1 .8h9.6a1 1 0 0 0 1-.8L20.5 8H6.2M9 20.5h.01M17 20.5h.01" />,
     relatorios: <path {...common} d="M4 20V10M10 20V4M16 20v-7M22 20H2" />,
     mais: (
       <>

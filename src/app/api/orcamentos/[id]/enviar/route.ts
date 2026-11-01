@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { isRepublishMetadata } from "@/lib/budget-cycle";
+import { robotSend } from "@/lib/evolution";
 import { requireActivePlan } from "@/lib/plan";
 import { prisma } from "@/lib/db";
 import { formatBRL } from "@/lib/money";
@@ -44,6 +45,7 @@ export async function POST(
     return NextResponse.json({ error: phoneError, url, message }, { status: 400 });
   }
   const href = whatsappHref(phone, message);
+  const sent = await robotSend(auth.company, phone, message);
   if (!href) {
     return NextResponse.json({ error: phoneError || "Não consegui abrir o WhatsApp.", url, message }, { status: 400 });
   }
@@ -63,5 +65,5 @@ export async function POST(
   }
 
   const status = budget.status === "draft" || budget.status === "waiting" ? "sent" : budget.status;
-  return NextResponse.json({ ok: true, href, url, message, status });
+  return NextResponse.json({ ok: true, href, url, message, status, sent });
 }

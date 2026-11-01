@@ -4,10 +4,12 @@ import { BudgetForm } from "@/components/budget-form";
 import { BudgetPhotosForm } from "@/components/budget-photos-form";
 import { CopyLinkButton } from "@/components/copy-link-button";
 import { SendWhatsAppButton } from "@/components/send-whatsapp-button";
+import { WhatsAppRobotPrompt } from "@/components/whatsapp-robot";
 import { StatusPill, budgetStatusTone } from "@/components/status-pill";
 import { groupedItems } from "@/lib/budget";
 import { isRepublishMetadata } from "@/lib/budget-cycle";
 import { prisma } from "@/lib/db";
+import { showRobotPrompt } from "@/lib/evolution";
 import { budgetStatusLabel } from "@/lib/budget-status";
 import { formatDateTime } from "@/lib/date";
 import { formatBRL, formatQuantity, moneyString } from "@/lib/money";
@@ -79,6 +81,7 @@ export default async function OrcamentoPage({
 
   return (
     <>
+      <WhatsAppRobotPrompt show={showRobotPrompt(user.company)} />
       <Link
         href="/painel"
         className="mb-4 inline-flex min-h-12 items-center text-sm font-medium text-text-soft"
