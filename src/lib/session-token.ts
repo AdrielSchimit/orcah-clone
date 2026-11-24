@@ -63,26 +63,29 @@ export async function signHandoffToken(userId: number) {
 }
 
 export async function readSessionToken(token: string) {
-  const { payload } = await jwtVerify(token, secret());
-  const userId = Number((payload as SessionPayload).userId);
+  const { payload } = await jwtVerify(token, secret(), { algorithms: ["HS256"], requiredClaims: ["iat", "exp"] });
+  if (payload.purpose !== undefined) return null; // Handoff JWTs are not session JWTs.
+  const userId = (payload as SessionPayload).userId;
   const slug = typeof payload.slug === "string" ? payload.slug : "";
-  if (!userId) return null;
+  if (typeof userId !== "number" || !Number.isSafeInteger(userId) || userId <= 0) return null;
   return { userId, slug, issuedAt: typeof payload.iat === "number" ? payload.iat : 0 };
 }
 
 export async function readHandoffToken(token: string) {
-  const { payload } = await jwtVerify(token, secret());
+  const { payload } = await jwtVerify(token, secret(), { algorithms: ["HS256"], requiredClaims: ["iat", "exp"] });
   if (payload.purpose !== "handoff") return null;
-  const userId = Number(payload.userId);
-  if (!userId) return null;
-  return userId;
+  const userId = payload.userId;
+  if (typeof userId !== "number" || !Number.isSafeInteger(userId) || userId <= 0) return null;
+  return { userId, issuedAt: typeof payload.iat === "number" ? payload.iat : 0 };
 }
 
 export function safeAppPath(value: string | null) {
-  if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("://")) {
+  if (!value || !value.startsWith("/") || value.startsWith("//") || value.includes("://") || value.includes("\\") || [...value].some(char => char.charCodeAt(0) < 32)) {
     return "/painel";
   }
-  if (value.startsWith("/painel") || value === "/onboarding") return value;
+  let path: string;
+  try { path = new URL(value, "https://orcah.invalid").pathname; } catch { return "/painel"; }
+  if (path === "/painel" || path.startsWith("/painel/") || path === "/onboarding") return value;
   return "/painel";
 }
 
