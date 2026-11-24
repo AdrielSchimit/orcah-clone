@@ -16,9 +16,11 @@ type NominatimReverse = {
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const lat = Number(searchParams.get("lat"));
-  const lon = Number(searchParams.get("lon"));
-  if (!Number.isFinite(lat) || !Number.isFinite(lon)) {
+  const rawLat = searchParams.get("lat");
+  const rawLon = searchParams.get("lon");
+  const lat = rawLat?.trim() ? Number(rawLat) : NaN;
+  const lon = rawLon?.trim() ? Number(rawLon) : NaN;
+  if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) {
     return NextResponse.json({ error: "Coordenadas inválidas." }, { status: 400 });
   }
 
@@ -33,6 +35,7 @@ export async function GET(request: Request) {
     const response = await fetch(url, {
       headers: { "User-Agent": "Orcah/1.0 (provider search; contact@orcah.com.br)" },
       next: { revalidate: 86400 },
+      signal: AbortSignal.timeout(8000),
     });
     if (!response.ok) {
       return NextResponse.json({ error: "Não foi possível identificar a localização." }, { status: 502 });

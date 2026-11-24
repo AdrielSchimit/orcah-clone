@@ -39,6 +39,7 @@ describe("validação de imagem", () => {
 
   it("rejeita formato inválido", () => {
     assert.equal(validateImageFile({ name: "a.gif", type: "image/gif", size: 1000 }), "Use foto JPG, PNG ou WEBP.");
+    assert.equal(validateImageFile({ name: "a.jpg", type: "image/png", size: 1000 }), "Use foto JPG, PNG ou WEBP.");
     assert.equal(validateImageFile({ name: "virus.exe", type: "image/png", size: 1000 }), "Use foto JPG, PNG ou WEBP.");
     assert.equal(validateImageFile({ name: "a.svg", type: "image/svg+xml", size: 1000 }), "Use foto JPG, PNG ou WEBP.");
   });
