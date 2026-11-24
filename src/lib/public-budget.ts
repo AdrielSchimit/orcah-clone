@@ -35,8 +35,9 @@ export async function recordBudgetEvent(
   budgetId: number,
   event: "viewed" | "approved" | "rejected" | "revision_requested" | "sent",
   metadata?: Prisma.InputJsonValue,
+  db: Pick<Prisma.TransactionClient, "budgetEvent"> = prisma,
 ) {
-  await prisma.budgetEvent.create({
+  await db.budgetEvent.create({
     data: {
       budgetId,
       event,
