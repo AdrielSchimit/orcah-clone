@@ -2,7 +2,8 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "git": {
     "deploymentEnabled": {
-      "fix/asaas-checkout-lock-20261124": false
+      "fix/asaas-checkout-lock-20261124": false,
+      "fix/asaas-webhook-ledger-20261124": false
     }
   }
 }

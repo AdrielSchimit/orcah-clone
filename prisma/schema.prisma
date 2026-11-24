@@ -438,6 +438,23 @@ model Subscription {
   @@map("subscriptions")
 }
 
+/// Registro de eventos do webhook Asaas (um por event.id). Só IDs e tipo: nenhum dado do pagador.
+model AsaasWebhookEvent {
+  id             String    @id @db.VarChar(120)
+  event          String    @db.VarChar(60)
+  paymentId      String?   @map("payment_id") @db.VarChar(80)
+  subscriptionId String?   @map("subscription_id") @db.VarChar(80)
+  attempts       Int       @default(1)
+  processedAt    DateTime? @map("processed_at")
+  lastError      String?   @map("last_error") @db.VarChar(40)
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  @@index([paymentId])
+  @@index([processedAt, createdAt])
+  @@map("asaas_webhook_events")
+}
+
 enum AssistedSetupStatus {
   requested
   contacted
