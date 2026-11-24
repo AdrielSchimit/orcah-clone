@@ -14,10 +14,8 @@ export async function POST(
   }
 
   if (maybeExpire(budget.validityDate, budget.status)) {
-    await prisma.budget.update({
-      where: { id: budget.id },
-      data: { status: "expired" },
-    });
+    const result = await prisma.budget.updateMany({ where: { id: budget.id, status: budget.status, updatedAt: budget.updatedAt }, data: { status: "expired" } });
+    if (!result.count) return NextResponse.json({ error: "Orçamento atualizado." }, { status: 409 });
     return NextResponse.json({ ok: true, status: "expired" });
   }
 
@@ -30,14 +28,15 @@ export async function POST(
     return NextResponse.json({ ok: true, status: budget.status });
   }
 
-  await prisma.budget.update({
-    where: { id: budget.id },
-    data: {
-      status: "viewed",
-      viewedAt: budget.viewedAt ?? new Date(),
-    },
+  const changed = await prisma.$transaction(async tx => {
+    const result = await tx.budget.updateMany({
+      where: { id: budget.id, status: budget.status, updatedAt: budget.updatedAt },
+      data: { status: "viewed", viewedAt: budget.viewedAt ?? new Date() },
+    });
+    if (!result.count) return false;
+    await recordBudgetEvent(request, budget.id, "viewed", undefined, tx);
+    return true;
   });
-  await recordBudgetEvent(request, budget.id, "viewed");
-
+  if (!changed) return NextResponse.json({ error: "Orçamento atualizado." }, { status: 409 });
   return NextResponse.json({ ok: true, status: "viewed" });
 }

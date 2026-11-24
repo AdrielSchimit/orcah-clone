@@ -1,3 +1,4 @@
+import type { BudgetStatus, Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { publicCanRespond } from "@/lib/budget-cycle";
 import { prisma } from "@/lib/db";
@@ -22,10 +23,7 @@ export async function POST(
   }
 
   if (maybeExpire(budget.validityDate, budget.status)) {
-    await prisma.budget.update({
-      where: { id: budget.id },
-      data: { status: "expired" },
-    });
+    await prisma.budget.updateMany({ where: { id: budget.id, status: budget.status, updatedAt: budget.updatedAt }, data: { status: "expired" } });
     return NextResponse.json({ error: "Este orçamento expirou." }, { status: 409 });
   }
 
@@ -37,49 +35,33 @@ export async function POST(
     return NextResponse.json({ error: "A empresa está ajustando este orçamento. Aguarde a nova versão." }, { status: 409 });
   }
 
-  const body = (await request.json()) as {
-    action?: string;
-    reason?: string;
-    message?: string;
-  };
+  const raw = await request.json().catch(() => null);
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) return NextResponse.json({ error: "Dados inválidos." }, { status: 400 });
+  const body = raw as { action?: unknown; reason?: unknown; message?: unknown };
+  const message = typeof body.message === "string" ? body.message.trim() : "";
+  if (message.length > 4000) return NextResponse.json({ error: "Mensagem muito longa." }, { status: 400 });
+  let status: BudgetStatus;
+  let event: "approved" | "rejected" | "revision_requested";
+  let metadata: Prisma.InputJsonValue | undefined;
+  if (body.action === "approve") { status = "approved"; event = "approved"; }
+  else if (body.action === "reject") {
+    const reason = typeof body.reason === "string" ? body.reason.trim() : "";
+    if (!rejectReasons.has(reason)) return NextResponse.json({ error: "Escolha o motivo da recusa." }, { status: 400 });
+    status = "rejected"; event = "rejected"; metadata = { reason, message: message || null };
+  } else if (body.action === "revision") {
+    if (message.length < 3) return NextResponse.json({ error: "Escreva o que gostaria de alterar." }, { status: 400 });
+    status = "waiting"; event = "revision_requested"; metadata = { message };
+  } else return NextResponse.json({ error: "Ação inválida." }, { status: 400 });
 
-  if (body.action === "approve") {
-    await prisma.budget.update({
-      where: { id: budget.id },
-      data: { status: "approved", approvedAt: new Date() },
+  const changed = await prisma.$transaction(async tx => {
+    const result = await tx.budget.updateMany({
+      where: { id: budget.id, status: budget.status, updatedAt: budget.updatedAt },
+      data: { status, ...(status === "approved" ? { approvedAt: new Date() } : {}), ...(status === "rejected" ? { rejectedAt: new Date() } : {}) },
     });
-    await recordBudgetEvent(request, budget.id, "approved");
-    return NextResponse.json({ ok: true, status: "approved" });
-  }
-
-  if (body.action === "reject") {
-    const reason = body.reason?.trim() ?? "";
-    if (!rejectReasons.has(reason)) {
-      return NextResponse.json({ error: "Escolha o motivo da recusa." }, { status: 400 });
-    }
-    await prisma.budget.update({
-      where: { id: budget.id },
-      data: { status: "rejected", rejectedAt: new Date() },
-    });
-    await recordBudgetEvent(request, budget.id, "rejected", {
-      reason,
-      message: body.message?.trim() || null,
-    });
-    return NextResponse.json({ ok: true, status: "rejected" });
-  }
-
-  if (body.action === "revision") {
-    const message = body.message?.trim() ?? "";
-    if (message.length < 3) {
-      return NextResponse.json({ error: "Escreva o que gostaria de alterar." }, { status: 400 });
-    }
-    await prisma.budget.update({
-      where: { id: budget.id },
-      data: { status: "waiting" },
-    });
-    await recordBudgetEvent(request, budget.id, "revision_requested", { message });
-    return NextResponse.json({ ok: true, status: "waiting" });
-  }
-
-  return NextResponse.json({ error: "Ação inválida." }, { status: 400 });
+    if (!result.count) return false;
+    await recordBudgetEvent(request, budget.id, event, metadata, tx);
+    return true;
+  });
+  if (!changed) return NextResponse.json({ error: "O orçamento mudou. Atualize a página antes de responder." }, { status: 409 });
+  return NextResponse.json({ ok: true, status });
 }
