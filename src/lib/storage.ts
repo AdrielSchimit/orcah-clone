@@ -38,10 +38,10 @@ export function validateImageFile(file: { name?: string; type: string; size: num
   if (!extensions) return "Use foto JPG, PNG ou WEBP.";
   const ext = (file.name ?? "").split(".").pop()?.toLowerCase() ?? "";
   // nome sem extensão é comum no celular (blob da câmera); com extensão, tem que bater com o tipo
-  if (ext && file.name?.includes(".") && !Object.values(ALLOWED).flat().includes(ext)) {
+  if (ext && file.name?.includes(".") && !extensions.includes(ext)) {
     return "Use foto JPG, PNG ou WEBP.";
   }
-  if (file.size <= 0) return "Escolha uma foto.";
+  if (!Number.isFinite(file.size) || file.size <= 0) return "Escolha uma foto.";
   if (file.size > IMAGE_MAX_BYTES) return "Foto muito grande (máximo 8 MB).";
   return null;
 }
@@ -184,7 +184,7 @@ export async function removeCompanyImage(
   if (!stored) return false;
   const assetPath = assetPathFromStored(stored, config);
   // arquivos antigos (antes do storage) ficavam em /uploads/empresa/{id}/
-  const legacyOwned = Boolean(assetPath && stored.startsWith("/uploads/") && assetPath.startsWith(`empresa/${companyId}/`) && !assetPath.includes(".."));
+  const legacyOwned = Boolean(assetPath && stored.startsWith("/uploads/") && assetPath.startsWith(`empresa/${companyId}/`) && !assetPath.includes("..") && !assetPath.includes("//") && /^[a-z0-9/_.-]+$/i.test(assetPath));
   if (!assetPath || !(isOwnedAssetPath(companyId, assetPath) || legacyOwned)) return false;
 
   if (stored.startsWith("/uploads/")) {
