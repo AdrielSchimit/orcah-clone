@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { isAdmin } from "@/lib/admin";
-import { asaasConfigured, clientIp, createCardSubscription, findOrCreateAsaasCustomer } from "@/lib/asaas";
-import { cardCheckoutAlreadyStarted, existingAsaasCheckoutMethod } from "@/lib/asaas-checkout";
+import { asaasConfigured, asaasRejectedRequest, clientIp, createCardSubscription, findOrCreateAsaasCustomer } from "@/lib/asaas";
+import { claimCheckout, reconcileClaimWithAsaas, recoverStaleCheckout, releaseUnsentCheckout } from "@/lib/checkout-claim";
+import { cardDetailsValid, checkoutDecision } from "@/lib/checkout-safety";
 import { requireCompany } from "@/lib/company";
 import { prisma } from "@/lib/db";
 import { digitsOnly, isCpfCnpj } from "@/lib/document";
@@ -17,7 +18,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Asaas ainda não está configurado." }, { status: 503 });
   }
 
-  const body = (await request.json()) as {
+  const raw = await request.json().catch(() => null);
+  if (!raw || typeof raw !== "object" || Array.isArray(raw) || Object.values(raw).some(value => typeof value !== "string" && value != null)) return NextResponse.json({ error: "Dados inválidos." }, { status: 400 });
+  const body = raw as {
     document?: string;
     holderName?: string;
     number?: string;
@@ -38,7 +41,7 @@ export async function POST(request: Request) {
   if (!isCpfCnpj(document)) {
     return NextResponse.json({ error: "Informe um CPF ou CNPJ válido." }, { status: 400 });
   }
-  if (holderName.length < 3 || number.length < 13 || expiry.length < 4 || ccv.length < 3) {
+  if (holderName.length < 3 || !cardDetailsValid(number, expiry, ccv)) {
     return NextResponse.json({ error: "Confira os dados do cartão." }, { status: 400 });
   }
   if (postalCode.length !== 8) {
@@ -53,25 +56,22 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Informe um e-mail nos dados da sua página para pagar com cartão." }, { status: 400 });
   }
 
-  await ensureSubscription(auth.company.id);
-  // Avoid another recurring charge after a timeout, refresh or repeated click.
-  const current = await prisma.subscription.findUnique({ where: { companyId: auth.company.id } });
-  if (existingAsaasCheckoutMethod(current) === "PIX") {
-    return NextResponse.json(
-      { error: "Há uma cobrança Pix em andamento. Consulte o suporte para alterar o pagamento." },
-      { status: 409 },
-    );
-  }
-  if (cardCheckoutAlreadyStarted(current)) {
-    return NextResponse.json({ ok: true, paid: false, pending: true });
-  }
-
-  await prisma.company.update({
-    where: { id: auth.company.id },
-    data: { document, zipCode: postalCode },
-  });
-
+  const current = await ensureSubscription(auth.company.id);
+  const row = (await recoverStaleCheckout(current)) ?? current;
+  const decision = checkoutDecision(row, "CREDIT_CARD");
+  if (decision === "reuse") return NextResponse.json({ ok: true, pending: true });
+  if (decision === "blocked") return NextResponse.json({ error: "Já existe uma cobrança ou tentativa em andamento. Consulte o suporte antes de tentar novamente." }, { status: 409 });
+  const marker = await claimCheckout(auth.company.id, "CREDIT_CARD");
+  if (!marker) return NextResponse.json({ error: "Já existe uma tentativa em andamento." }, { status: 409 });
+  // prepare: nothing sent to Asaas yet · create: POST /subscriptions in flight · created: Asaas accepted it
+  let stage: "prepare" | "create" | "created" = "prepare";
+  let customerId: string | null = null;
   try {
+    await prisma.company.update({
+      where: { id: auth.company.id },
+      data: { document, zipCode: postalCode },
+    });
+
     const customer = await findOrCreateAsaasCustomer({
       name: auth.company.name,
       email: billingEmail,
@@ -80,6 +80,9 @@ export async function POST(request: Request) {
       companyId: auth.company.id,
     });
 
+    await prisma.subscription.update({ where: { companyId: auth.company.id }, data: { providerCustomerId: customer.id } });
+    customerId = customer.id;
+    stage = "create";
     const created = await createCardSubscription({
       customerId: customer.id,
       remoteIp: clientIp(request),
@@ -100,25 +103,26 @@ export async function POST(request: Request) {
         mobilePhone: phone,
       },
     });
+    stage = "created";
 
-    // Creating a subscription is NOT payment confirmation.
-    // Preserve the existing trial/expired state until a verified webhook arrives.
     await prisma.subscription.update({
       where: { companyId: auth.company.id },
-      data: {
-        provider: "asaas",
-        providerCustomerId: customer.id,
-        providerSubscriptionId: created.id,
-        providerPaymentId: null,
-        billingType: "CREDIT_CARD",
-      },
+      data: { provider: "asaas", providerCustomerId: customer.id, providerSubscriptionId: created.id, billingType: "CREDIT_CARD" },
     });
-
-    return NextResponse.json({ ok: true, paid: false, pending: true });
-  } catch {
-    return NextResponse.json(
-      { error: "Não foi possível concluir a solicitação. Verifique o status antes de tentar novamente." },
-      { status: 502 },
-    );
+    return NextResponse.json({ ok: true, pending: true });
+  } catch (error) {
+    if (stage === "prepare") {
+      await releaseUnsentCheckout(auth.company.id, marker).catch(() => false);
+      return NextResponse.json({ error: "Não foi possível iniciar a cobrança. Tente novamente." }, { status: 502 });
+    }
+    if (stage === "create" && customerId && asaasRejectedRequest(error)) {
+      // Asaas answered with a refusal (e.g. card declined). Confirm nothing was created before unlocking a retry.
+      const outcome = await reconcileClaimWithAsaas(auth.company.id, marker, customerId).catch(() => "kept" as const);
+      if (outcome === "released") {
+        return NextResponse.json({ error: "O cartão não foi aprovado. Confira os dados ou use outro cartão." }, { status: 402 });
+      }
+      if (outcome === "adopted") return NextResponse.json({ ok: true, pending: true });
+    }
+    return NextResponse.json({ error: "Não foi possível confirmar a criação da cobrança. Consulte o suporte antes de repetir." }, { status: 502 });
   }
 }

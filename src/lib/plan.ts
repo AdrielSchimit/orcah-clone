@@ -40,9 +40,7 @@ async function ensureComplimentarySubscription(companyId: number) {
     return prisma.subscription.update({ where: { companyId }, data });
   }
 
-  return prisma.subscription.create({
-    data: { companyId, startsAt: new Date(), ...data },
-  });
+  return prisma.subscription.upsert({ where: { companyId }, update: data, create: { companyId, startsAt: new Date(), ...data } });
 }
 
 export async function ensureSubscription(companyId: number) {
@@ -61,8 +59,9 @@ export async function ensureSubscription(companyId: number) {
   const endsAt = new Date(startsAt);
   endsAt.setDate(endsAt.getDate() + TRIAL_DAYS);
 
-  return prisma.subscription.create({
-    data: {
+  return prisma.subscription.upsert({
+    where: { companyId }, update: {},
+    create: {
       companyId,
       provider: "local",
       status: "trialing",

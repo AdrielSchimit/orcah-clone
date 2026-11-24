@@ -6,41 +6,34 @@ import { PLAN_PRICE_LABEL } from "@/lib/plan-constants";
 
 type Tab = "pix" | "card";
 
-export function PlanCheckout({
-  document,
-  cardAwaitingConfirmation = false,
-}: {
-  document?: string | null;
-  cardAwaitingConfirmation?: boolean;
-}) {
+export function PlanCheckout({ document, initialPendingCard = false }: { document?: string | null; initialPendingCard?: boolean }) {
   const router = useRouter();
-  const [tab, setTab] = useState<Tab>(cardAwaitingConfirmation ? "card" : "pix");
+  const [tab, setTab] = useState<Tab>(initialPendingCard ? "card" : "pix");
   const [cpf, setCpf] = useState(document ?? "");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [payload, setPayload] = useState("");
   const [image, setImage] = useState("");
+  const [pendingCard, setPendingCard] = useState(initialPendingCard);
   const [copied, setCopied] = useState(false);
-  const [cardPending, setCardPending] = useState(cardAwaitingConfirmation);
 
   useEffect(() => {
-    if (!payload && !cardPending) return;
-    let active = true;
-    const timer = setInterval(async () => {
+    if (!payload && !pendingCard) return;
+    const controller = new AbortController();
+    let timer: ReturnType<typeof setTimeout>;
+    async function poll() {
       try {
-        const response = await fetch("/api/plano/status");
-        if (!response.ok) return;
-        const data = (await response.json()) as { paid?: boolean };
-        if (active && data.paid) {
-          setCardPending(false);
-          router.refresh();
+        const response = await fetch("/api/plano/status", { signal: controller.signal, cache: "no-store" });
+        if (response.ok) {
+          const state = await response.json() as { paid?: boolean; billingStatus?: string };
+          if (state.paid || state.billingStatus === "canceled") { router.refresh(); return; }
         }
-      } catch {
-        // Network errors must never be interpreted as payment approval.
-      }
-    }, 10000);
-    return () => { active = false; clearInterval(timer); };
-  }, [payload, cardPending, router]);
+      } catch { /* Temporary failure; retry while mounted. */ }
+      if (!controller.signal.aborted) timer = setTimeout(poll, 4000);
+    }
+    timer = setTimeout(poll, 4000);
+    return () => { controller.abort(); clearTimeout(timer); };
+  }, [payload, pendingCard, router]);
 
   async function createPix(event: FormEvent) {
     event.preventDefault();
@@ -85,16 +78,13 @@ export function PlanCheckout({
           addressNumber: form.get("addressNumber"),
         }),
       });
-      const data = (await response.json()) as { error?: string; paid?: boolean; pending?: boolean };
+      const data = (await response.json()) as { error?: string; pending?: boolean };
       if (!response.ok) {
-        setError(data.error ?? "Não foi possível processar o cartão.");
+        setError(data.error ?? "Cartão não autorizado.");
         return;
       }
-      if (data.paid) {
-        router.refresh();
-      } else {
-        setCardPending(true);
-      }
+      setPendingCard(Boolean(data.pending));
+      router.refresh();
     } catch {
       setError("Falha de conexão.");
     } finally {
@@ -103,9 +93,11 @@ export function PlanCheckout({
   }
 
   async function copyPix() {
-    await navigator.clipboard.writeText(payload);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      await navigator.clipboard.writeText(payload);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { setError("Não foi possível copiar automaticamente. Tente novamente."); }
   }
 
   return (
@@ -114,7 +106,7 @@ export function PlanCheckout({
         <button
           type="button"
           onClick={() => setTab("pix")}
-          disabled={cardPending}
+          disabled={pendingCard}
           className={`min-h-12 rounded-btn px-4 text-sm font-semibold ${
             tab === "pix" ? "bg-gold text-ink" : "border border-line bg-card"
           }`}
@@ -155,7 +147,7 @@ export function PlanCheckout({
           ) : null}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || pendingCard}
             className="min-h-12 rounded-btn bg-gold px-4 text-base font-semibold text-ink hover:bg-gold-press disabled:opacity-60"
           >
             {loading ? "Gerando…" : payload ? "Gerar Pix de novo" : `Pagar ${PLAN_PRICE_LABEL} no Pix`}
@@ -214,20 +206,15 @@ export function PlanCheckout({
           </div>
           <button
             type="submit"
-            disabled={loading || cardPending}
+            disabled={loading || pendingCard}
             className="min-h-12 rounded-btn bg-gold px-4 text-base font-semibold text-ink hover:bg-gold-press disabled:opacity-60"
           >
-            {loading ? "Enviando…" : cardPending ? "Aguardando confirmação do Asaas" : `Pagar ${PLAN_PRICE_LABEL} no cartão`}
+            {loading ? "Enviando…" : pendingCard ? "Aguardando confirmação do Asaas" : `Pagar ${PLAN_PRICE_LABEL} no cartão`}
           </button>
-          {cardPending ? (
-            <p role="status" className="text-sm text-text-soft">
-              Sua assinatura foi solicitada, mas o pagamento ainda não foi confirmado. Não repita a cobrança.
-              Se não houver confirmação, fale com o suporte.
-            </p>
-          ) : null}
-          <p className="text-xs text-text-soft">O número vai direto ao Asaas. A gente não guarda cartão.</p>
+          <p className="text-xs text-text-soft">Os dados são encaminhados ao Asaas pelo servidor. Não armazenamos o número do cartão.</p>
         </form>
       )}
+      {pendingCard ? <p className="mt-3 text-sm text-text-soft" role="status">Aguardando confirmação do pagamento. Não envie novamente.</p> : null}
       {error ? <p className="mt-3 text-sm text-no">{error}</p> : null}
     </div>
   );

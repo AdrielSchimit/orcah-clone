@@ -1,0 +1,45 @@
+import assert from "node:assert/strict";
+import { test } from "node:test";
+import { cardDetailsValid, checkoutDecision, claimIsStale, decidePayment, isCheckoutMarker, latestPaidPayment, markerMethod, openPixPayment, paidAmountMatches, paymentPeriodEnd, reconcileClaim, type BillingSnapshot, type PaymentSnapshot } from "../src/lib/checkout-safety";
+const empty = { providerSubscriptionId: null, billingType: null };
+const initial: BillingSnapshot = { status: "trialing", providerPaymentId: null, providerCustomerId: "cus_test", endsAt: new Date("2026-12-01T00:00:00Z"), amount: 29 };
+const paid: PaymentSnapshot = { id: "pay_1", customer: "cus_test", status: "CONFIRMED", value: 29, dueDate: "2026-11-24" };
+const active: BillingSnapshot = { ...initial, status: "active", providerPaymentId: "pay_1", endsAt: paymentPeriodEnd(paid.dueDate) };
+test("checkout creates only when no provider subscription exists", () => { assert.equal(checkoutDecision(empty, "PIX"), "create"); assert.equal(checkoutDecision(empty, "CREDIT_CARD"), "create"); });
+test("both payment methods share the in-flight lock", () => { for (const marker of ["CREATING_PIX", "CREATING_CARD"]) for (const type of ["PIX", "CREDIT_CARD"] as const) assert.equal(checkoutDecision({ ...empty, billingType: marker }, type), "blocked"); });
+test("existing subscription is reused, never replaced by another method", () => { assert.equal(checkoutDecision({ providerSubscriptionId: "sub", billingType: "PIX" }, "PIX"), "reuse"); assert.equal(checkoutDecision({ providerSubscriptionId: "sub", billingType: "PIX" }, "CREDIT_CARD"), "blocked"); });
+test("end of period is anchored to provider date; invalid dates rejected", () => { assert.equal(paymentPeriodEnd("2026-11-24")?.toISOString(), "2026-12-29T23:59:59.999Z"); for (const invalid of [undefined, "2026-02-30", "2026-2-3", "garbage"]) assert.equal(paymentPeriodEnd(invalid), null); });
+test("underpayment, missing amount and nonfinite amounts do not activate", () => { assert.equal(paidAmountMatches(29, 29), true); for (const invalid of [28.99, undefined, NaN, Infinity, "29"]) assert.equal(paidAmountMatches(invalid, 29), false); });
+test("card format validates expiry and CVV", () => { const now = new Date("2026-11-24T12:00:00Z"); assert.equal(cardDetailsValid("4111111111111111", "1226", "123", now), true); for (const expiry of ["1026", "0027", "1327", "123", "1220267"]) assert.equal(cardDetailsValid("4111111111111111", expiry, "123", now), false); assert.equal(cardDetailsValid("4111111111111111", "122026", "12345", now), false); });
+test("pending does not activate a trial", () => assert.equal(decidePayment(initial, { ...paid, status: "PENDING" }), null));
+test("confirmed payment activates through provider snapshot", () => assert.deepEqual(decidePayment(initial, paid), { status: "active", endsAt: paymentPeriodEnd(paid.dueDate) }));
+test("wrong customer and wrong amount never activate", () => { assert.equal(decidePayment(initial, { ...paid, customer: "cus_other" }), null); assert.equal(decidePayment(initial, { ...paid, value: 1 }), null); });
+test("duplicate confirmation does not renew the same period", () => assert.equal(decidePayment(active, paid), null));
+test("older paid invoice cannot replace the active period", () => assert.equal(decidePayment(active, { ...paid, id: "pay_old", dueDate: "2026-10-24" }), null));
+test("new monthly confirmation extends to a deterministic period", () => assert.deepEqual(decidePayment(active, { ...paid, id: "pay_2", dueDate: "2026-12-24" }), { status: "active", endsAt: paymentPeriodEnd("2026-12-24") }));
+test("older overdue invoice does not disable current paid plan", () => assert.equal(decidePayment(active, { ...paid, id: "pay_old", status: "OVERDUE", dueDate: "2026-10-24" }), null));
+test("refund on current payment cancels; replay does not reopen", () => { assert.deepEqual(decidePayment(active, { ...paid, status: "REFUNDED" }), { status: "canceled" }); assert.equal(decidePayment({ ...active, status: "canceled" }, paid), null); });
+test("canceled remote subscription is neither reused nor replaced", () => { for (const type of ["PIX", "CREDIT_CARD"] as const) assert.equal(checkoutDecision({ providerSubscriptionId: "sub", billingType: type, status: "canceled" }, type), "blocked"); });
+test("unpaid or deleted charge does not end the free trial early", () => { for (const status of ["OVERDUE", "DELETED"]) assert.equal(decidePayment(initial, { ...paid, status }), null); });
+test("overdue current charge on an active plan marks past_due", () => assert.deepEqual(decidePayment(active, { ...paid, status: "OVERDUE" }), { status: "past_due" }));
+test("claim reconciliation releases only on a complete, empty listing", () => {
+  assert.deepEqual(reconcileClaim([], true, "PIX"), { action: "release" });
+  assert.deepEqual(reconcileClaim([{ id: "old", deleted: true }], true, "PIX"), { action: "release" });
+  assert.deepEqual(reconcileClaim([], false, "PIX"), { action: "keep" });
+  assert.deepEqual(reconcileClaim([{ id: "s1", billingType: "PIX" }], true, "PIX"), { action: "adopt", subscriptionId: "s1" });
+  assert.deepEqual(reconcileClaim([{ id: "s1", billingType: "PIX" }], true, "CREDIT_CARD"), { action: "keep" });
+  assert.deepEqual(reconcileClaim([{ id: "s1", billingType: "PIX" }, { id: "s2", billingType: "PIX" }], true, "PIX"), { action: "keep" });
+});
+test("claim is stale only after 15 minutes", () => { const t0 = new Date("2026-11-24T12:00:00Z"); assert.equal(claimIsStale(t0, new Date("2026-11-24T12:14:59Z")), false); assert.equal(claimIsStale(t0, new Date("2026-11-24T12:15:00Z")), true); });
+test("marker helpers", () => { assert.equal(markerMethod("CREATING_PIX"), "PIX"); assert.equal(markerMethod("CREATING_CARD"), "CREDIT_CARD"); assert.equal(markerMethod("PIX"), null); assert.equal(isCheckoutMarker(null), false); });
+test("picks the latest paid payment, not the first listed", () => {
+  const list = [{ ...paid, id: "p_old", dueDate: "2026-10-24" }, { ...paid, id: "p_new", dueDate: "2026-12-24" }, { ...paid, id: "p_pend", status: "PENDING", dueDate: "2027-01-24" }, { ...paid, id: "p_bad", dueDate: "garbage" }];
+  assert.equal(latestPaidPayment(list)?.id, "p_new");
+  assert.equal(latestPaidPayment([{ ...paid, status: "PENDING" }]), null);
+});
+test("Pix QR goes to the oldest pending charge, then overdue", () => {
+  const list = [{ ...paid, id: "paid" }, { ...paid, id: "late", status: "OVERDUE", dueDate: "2026-10-01" }, { ...paid, id: "p2", status: "PENDING", dueDate: "2026-12-24" }, { ...paid, id: "p1", status: "PENDING", dueDate: "2026-11-24" }];
+  assert.equal(openPixPayment(list)?.id, "p1");
+  assert.equal(openPixPayment(list.filter((item) => item.status !== "PENDING"))?.id, "late");
+  assert.equal(openPixPayment([paid]), null);
+});

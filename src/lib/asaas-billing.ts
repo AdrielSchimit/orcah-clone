@@ -1,78 +1,23 @@
 import { prisma } from "@/lib/db";
-import { type AsaasPayment, paymentIsOverdue, paymentIsPaid } from "@/lib/asaas";
-import { PLAN_PRICE } from "@/lib/plan-constants";
+import type { AsaasPayment } from "@/lib/asaas";
+import { decidePayment } from "@/lib/checkout-safety";
 import { isBillingExempt } from "@/lib/plan";
 
-export async function markPaid(input: {
-  companyId: number;
-  providerCustomerId?: string | null;
-  providerSubscriptionId?: string | null;
-  providerPaymentId?: string | null;
-  billingType?: string | null;
-  dueDate?: string | null;
-}) {
-  const startsAt = new Date();
-  const endsAt = input.dueDate ? new Date(`${input.dueDate}T23:59:59`) : new Date(startsAt);
-  if (!input.dueDate) endsAt.setDate(endsAt.getDate() + 35);
-  else endsAt.setDate(endsAt.getDate() + 35);
-
-  return prisma.subscription.update({
-    where: { companyId: input.companyId },
-    data: {
-      status: "active",
-      provider: "asaas",
-      plan: "unico",
-      amount: PLAN_PRICE,
-      startsAt,
-      endsAt,
-      providerCustomerId: input.providerCustomerId ?? undefined,
-      providerSubscriptionId: input.providerSubscriptionId ?? undefined,
-      providerPaymentId: input.providerPaymentId ?? undefined,
-      billingType: input.billingType ?? undefined,
-    },
-  });
-}
-
-export async function markUnpaid(companyId: number, status: "past_due" | "canceled") {
-  return prisma.subscription.update({
-    where: { companyId },
-    data: {
-      status,
-      provider: "asaas",
-    },
-  });
-}
-
+/** Reconcile provider snapshots, not arrival order. No renewal from the local clock. */
 export async function applyAsaasPayment(payment: AsaasPayment) {
   const subscription = payment.subscription
-    ? await prisma.subscription.findFirst({
-        where: { providerSubscriptionId: payment.subscription },
-      })
-    : await prisma.subscription.findFirst({
-        where: { providerPaymentId: payment.id },
-      });
-
+    ? await prisma.subscription.findFirst({ where: { providerSubscriptionId: payment.subscription } })
+    : await prisma.subscription.findFirst({ where: { providerPaymentId: payment.id } });
   if (!subscription) return null;
-
-  const company = await prisma.company.findUnique({
-    where: { id: subscription.companyId },
-    select: { userId: true },
+  const company = await prisma.company.findUnique({ where: { id: subscription.companyId }, select: { userId: true } });
+  if (isBillingExempt({ id: company?.userId }) || subscription.provider === "complimentary") return subscription;
+  const decision = decidePayment({ ...subscription, amount: Number(subscription.amount) }, payment);
+  if (!decision) return subscription;
+  // Atomic conditional write; a concurrent update causes retry rather than overwrite.
+  const result = await prisma.subscription.updateMany({
+    where: { id: subscription.id, updatedAt: subscription.updatedAt, providerSubscriptionId: subscription.providerSubscriptionId, providerPaymentId: subscription.providerPaymentId, status: subscription.status },
+    data: { status: decision.status, provider: "asaas", providerPaymentId: payment.id, ...(decision.status === "active" ? { startsAt: new Date(), endsAt: decision.endsAt } : {}) },
   });
-  if (isBillingExempt({ id: company?.userId })) return subscription;
-
-  if (paymentIsPaid(payment.status)) {
-    return markPaid({
-      companyId: subscription.companyId,
-      providerSubscriptionId: payment.subscription ?? subscription.providerSubscriptionId,
-      providerPaymentId: payment.id,
-      billingType: subscription.billingType,
-      dueDate: payment.dueDate,
-    });
-  }
-
-  if (paymentIsOverdue(payment.status)) {
-    return markUnpaid(subscription.companyId, payment.status === "DELETED" ? "canceled" : "past_due");
-  }
-
-  return subscription;
+  if (!result.count) throw new Error("Concurrent payment update; retry reconciliation.");
+  return prisma.subscription.findUnique({ where: { id: subscription.id } });
 }

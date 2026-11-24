@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { getPayment } from "@/lib/asaas";
+import { listSubscriptionPayments } from "@/lib/asaas";
 import { applyAsaasPayment } from "@/lib/asaas-billing";
+import { latestPaidPayment } from "@/lib/checkout-safety";
 import { requireCompany } from "@/lib/company";
 import { prisma } from "@/lib/db";
 import { ensureSubscription, planView } from "@/lib/plan";
@@ -10,10 +11,12 @@ export async function GET() {
   if ("error" in auth) return auth.error;
 
   const subscription = await ensureSubscription(auth.company.id);
-  if (subscription.providerPaymentId && subscription.status !== "active") {
+  if (subscription.providerSubscriptionId && (!planView(subscription).ok || subscription.status === "trialing")) {
     try {
-      const payment = await getPayment(subscription.providerPaymentId);
-      await applyAsaasPayment(payment);
+      // Only a confirmed payment can unlock the plan here; cancellations and refunds come from the webhook.
+      const payments = await listSubscriptionPayments(subscription.providerSubscriptionId);
+      const payment = latestPaidPayment(payments.items);
+      if (payment) await applyAsaasPayment(payment);
     } catch {
       // O webhook confirma quando o site estiver público; aqui só tenta o Pix local.
     }
@@ -26,5 +29,6 @@ export async function GET() {
     kind: plan.kind,
     paid: plan.kind === "active",
     label: plan.label,
-  });
+    billingStatus: (fresh ?? subscription).status,
+  }, { headers: { "Cache-Control": "no-store" } });
 }
