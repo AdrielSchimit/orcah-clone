@@ -69,10 +69,12 @@ export default async function PlanoPage() {
         </ul>
         {plan.kind === "active" ? (
           <p className="mt-5 text-sm text-ok">Plano ativo. Obrigado.</p>
+        ) : subscription.status === "canceled" && subscription.providerSubscriptionId ? (
+          <p className="mt-5 text-sm text-text-soft">A cobrança anterior foi cancelada. Entre em contato com o suporte antes de iniciar outra assinatura.</p>
         ) : asaasConfigured() ? (
           <PlanCheckout
             document={user.company.document}
-            cardAwaitingConfirmation={
+            initialPendingCard={
               subscription.provider === "asaas" &&
               subscription.billingType === "CREDIT_CARD" &&
               Boolean(subscription.providerSubscriptionId) &&

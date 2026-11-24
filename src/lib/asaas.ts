@@ -34,11 +34,29 @@ export function asaasConfigured() {
 }
 
 export function asaasErrorMessage(body: unknown, fallback = "Não foi possível falar com o Asaas.") {
-  const data = body as AsaasErrorBody;
+  const data = (body && typeof body === "object" ? body : {}) as AsaasErrorBody;
   const first = data.errors?.[0]?.description;
   if (first) return first;
   if (typeof data.message === "string" && data.message.trim()) return data.message;
   return fallback;
+}
+
+/** HTTP error answered by Asaas. `status` lets callers tell a definitive rejection from a timeout. */
+export class AsaasHttpError extends Error {
+  readonly status: number;
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "AsaasHttpError";
+    this.status = status;
+  }
+}
+
+/**
+ * True only when Asaas answered and refused the request (validation, card refused, auth, rate limit).
+ * Timeouts, network errors and 5xx stay ambiguous: the remote write may have happened.
+ */
+export function asaasRejectedRequest(error: unknown) {
+  return error instanceof AsaasHttpError && [400, 401, 403, 404, 422, 429].includes(error.status);
 }
 
 export async function asaas<T>(path: string, init?: RequestInit): Promise<T> {
@@ -57,6 +75,8 @@ export async function asaas<T>(path: string, init?: RequestInit): Promise<T> {
       ...(init?.headers ?? {}),
     },
     cache: "no-store",
+    signal: init?.signal ?? AbortSignal.timeout(15_000),
+    redirect: "error",
   });
 
   const text = await response.text();
@@ -65,11 +85,12 @@ export async function asaas<T>(path: string, init?: RequestInit): Promise<T> {
     try {
       body = JSON.parse(text) as unknown;
     } catch {
+      if (!response.ok) throw new AsaasHttpError(response.status, "Resposta inválida do Asaas.");
       throw new Error("Resposta inválida do Asaas.");
     }
   }
   if (!response.ok) {
-    throw new Error(asaasErrorMessage(body));
+    throw new AsaasHttpError(response.status, asaasErrorMessage(body));
   }
   return body as T;
 }
@@ -156,19 +177,34 @@ export async function createCardSubscription(input: {
   );
 }
 
-export async function firstSubscriptionPayment(subscriptionId: string) {
-  const listed = await asaas<{ data?: AsaasPayment[] }>(
-    `/payments?subscription=${encodeURIComponent(subscriptionId)}&limit=1`,
+export type AsaasSubscriptionSummary = { id: string; customer?: string; billingType?: string; status?: string; deleted?: boolean };
+
+/** Every subscription of one customer. `complete` is false when Asaas says there are more pages. */
+export async function listCustomerSubscriptions(customerId: string) {
+  const listed = await asaas<{ data?: AsaasSubscriptionSummary[]; hasMore?: boolean }>(
+    `/subscriptions?customer=${encodeURIComponent(customerId)}&limit=100`,
   );
-  return listed.data?.[0] ?? null;
+  return { items: Array.isArray(listed.data) ? listed.data : [], complete: listed.hasMore === false };
+}
+
+export async function getSubscription(id: string) {
+  return asaas<AsaasSubscriptionSummary>(`/subscriptions/${encodeURIComponent(id)}`);
+}
+
+/** Payments of one subscription (up to 100). `complete` is false when more pages exist. */
+export async function listSubscriptionPayments(subscriptionId: string) {
+  const listed = await asaas<{ data?: AsaasPayment[]; hasMore?: boolean }>(
+    `/payments?subscription=${encodeURIComponent(subscriptionId)}&limit=100`,
+  );
+  return { items: Array.isArray(listed.data) ? listed.data : [], complete: listed.hasMore === false };
 }
 
 export async function getPayment(id: string) {
-  return asaas<AsaasPayment>(`/payments/${id}`);
+  return asaas<AsaasPayment>(`/payments/${encodeURIComponent(id)}`);
 }
 
 export async function getPixQr(paymentId: string) {
-  return asaas<AsaasPixQr>(`/payments/${paymentId}/pixQrCode`);
+  return asaas<AsaasPixQr>(`/payments/${encodeURIComponent(paymentId)}/pixQrCode`);
 }
 
 export function paymentIsPaid(status?: string) {
